@@ -1,10 +1,32 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
-# select_snps 0.1
+# select_snps 0.2
 # Michael G. Campana, 2015
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
+$completeprobe = false # Dummy variables to allow compilation
+$probelength = 0
+$mingc = 0
+$maxgc = 100
+def filter_probes(probe)
+	# Sequence complexity
+	# Include/Exclude multi-allelic sites
+	# Minimum PIC/Calculate PIC
+	# Melting Temperature
+	# Self-complementarity
+	keep = true
+	keep = false if probe.length < $probelength
+	gc = 0
+	for i in 0 ... probe.length
+		if probe[i].chr.upcase == "G" or probe[i].chr.upcase == "C"
+			gc += 1
+		end
+	end
+	keep = false if (gc * 100/probe.length) < $mingc
+	keep = false if (gc * 100/probe.length) > $maxgc
+	return keep
+end
 begin
 	# Data options block
 	if ARGV[0] == "--help" or ARGV[0] == "-h"
@@ -15,18 +37,20 @@ begin
 		print "* Total requested SNPs\n"
 		print "* Maximum number of SNPs per contig\n"
 		print "* Minimum distance between SNPs within a contig\n"
-        # GC content range
-		# Sequence complexity
-		# Include/Exclude multi-allelic sites
-		# Minimum PIC/Calculate PIC
-        print "* -y to output probes (otherwise leave blank)\n"
-        print "* If probe ouput selected, the reference sequence file (otherwise blank)\n"
-        print "* If probe output selected, the number of bases before the SNP (otherwise blank)\n"
-        print "* If probe output selected, the number of bases after the SNP (otherwise blank)\n\n"
+        print "* --probes to output probes (otherwise leave blank)\n"
+    	print "* If probe ouput selected, the reference sequence file (otherwise blank)\n"
+    	print "* If probe output selected, the number of bases before the SNP (otherwise blank)\n"
+    	print "* If probe output selected, the number of bases after the SNP (otherwise blank)\n"
+		print "* --filter to filter candidate probes (otherwise leave blank)\n"
+		print "* --complete to require probes be the full length (if not filtering, leave blank)\n"
+		print "* Minimum GC content (if not filtering, leave blank)\n"
+		print "* Maximum GC content (if not filtering, leave blank)\n\n"
 		print "For example, the command <ruby select_snps.rb input.vcf 5000 2 1000> would select 5000 SNPs, with\n"
-		print "a maximum of 2 SNPs per contig and a minimum distance of 1000 bp between SNPs from file input.vcf.\n"
-        print "Appending, <-y refseq.fa 60 59> to the previous command would ouput probes based on refseq.fa, with\n"
+		print "a maximum of 2 SNPs per contig and a minimum distance of 1000 bp between SNPs from file input.vcf.\n\n"
+        print "Appending, <--probes refseq.fa 60 59> to the previous command would ouput probes based on refseq.fa, with\n"
         print "the SNP appearing at the 61st postion of a 120 bp probe.\n\n"
+		print "Appending, <--filter --complete 40 60> to the previous command would filter probes requiring the complete\n"
+		print "120 bp probe length and a GC content range of 40 to 60%.\n\n"
 		exit # Kill the program rather than proceed without data
 	elsif ARGV[0].nil?
 		print "Enter input file.\n"
@@ -55,26 +79,55 @@ begin
 		end
 		print "Output probes? (y/n)\n"
         @probes = false
-        @probes = true if gets.chomp == "y"
+		@filter = false
+		t = gets.chomp.upcase
+		if t == "Y" or t == "YES"
+        	@probes = true
+		end
         if @probes
-            print "Enter reference sequence.\n"
-            @refseq = gets.chomp
+       		print "Enter reference sequence.\n"
+        	@refseq = gets.chomp
             while !FileTest.exist?(@refseq)
-                print "Reference sequence not found. Please re-enter.\n"
-                @refseq = gets.chomp
-            end
+        		print "Reference sequence not found. Please re-enter.\n"
+        		@refseq = gets.chomp
+    		end
             print "Number of bases before SNP in probe\n"
             @lenbef = gets.chomp.to_i
             while @lenbef < 0
-                print "The number of probe bases before the SNP must be at least 0. Please re-enter.\n"
-                @lenbef = gets.chomp.to_i
-            end
+            	print "The number of probe bases before the SNP must be at least 0. Please re-enter.\n"
+            	@lenbef = gets.chomp.to_i
+        	end
             print "Number of bases after SNP in probe\n"
             @lenaft = gets.chomp.to_i
             while @lenaft < 0
-                print "The number of probe bases after the SNP must be at least 0. Please re-enter.\n"
-                @lenaft = gets.chomp.to_i
-            end
+            	print "The number of probe bases after the SNP must be at least 0. Please re-enter.\n"
+            	@lenaft = gets.chomp.to_i
+        	end
+			$probelength = @lenbef + @lenaft + 1
+			print "Filter probes?\n"
+			t = gets.chomp.upcase
+			if t == "Y" or t == "YES"
+				@filter = true
+			end
+			if @filter
+				print "Require complete length probe?\n"
+				t = gets.chomp.upcase
+				if t == "Y" or t == "YES"
+					$completeprobe = true 
+				end
+				print "Enter minimum GC content.\n"
+				$mingc = gets.chomp.to_i
+				while $mingc < 0 or $mingc > 100
+					print "Minimum GC content must be between 0 and 100. Please re-enter.\n"
+					$mingc = gets.chomp.to_i
+				end
+				print "Enter maximum GC content.\n"
+				$maxgc = gets.chomp.to_i
+				while $maxgc < $mingc or $maxgc > 100
+					print "Maximum GC content must be between minimum GC content and 100. Re-enter.\n"
+					$maxgc = gets.chomp.to_i
+				end
+			end
         end
 	else
 		@vcfin = ARGV[0]
@@ -98,24 +151,40 @@ begin
 			@min_distance = $stdin.gets.chomp.to_i
 		end
         @probes = false
-        @probes = true if ARGV[4] == "-y"
+		@filter = false
+        @probes = true if ARGV[4] == "--probes"
+		@filter = true if ARGV[8] == "--filter"
+		$completeprobe = true if ARGV[9] == "--complete"
         if @probes
-            @refseq = ARGV[5]
-            while !FileTest.exist?(@refseq)
-                print "Reference sequence not found. Please re-enter.\n"
-                @refseq = $stdin.gets.chomp
-            end
+        	@refseq = ARGV[5]
+        	while !FileTest.exist?(@refseq)
+            	print "Reference sequence not found. Please re-enter.\n"
+            	@refseq = $stdin.gets.chomp
+        	end
             @lenbef = ARGV[6].to_i
             while @lenbef < 0
-                print "The number of probe bases before the SNP must be at least 0. Please re-enter.\n"
-                @lenbef = $stdin.gets.chomp.to_i
-            end
+            	print "The number of probe bases before the SNP must be at least 0. Please re-enter.\n"
+            	@lenbef = $stdin.gets.chomp.to_i
+        	end
             @lenaft = ARGV[7].to_i
             while @lenaft < 0
-                print "The number of probe bases after the SNP must be at least 0. Please re-enter.\n"
-                @lenaft = $stdin.gets.chomp.to_i
-            end
+            	print "The number of probe bases after the SNP must be at least 0. Please re-enter.\n"
+            	@lenaft = $stdin.gets.chomp.to_i
+        	end
         end
+		$probelength = @lenbef + @lenaft + 1
+		if @filter
+			$mingc = ARGV[10].to_i
+			while $mingc < 0 or $mingc > 100
+				print "Minimum GC content must be between 0 and 100. Please re-enter.\n"
+				$mingc = $stdin.gets.chomp.to_i
+			end
+			$maxgc = ARGV[11].to_i
+			while $maxgc < $mingc or $maxgc > 100
+				print "Maximum GC content must be between minimum GC content and 100. Re-enter.\n"
+				$maxgc = $stdin.gets.chomp.to_i
+			end
+		end
 	end
 	# Read VCF file
 	@snps = {}
@@ -213,6 +282,7 @@ begin
     # Output probe sequences if this option was selected
     if @probes
         probesout = ""
+		outfilter = ""
         File.open(@refseq, 'r') do |seqget|
             while line = seqget.gets
                 if line[0].chr == ">"
@@ -235,6 +305,9 @@ begin
                         after = line.length - 2 if after >= line.length - 1 # Final char is line break
                         seq = ">" + chromo + "\t" + snp.to_s + "\n" + line[be4 .. after] + "\n"
                         probesout += seq
+						if @filter
+							outfilter += seq if filter_probes(line[be4 .. after])
+						end
                     end
                 end
             end
@@ -242,5 +315,10 @@ begin
         File.open(@vcfin + "-selected-probes.fa", 'w') do |write|
             write.puts probesout
         end
+		if @filter
+			File.open(@vcfin + "-filtered-probes.fa", 'w') do |write|
+				write.puts outfilter
+			end
+		end
     end
 end
