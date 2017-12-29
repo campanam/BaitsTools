@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # bed2baits
-BED2BAITSVER = "0.4"
+BED2BAITSVER = "0.5"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -17,12 +17,14 @@ def bed2baits
 	#Read coordinates table
 	print "** Reading BED file **\n"
 	regions = [] #Array to hold generated fasta sequences
+	$options.logtext += "ExtractedRegions\nRegion\tStart\tEnd\tLength\n" if $options.log
+	totallength = 0
 	File.open($options.infile, 'r') do |coord|
 		while line = coord.gets
 			line_arr = line.split("\t")
 			chromosome = line_arr[0]
-			seqst = line_arr[1].to_i
-			seqend = line_arr[2].to_i
+			seqst = line_arr[1].to_i - $options.pad
+			seqend = line_arr[2].to_i + $options.pad
 			if refhash.include?(chromosome)
 				if seqst < 0
 					print "** Chromosome " + chromosome + " starting coordinate set to 1. **\n"
@@ -40,7 +42,12 @@ def bed2baits
 					seq.calc_quality
 				end
 				seq.seq = refhash[chromosome].seq[seqst..seqend-1] #Correct for 0-based counting
+				seq.bedstart = seqst
 				regions.push(seq)
+				if $options.log
+					$options.logtext += seq.header + "\t" + (seqst+1).to_s + "\t" + seqend.to_s + "\t" + seq.seq.length.to_s + "\n"
+					totallength += seq.seq.length
+				end
 			else
 				print "** Chromosome " + chromosome + " not found in reference sequence file. **\n"
 			end
@@ -51,6 +58,7 @@ def bed2baits
 	for reg in regions
 		outfasta += ">" + reg.header + "\n" + reg.seq + "\n"
 	end
+	$options.logtext += "\nTotalRegions\tTotalRegionLength\n" + regions.size.to_s + "\t" + totallength.to_s + "\n\n" if $options.log
 	File.open($options.outdir+"/"+$options.outprefix+"-regions.fa", 'w') do |out|
 		out.puts outfasta
 	end

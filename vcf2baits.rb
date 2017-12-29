@@ -44,6 +44,7 @@ def vcf2baits
 	@snps.delete_if {|key, value| key == ""} # Delete dummy original value
 	@snps.delete_if {|key, value| value == []} # Delete empty contigs due to QUAL filter
 	print "** Selecting variants **\n" unless $options.every
+	$options.logtext += "Variants\n" if $options.log
 	@selectsnps = selectsnps(@snps) 	# Select SNPs
 	filteredsnps = @selectsnps.dup # Hash for filtering
 	# Write VCF & baits
@@ -66,6 +67,7 @@ def vcf2baits
 		print "** Reading reference sequence **\n"
 		refseq = read_fasta($options.refseq)
 		print "** Generating and filtering baits **\n"
+		$options.logtext += "VariantBaits\n" if $options.log
 		baits = snp_to_baits(@selectsnps, refseq)
 		write_baits(baits[0], baits[1], baits[2], baits[3], baits[4])
 		if $options.filter

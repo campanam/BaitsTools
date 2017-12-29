@@ -1,5 +1,8 @@
 #!/bin/bash
-curl -sSL https://get.rvm.io | bash -s stable --ruby=2.4.1
+curl -sSL https://get.rvm.io | bash -s stable
+source ~/.rvm/scripts/rvm
+rvm install 2.4.1
+rvm default 2.4.1
 gem install tk
 mkdir $HOME/baitstools
 chmod +x *.rb

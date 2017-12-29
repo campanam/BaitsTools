@@ -138,14 +138,18 @@ def stacks2baits
 	end
 	# Select SNPs -- Note that there is no cross-referencing between types
 	print "** Selecting SNPs **\n"
+	$options.logtext += "BetweenPopsVariants\n" if $options.log
 	selected_between = selectsnps(between_pops)
 	write_stacks(stacksheader, selected_between, "-betweenpops")
 	if $options.sort and $options.hwe
+		$options.logtext += "InHWEVariants\n" if $options.log
 		selected_inhwe = selectsnps(in_hwe)
+		$options.logtext += "OutHWEVariants\n" if $options.log
 		selected_outhwe = selectsnps(out_hwe)
 		write_stacks(stacksheader, selected_inhwe, "-inhwe")
 		write_stacks(stacksheader, selected_outhwe, "-outhwe")	
 	elsif $options.sort
+		$options.logtext += "WithinPopsVariants\n" if $options.log
 		selected_within = selectsnps(within_pops)
 		write_stacks(stacksheader, selected_within, "-withinpops")
 	end
@@ -154,11 +158,14 @@ def stacks2baits
 		print "** Reading reference sequence **\n"
 		refseq = read_fasta($options.refseq)
 		print "** Generating and filtering baits **\n"
+		$options.logtext += "BetweenPopsVariantBaits\n" if $options.log
 		bbaits = snp_to_baits(selected_between, refseq)
 		write_stacks(stacksheader, bbaits[5], "-betweenpops-filtered")
 		write_baits(bbaits[0], bbaits[1], bbaits[2], bbaits[3], bbaits[4], $options.infile+"-betweenpops")
 		if $options.sort and $options.hwe
+			$options.logtext += "InHWEVariantBaits\n" if $options.log
 			ihbaits = snp_to_baits(selected_inhwe, refseq)
+			$options.logtext += "OutHWEVariantBaits\n" if $options.log
 			ohbaits = snp_to_baits(selected_outhwe,refseq)
 			write_stacks(stacksheader, ihbaits[5], "-inhwe-filtered")
 			write_stacks(stacksheader, ohbaits[5], "-outhwe-filtered")
@@ -166,6 +173,7 @@ def stacks2baits
 			write_baits(ohbaits[0], ohbaits[1], ohbaits[2], ohbaits[3], ohbaits[4], $options.infile+"-outhwe")
 		elsif $options.sort
 			wbaits = snp_to_baits(selected_within_pops, refseq)
+			$options.logtext += "WithinPopsVariantBaits\n" if $options.log
 			write_stacks(stacksheader, wbaits[5], "-withinpops-filtered")
 			write_baits(wbaits[0], wbaits[1], wbaits[2], wbaits[3], wbaits[4], $options.infile+"-withinpops")
 		end

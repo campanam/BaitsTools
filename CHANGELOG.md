@@ -16,6 +16,15 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 0.7  
+Absolute/relative BED coordinates  
+Gap handling options  
+Param file notes Ns and gaps, mask %  
+Mask handling  
+Detailed log  
+Ambiguity handling transferred to get_ambiguity in baitstools  
+Ability to handle multiple loci  
+
 ### Version 0.6  
 Rubinius threading compatibility  
 BED start index bug fixed  
@@ -47,10 +56,13 @@ Preliminary script to generate weighted bait set from a fasta alignment
 
 ## annot2baits  
 ### Version 0.4  
-Output directory and prefix can be named  
+Absolute BED coordinates recorded  
+Padding parameter  
+Detailed log  
 
 ### Version 0.3  
 Upcasing removed  
+Output directory and prefix can be named  
 
 ### Version 0.2  
 Version constant added to header  
@@ -59,6 +71,24 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitstools  
+### Version 0.9  
+Tiling offset default changed to 60 bp  
+Added pyrad2baits method  
+Fixed bug in get_command_line for negative parameter values  
+Quality scores limited to possible range of 0 to 93  
+TSV capitalized in help text  
+write_baits can output relative BED positions  
+Detailed log  
+Gap handling options  
+Param file notes Ns and gaps, mask %  
+Mask handling  
+Revision of variant tiling parameters  
+Alt alleles now -a for intuitiveness  
+selectsnps speed improvements  
+Ambiguity handling transferred to get_ambiguity in baitstools  
+snp_to_baits bait headers more self-explanatory  
+read_fasta can handle multiple loci with loc tag  
+
 ### Version 0.8  
 Rubinius threading compatibility  
 Output directory and prefix can be named  
@@ -132,10 +162,26 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 0.2  
+Tiling offset default changed to 60 bp  
+Fixed bug in start_baitstools for negative parameter values  
+Quality scores limited to possible range of 0 to 93  
+Added relative BED option  
+Detailed log  
+Gap handling options  
+Mask handling  
+Revision of variant tiling parameters  
+pyrad2baits added  
+
 ### Version 0.1  
 Basic GUI compatible with baitstools 0.8  
 
 ## bed2baits  
+### Version 0.5  
+Absolute BED coordinates recorded  
+Padding parameter  
+Detailed log  
+
 ### Version 0.4  
 Output directory and prefix can be named  
 BED start index bug fixed  
@@ -153,6 +199,11 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## checkbaits  
+### Version 0.5  
+Param file notes Ns and gaps, mask %  
+Mask handling  
+Detailed log  
+
 ### Version 0.4  
 Rubinius threading compatibility  
 
@@ -166,9 +217,14 @@ Version constant added to header
 ### Version 0.1  
 Preliminary script to filter predefined baits through quality filters  
 
+## pyrad2baits  
+### Version 0.1  
+Preliminary script to generate baits from PyRAD/ipyrad loci files  
+
 ## stacks2baits  
 ### Version 0.4  
 Output directory and prefix can be named  
+Detailed log  
 
 ### Version 0.3  
 Version constant added to header  
@@ -186,6 +242,14 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
 ## tilebaits  
+### Version 0.7  
+Absolute/relative BED coordinates handled  
+Fixed :seqst-1 bug  
+Gap handling options  
+Param file notes Ns and gaps, mask %  
+Mask handling  
+Detailed log  
+
 ### Version 0.7  
 Rubinius threading compatibility  
 BED start index bug fixed  
@@ -220,6 +284,7 @@ Preliminary script to divide genic/genomic sequences into tiled baits
 ## vcf2baits  
 ### Version 0.10  
 Output directory and prefix can be named  
+Detailed log  
 
 ### Version 0.9  
 Now records reference allele to allow proper application of indel variants  
