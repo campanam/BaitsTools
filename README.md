@@ -53,6 +53,7 @@ A tutorial and example data are available in the example_data subdirectory of th
 ## Common Options  
 `-B, --bed`: Output BED file listing the coordinates of baits in comparison to the reference sequences. *Recommended*.  
 `-D, --ncbi`: Denotes that FASTA/FASTQ file headers have NCBI-style descriptors after the sample name separated by spaces (e.g. `>{sample_name} {descriptor1} {descriptor2}`).  
+`-Y, --rna`: Output bait sequences as RNA rather than DNA.  
 `-h, --help`: Print subcommand-specific help to the screen. Use without other arguments (e.g. `ruby baitstools.rb vcf2baits -h`).  
 `-v, --version`: Print subcommand version to the screen (which may not correspond with the BaitsTools release version). Use without other arguments (e.g. `ruby baitstools.rb vcf2baits -v`).
 
@@ -61,11 +62,12 @@ A tutorial and example data are available in the example_data subdirectory of th
 `-c, --complete`: Remove candidate baits that are shorter than the requested bait length.  
 `-G, --nogaps`: Exclude candidate baits that include gap characters (-).  
 `-N, --noNs`: Exclude candidate baits that include unknown bases (Ns).  
+`-C, --collapse`: Collapse ambiguity codes to a single nucleotide. One nucleotide will be chosen randomly from the possible nucleotides (e.g. either A or G will be selected for a R site). If `-N` is specified, N sites will be treated as missing data and filtered out as specified. Otherwise, N sites will be treated as matching any nucleotide (A, G, C, T(U)).  
 `-n, --mingc [VALUE]`: Exclude candidate baits with a GC% below the specified value. Default is 30.0%.  
 `-x, --maxgc [VALUE]`: Exclude candidate baits with a GC% above the specified value. Default is 50.0%.  
 `-q, --mint [VALUE]`: Exclude candidate baits with melting temperature below the specified value. Default is 0.0°C.  
 `-z, --maxt [VALUE]`: Exclude candidate baits with melting temperature above the specified value. Default is 120.0°C.  
-`-T, --type [VALUE]`: Hybridization chemistry (one of `DNA-DNA`, `RNA-RNA`, or `RNA-DNA`) for melting temperature estimation. Default is `DNA-RNA`.  
+`-T, --type [VALUE]`: Hybridization chemistry (one of `DNA-DNA`, `RNA-RNA`, or `RNA-DNA`) for melting temperature estimation. Default is DNA-RNA.  
 `-s, --na [VALUE]`: Sodium concentration for melting temperature estimation. Default is 0.9M.  
 `-f, --formamide [VALUE]`: Formamide concentration for melting temperature estimation. Default is 0.0M.  
 `-Q, --meanqual [VALUE]`: Exclude baits with a mean Phred-like base quality below the specified value. Default is 20.0.  
@@ -89,7 +91,7 @@ aln2baits generates baits from a DNA alignment in FASTA or FASTQ format. Bait se
 `-i, --input [FILE]`: Input alignment file name. Include the path to the file if not in the current directory.  
 `-L, --length [VALUE]`: Requested bait length. Default is 120 bp.  
 `-O, --offset [VALUE]`: Offset (in bp) between tiled baits. Default is 20 bp.  
-`-H, --haplo [VALUE]`: Haplotype definition for bait generation. Entering `haplotype` will cause the program to identify all unique haplotypes within each bait tiling window observed in the data. Alternatively, entering `variant` will cause the program to generate all possible permutations of single nucleotide variants observed within the window.  
+`-H, --haplo [VALUE]`: Haplotype definition for bait generation. Entering `haplotype` will cause the program to identify all unique haplotypes within each bait tiling window observed in the data. Alternatively, entering `variant` will cause the program to generate all possible permutations of single nucleotide variants observed within the window. Default is haplotype.  
 
 ### annot2baits  
 annot2baits generates baits from an annotation file in GTF or GFF and a corresponding DNA sequence in FASTA or FASTQ format.  

@@ -6,6 +6,7 @@ ANNOT2BAITSVER = "0.2"
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
+
 def annot2baits
 	#Import reference sequence
 	print "** Reading reference sequence **\n"

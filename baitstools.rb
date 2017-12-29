@@ -1,10 +1,11 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "0.6"
+BAITSTOOLSVER = "0.7"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
+
 
 require 'optparse'
 require 'ostruct'
@@ -26,6 +27,10 @@ class Fa_Seq #container for fasta/fastq sequences
 		@qual = qual # Original quality scores
 		@qual_array = [] # Array of numeric quality scores
 		@fasta = fasta # FASTA format flag
+	end
+	def make_dna # Replace uracils with thymines for internal consistency and upcase sequences
+		@seq.upcase!
+		@seq.gsub!("U", "T")
 	end
 	def calc_quality # Convert quality scores to numeric values so only needed once
 		for i in 0...@qual.length
@@ -88,19 +93,47 @@ def mean(val = [])
 	return mean
 end
 #-----------------------------------------------------------------------------------------------
+def collapse_ambiguity(bait) # Ambiguity handling
+	r = ["A","G"]
+	y = ["C","T"]
+	m = ["A","C"]
+	k = ["G","T"]
+	s = ["C","G"]
+	w = ["A","T"]
+	h = ["A","C","T"]
+	b = ["C","G","T"]
+	v = ["A","C","G"]
+	d = ["A","G","T"]
+	n = ["A","C","G","T"]
+	bait.gsub!("R",r[rand(2)])
+	bait.gsub!("Y",y[rand(2)])
+	bait.gsub!("M",m[rand(2)])
+	bait.gsub!("K",k[rand(2)])
+	bait.gsub!("S",s[rand(2)])
+	bait.gsub!("W",w[rand(2)])
+	bait.gsub!("H",h[rand(3)])
+	bait.gsub!("B",b[rand(3)])
+	bait.gsub!("V",v[rand(3)])
+	bait.gsub!("D",d[rand(3)])
+	bait.gsub!("N",n[rand(4)]) unless $options.no_Ns
+	bait.gsub!("T","U") if $options.rna # Remove any residual Ts after ambiguity collapsing
+	return bait
+end
+#-----------------------------------------------------------------------------------------------
 def filter_baits(bait, qual = [0])
 
 	# To be implemented:
 	# Sequence complexity filter
 	# Self-complementarity filter
-
+	
+	bait = collapse_ambiguity(bait) if $options.collapse_ambiguities # Ambiguity handling
 	keep = true
 	keep = false if (bait.length < $options.baitlength && $options.completebait)
-	keep = false if (bait.upcase.include?("N") and $options.no_Ns)
-	keep = false if (bait.upcase.include?("-") and $options.no_gaps)
+	keep = false if (bait.include?("N") and $options.no_Ns)
+	keep = false if (bait.include?("-") and $options.no_gaps)
 	gc = 0.0
 	for i in 0 ... bait.length
-		if bait[i].chr.upcase == "G" or bait[i].chr.upcase == "C"
+		if bait[i].chr == "G" or bait[i].chr == "C"
 			gc += 1.0
 		end
 	end
@@ -162,6 +195,7 @@ def read_fasta(file) # Read fasta and fastq files
 				if line[0].chr == ">" and qual == false
 					if !faseq.nil? # push previously completed sequence into array
 						faseq.calc_quality unless faseq.fasta # Calculate quality scores
+						faseq.make_dna # Convert RNA sequences to DNA for internal algorithms and upcase sequences
 						seq_array.push(faseq)
 					end
 					header = line[1...-1] # Remove final line break and beginning >
@@ -182,6 +216,7 @@ def read_fasta(file) # Read fasta and fastq files
 					qual = false
 					if !faseq.nil? # push previously completed sequence into array
 						faseq.calc_quality unless faseq.fasta # Calculate quality scores
+						faseq.make_dna # Convert RNA sequences to DNA for internal algorithms and upcase sequences
 						seq_array.push(faseq)
 					end 
 					header = line[1...-1] # Remove final line break and beginning >
@@ -205,6 +240,7 @@ def read_fasta(file) # Read fasta and fastq files
 		end
 	end
 	faseq.calc_quality unless faseq.fasta # Calculate quality scores
+	faseq.make_dna # Convert RNA sequences to DNA for internal algorithms and upcase sequences
 	seq_array.push(faseq) # Put last sequence into fasta array
 	return seq_array
 end
@@ -325,13 +361,14 @@ def snp_to_baits(selectedsnps, refseq)
 								qual = rseq_var.numeric_quality[be4-1..after-1] unless rseq_var.fasta
 							end
 						end
+						prb.gsub!("T","U") if $options.rna # RNA output handling
 						seq = ">" + rseq_var.header + "\t" + snp.snp.to_s + "\n" + prb + "\n"
 						baitsout += seq
 						be4 = rseq_var.seq.length + be4 if be4 < 1
 						coord = rseq_var.header + "\t" + be4.to_s + "\t" + after.to_s + "\n"
 						coordline += coord
 						if $options.filter
-							parameters = filter_baits(prb, qual)
+							parameters = filter_baits(prb, qual) # U should not affect filtration
 							if parameters[0]
 								outfilter += seq
 								filtercoordline += coord 
@@ -402,13 +439,15 @@ def get_command_line # Get command line for summary output
 		end		
 	end
 	cmdline += " -B" if $options.coords
-	cmdline +=	" -D" if $options.ncbi		
+	cmdline += " -D" if $options.ncbi
+	cmdline += " -Y" if $options.rna
 	# Generate filtration options
 	fltline = ""
 	fltline += " -w" if $options.params
 	fltline += " -c" if $options.completebait
 	fltline += " -G" if $options.no_gaps
 	fltline += " -N" if $options.no_Ns
+	fltline += " -C" if $options.collapse_ambiguities
 	fltline += " -n " + $options.mingc.to_s if $options.mingc_filter
 	fltline += " -x " + $options.maxgc.to_s if $options.maxgc_filter
 	fltline += " -q " + $options.mint.to_s if $options.mint_filter
@@ -467,7 +506,8 @@ class Parser
 		args.coords = false # Flag to output coordinates table of baits
 		args.no_gaps = false # Flag to omit bait sequences with gaps
 		args.no_Ns = false # Flag to omit bait sequences with Ns
-		args.haplodef = "" # Haplotype definition for aln2baits
+		args.collapse_ambiguities = false # Flag to collapse ambiguities to a single nucleotide
+		args.haplodef = "haplotype" # Haplotype definition for aln2baits
 		args.sort = false # Flag to sort stack2baits SNPs by between/within population variation
 		args.hwe = false # Flag to sort stacks2baits SNPs by Hardy-Weinberg Equilibrium
 		args.alpha = 0.05 # HWE test alpha value
@@ -478,6 +518,7 @@ class Parser
 		args.fasta_score = 0 # Asssumed base quality score for FASTA sequences
 		args.features = [] # Array holding desired features
 		args.ncbi = false # Flag whether FASTA/FASTQ headers include NCBI-style descriptors
+		args.rna = false # Flag whether baits are output as RNA
 		args.alt_alleles = false # Flag to apply alternate alleles
 		args.varqual_filter = false # Flag to determine whether to filter vcf variants by QUAL scores
 		args.varqual = 30 # Minimum vcf variant QUAL score
@@ -546,8 +587,8 @@ class Parser
 							args.features = feat.upcase.split(",")
 						end
 					elsif args.algorithm == "aln2baits"
-						opts.on("-H","--haplo [VALUE]", String, "Window haplotype definition (haplotype or variant)") do |fa|
-							args.haplodef = fa
+						opts.on("-H","--haplo [VALUE]", String, "Window haplotype definition (haplotype or variant) (Default = haplotype)") do |fa|
+							args.haplodef = fa if fa != nil
 						end
 					end
 				end	
@@ -608,7 +649,10 @@ class Parser
 				end	
 				opts.on("-N", "--noNs", "Exclude bait sequences with Ns") do
 					args.no_Ns = true
-				end	
+				end
+				opts.on("-C", "--collapse", "Collapse ambiguities to a single nucleotide") do
+					args.collapse_ambiguities = true
+				end
 				opts.on("-n","--mingc [VALUE]", Float, "Minimum GC content (Default = 30.0)") do |mgc|
 					args.mingc = mgc if mgc != nil
 					args.mingc_filter = true
@@ -657,6 +701,9 @@ class Parser
 				end
 				opts.on("-D", "--ncbi", "FASTA/FASTQ file headers have NCBI-style descriptions") do
 					args.ncbi = true
+				end
+				opts.on("-Y","--rna", "Output baits as RNA rather than DNA") do
+					args.rna = true
 				end
 				opts.on_tail("-h","--help", "Show help") do
 					print "Welcome to baitstools " + args.algorithm + '.' +"\n\n"
@@ -933,6 +980,16 @@ begin
 		if t == "Y" or t == "YES"
 			$options.no_Ns = true
 		end
+		print "Collapse ambiguity codes to a single nucleotide? (y/n)\n"
+		t = gets.chomp.upcase
+		if t == "Y" or t == "YES"
+			$options.collapse_ambiguities = true
+		end
+		print "Output baits as RNA rather than DNA? (y/n)\n"
+		t = gets.chomp.upcase
+		if t == "Y" or t == "YES"
+			$options.rna = true
+		end		
 		print "Filter by minimum GC content? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
@@ -1014,7 +1071,7 @@ begin
 	$options.fasta_score = 0 if $options.fasta_score < 0 # Correct fasta_score parameter
 	$options.fasta_score = 93 if $options.fasta_score > 93 # Limit to currently possible scores
 	$options.no_baits = false if ($options.every or $options.alt_alleles) # Override -p when needed
-	$options.filter = true if ($options.completebait or $options.params or $options.algorithm == "checkbaits" or $options.mingc_filter or $options.maxgc_filter or $options.mint_filter or $options.maxt_filter or $options.meanqual_filter or $options.minqual_filter or $options.no_gaps or $options.no_Ns) # Force filtration as necessary
+	$options.filter = true if ($options.completebait or $options.params or $options.algorithm == "checkbaits" or $options.mingc_filter or $options.maxgc_filter or $options.mint_filter or $options.maxt_filter or $options.meanqual_filter or $options.minqual_filter or $options.no_gaps or $options.no_Ns or $options.collapse_ambiguities) # Force filtration as necessary
 	cmdline = get_command_line
 	print "** Starting program with the following options: **\n"
 	print "** Basic command: " + cmdline[0] + " **\n"

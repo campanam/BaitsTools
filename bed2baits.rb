@@ -6,6 +6,7 @@ BED2BAITSVER = "0.3"
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
+
 def bed2baits
 	#Import reference sequence
 	print "** Reading reference sequence **\n"

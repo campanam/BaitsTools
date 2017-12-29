@@ -6,6 +6,7 @@ STACKS2BAITSVER = "0.3"
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
+
 class Popvar # Population-specific SNP data object
 	attr_accessor :pop, :alleles, :no_ind, :pfreq, :hetobs, :line 
 	def initialize(pop, alleles, no_ind, pfreq, hetobs, line)

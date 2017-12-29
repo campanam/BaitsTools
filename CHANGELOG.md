@@ -15,6 +15,10 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 0.5  
+Upcasing removed since now read as upcased  
+RNA output handling added  
+
 ### Version 0.4  
 Version constant added to header  
 Outputs bed files rather than coordinates tables  
@@ -35,6 +39,9 @@ Corrected double-tabbed output in parameters output
 Preliminary script to generate weighted bait set from a fasta alignment  
 
 ## annot2baits  
+### Version 0.3  
+Upcasing removed  
+
 ### Version 0.2  
 Version constant added to header  
 
@@ -42,6 +49,15 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitstools  
+### Version 0.7  
+-H defaults to haplotype  
+Ambiguity collapsing added to bait filtration  
+Fa_Seq method 'make_dna' converts uracil residues to thymines for internal consistency  
+make_dna upcases all sequences for later analyses  
+read_fasta calls make_dna after each sequence read in  
+frontend handling for RNA bait output  
+RNA output handling for snp_to_baits and collapse_ambiguity  
+
 ### Version 0.6  
 Incorporated baitslib into baitstools main script  
 require statements for subcommands now require_relative  
@@ -111,6 +127,9 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## checkbaits  
+### Version 0.3  
+RNA output handling added  
+
 ### Version 0.2  
 Version constant added to header  
 
@@ -133,7 +152,10 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 ### Version 0.1  
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
-## tilebaits 
+## tilebaits  
+### Version 0.6  
+RNA output handling added  
+
 ### Version 0.5  
 Returns BED format information rather than coordinates tables  
 Version constant added to header  

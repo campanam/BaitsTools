@@ -6,6 +6,7 @@ VCF2BAITSVER = "0.9"
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
+
 def vcf2baits
 	# Read VCF file
 	@snps = {}

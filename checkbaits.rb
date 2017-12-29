@@ -1,9 +1,21 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
 # checkbaits
-CHECKBAITSVER = "0.2"
-# Michael G. Campana, 2017
-# Smithsonian Conservation Biology Institute
+CHECKBAITSVER = "0.3"
+# Copyright (C) 2017 Michael G. Campana
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-----------------------------------------------------------------------------------------------
 
 def checkbaits
@@ -20,6 +32,7 @@ def checkbaits
 			flt = filter_baits(seq.seq, seq.numeric_quality)
 		end
 		if flt[0]
+			seq.seq.gsub!("T","U") if $options.rna # RNA output handling
 			outfilter += ">" + seq.header + "\n" + seq.seq + "\n"
 		end
 		if $options.params

@@ -1,10 +1,11 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
 # aln2baits
-ALN2BAITSVER = "0.4"
+ALN2BAITSVER = "0.5"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
+
 
 class Hap_Window # Object defining a haplotype window
 	attr_accessor :header, :seqstart, :seqend, :haplotypes
@@ -22,10 +23,10 @@ class Hap_Window # Object defining a haplotype window
 		end
 		for i in 0...@haplotypes[0].length
 			for seq in @haplotypes
-				if !variants[i].include?(seq[i].upcase)
-					case seq[i].upcase
+				if !variants[i].include?(seq[i])
+					case seq[i]
 					when "A","T","G","C","-"
-						variants[i].push(seq[i].upcase)
+						variants[i].push(seq[i])
 					when "R"
 						variants[i].push("A","G")
 					when "Y"
@@ -100,11 +101,12 @@ def aln2baits
 		case $options.haplodef
 		when "haplotype"
 			for hapno in 1..window.haplotypes.size
-				rng = (window.seqstart+1).to_s+"-"+(window.seqend+1).to_s #Adjust for 1-based indexing
+				rng = (window.seqstart+1).to_s+"-"+(window.seqend+1).to_s # Adjust for 1-based indexing
+				window.haplotypes[hapno-1].gsub!("T","U") if $options.rna # Will correct both raw and filtered sequences
 				baitsout += ">" + window.header[hapno-1] + "_" + rng + "_haplotype" + hapno.to_s + "\n" + window.haplotypes[hapno-1] + "\n"
 				coordline += window.header[hapno-1] + "\t" + (window.seqstart+1).to_s + "\t" + (window.seqend+1).to_s + "\n"
 				if $options.filter
-					flt = filter_baits(window.haplotypes[hapno-1])
+					flt = filter_baits(window.haplotypes[hapno-1]) # U won't affect filtration
 					if flt[0]
 						outfilter += ">" + window.header[hapno-1] + "_" + rng + "_haplotype" + hapno.to_s+ "\n" + window.haplotypes[hapno-1] + "\n"
 						filtercoordline += window.header[hapno-1] + "\t" + (window.seqstart+1).to_s + "\t" + (window.seqend+1).to_s + "\n"
@@ -117,12 +119,13 @@ def aln2baits
 		when "variant"
 			nvars = window.var_permutations # Get window_permutations
 			for hapno in 1..nvars.size
-				haplo = nvars[hapno-1] 
+				haplo = nvars[hapno-1]
+				haplo.gsub!("T","U") if $options.rna # Will correct both raw and filtered sequences
 				rng = (window.seqstart+1).to_s + "-" + (window.seqend+1).to_s #Adjust for 1-based indexing
 				baitsout += ">Alignment_" + rng + "_haplotype" + hapno.to_s + "\n" + haplo + "\n" # Original window headers are meaningless
 				coordline += "Alignment\t" + (window.seqstart+1).to_s + "\t" + (window.seqend+1).to_s + "\n" # Original window headers are meaningless
 				if $options.filter
-					flt = filter_baits(haplo)
+					flt = filter_baits(haplo) # U won't affect filtration
 					if flt[0]
 						outfilter += ">Alignment_" + rng + "_haplotype" + hapno.to_s+ "\n" + haplo + "\n"
 						filtercoordline += "Alignment\t" + (window.seqstart+1).to_s + "\t" + (window.seqend+1).to_s + "\n"

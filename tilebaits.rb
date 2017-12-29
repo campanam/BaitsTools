@@ -1,10 +1,11 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
 # tilebaits
-TILEBAITSVER = "0.5"
+TILEBAITSVER = "0.6"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
+
 
 def tilebaits(seq_array)
 	# Process FASTA file
@@ -35,10 +36,11 @@ def tilebaits(seq_array)
 				prb = seq.seq[seqst-1..seqend-1] #Correct for 0-based counting
 				qual = seq.numeric_quality[seqst-1..seqend-1] unless seq.fasta
 			end
+			prb.gsub!("T","U") if $options.rna # RNA output handling
 			baitsout += ">" + seq.header + "_" + seqst.to_s + "-" + seqend.to_s + "\n" + prb + "\n"
 			coordline += seq.header + "\t" + seqst.to_s + "\t" + seqend.to_s + "\n"
 			if $options.filter
-				flt = filter_baits(prb, qual)
+				flt = filter_baits(prb, qual) # U should not affection filtration
 				if flt[0]
 					outfilter += ">" + seq.header + "_" + seqst.to_s + "-" + seqend.to_s + "\n" + prb + "\n"
 					filtercoordline += seq.header + "\t" + seqst.to_s + "\t" + seqend.to_s + "\n"
