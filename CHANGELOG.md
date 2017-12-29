@@ -121,6 +121,9 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.0.1  
+Fixed inaccurate help text for --maxmask  
+
 ### Version 1.0  
 GC% calculated for uncollapsed ambiguities  
 General methods and classes moved to restored baitslib  

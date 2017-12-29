@@ -4,7 +4,7 @@ Michael G. Campana, 2017
 Smithsonian Conservation Biology Institute  
 Contact: <campanam@si.edu>  
 
-BaitsTools is an open-source package to facilitate the design of nucleic acid bait sets for hybridization capture experiments. It can generate RNA and DNA baits from a wide variety of input formats including FASTA/FASTQ sequences and alignments, [Stacks](http://catchenlab.life.illinois.edu/stacks/) population summary statistics files, genome annotations and features (BED/GTF/GFF) and VCF files. BaitsTools provides both a traditional command-line interface with arguments and an interactive interface using text prompts. Please read the accompanying [manuscript](#citation) before using this software.  
+BaitsTools is an open-source package to facilitate the design of nucleic acid bait sets for hybridization capture experiments. It can generate RNA and DNA baits from a wide variety of input formats including FASTA/FASTQ sequences and alignments, [Stacks](http://catchenlab.life.illinois.edu/stacks/) population summary statistics files, [PyRAD](http://dereneaton.com/software/pyrad/) and [ipyrad](http://ipyrad.readthedocs.io/) loci files, genome annotations and features (BED/GTF/GFF) and VCF files. BaitsTools provides both a traditional command-line interface with arguments and an interactive interface using text prompts. Please read and cite the accompanying [manuscript](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract) when using this software.  
 
 ## License  
 The software is made available under the Smithsonian Institution [terms of use](https://www.si.edu/termsofuse).  
@@ -249,7 +249,7 @@ vcf2baits selects variants and generates baits from a VCF file and a reference s
 `-k, --depth [VALUE]`: Requested tiled baits per variant. Default is 1.  
 
 ## Tips and Tricks
-1. The "#' character is reserved for BaitsTools annotations of sequence headers. Do not include this character in sequence identifiers.  
+1. The "#" character is reserved for BaitsTools annotations of sequence headers. Do not include this character in sequence identifiers.  
 
 2. Sequence characters in lowercase are considered masked by BaitsTools. This only impacts the optional `--maxmask` filter.  
 
@@ -270,4 +270,4 @@ BaitsTools is a complex program under active development. Bugs and technical iss
 
 ## Citation  
 Please cite:  
-Campana, M.G. Accepted. BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources*.  
+Campana, M.G. Accepted. BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources*. doi: [10.1111/1755-0998.12721](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract).  

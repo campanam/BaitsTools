@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.0"
+BAITSTOOLSVER = "1.0.1"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -275,7 +275,7 @@ class Parser
 				opts.on("-f", "--formamide [VALUE]", Float, "Melting temperature formamide concentration in M (Default = 0.0)") do |form|
 					args.formamide = form if form != nil
 				end
-				opts.on("-K", "--maxmask [VALUE]", Float, "Maximum % sequence consists of repetitive/low-complexity elements (Default = 25.0)") do |maxrep|
+				opts.on("-K", "--maxmask [VALUE]", Float, "Maximum % sequence consisting of masked elements (Default = 25.0)") do |maxrep|
 					args.maxmask = maxrep if maxrep != nil
 					args.maxmask_filter = true # Force bait filtration if called
 				end
