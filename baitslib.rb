@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.0"
+BAITSLIBVER = "1.0.3"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -620,7 +620,7 @@ def snp_to_baits(selectedsnps, refseq)
 							for Thread.current[:rseq_var] in Thread.current[:rseq_vars]
 								for Thread.current[:tile] in 0...Thread.current[:tiling]
 									Thread.current[:be4] = Thread.current[:snp].snp - $options.lenbef + Thread.current[:tile] * $options.tileoffset
-									Thread.current[:after] = Thread.current[:snp].snp + $options.baitlength + 1 - $options.lenbef + Thread.current[:tile] * $options.tileoffset
+									Thread.current[:after] = Thread.current[:snp].snp + $options.baitlength - 1 - $options.lenbef + Thread.current[:tile] * $options.tileoffset
 									Thread.current[:be4] = 1 if (Thread.current[:be4] < 1 and !Thread.current[:rseq_var].circular)
 									Thread.current[:qual] = [$options.fasta_score]
 									if Thread.current[:after] > Thread.current[:rseq_var].seq.length and !Thread.current[:rseq_var].circular

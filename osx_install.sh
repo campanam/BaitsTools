@@ -1,4 +1,9 @@
 #!/bin/bash
+#-----------------------------------------------------------------------------------------------
+# osx_install v 1.0.3
+# Michael G. Campana, 2017
+# Smithsonian Conservation Biology Institute
+#-----------------------------------------------------------------------------------------------
 curl -sSL https://get.rvm.io | bash -s stable
 source ~/.rvm/scripts/rvm
 rvm install 2.4.1

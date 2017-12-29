@@ -6,10 +6,12 @@ Contact: campanam@si.edu
 ## Table of Contents  
 [aln2baits](#aln2baits)  
 [annot2baits](#annot2baits)  
+[baitslib](#baitslib)  
 [baitstools](#baitstools)  
 [baitstoolsgui](#baitstoolsgui)  
 [bed2baits](#bed2baits)  
 [checkbaits](#checkbaits)  
+[osx_install](#osx_install)  
 [stacks2baits](#stacks2baits)  
 [tilebaits](#tilebaits)  
 [vcf2baits](#vcf2baits)  
@@ -75,6 +77,10 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.0.3  
+Fixed bug in snp_to_baits that added 2 bp to bait lengths.  
+baitstools and baitslib version will now track package version (even if no updates to these scripts) for package clarity. Individual version numbers left only to subcommands/GUI.  
+
 ### Version 1.0  
 Library restored for general release  
 Includes all general methods and classes from baitstools  
@@ -121,6 +127,9 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.0.3  
+baitstools and baitslib version will now track package version (even if no updates to these scripts) for package clarity. Individual version numbers left only to subcommands/GUI.  
+
 ### Version 1.0.1  
 Fixed inaccurate help text for --maxmask  
 
@@ -152,7 +161,7 @@ read_fasta can handle multiple loci with loc tag
 ### Version 0.8  
 Rubinius threading compatibility  
 Output directory and prefix can be named  
-Fixed bug in interactive prompts to ensure foramide entered and no negative Na/Formamide concentrations  
+Fixed bug in interactive prompts to ensure formamide entered and no negative Na/Formamide concentrations  
 BED start index bug fixed  
 
 ### Version 0.7  
@@ -284,6 +293,14 @@ Version constant added to header
 
 ### Version 0.1  
 Preliminary script to filter predefined baits through quality filters  
+
+## osx_install
+### Version 1.0.3  
+Changes now recorded in change log.  
+Versioning added to header of script  
+
+### Version 1.0.2  
+RVM default bug fixed  
 
 ## pyrad2baits  
 ### Version 0.1  
