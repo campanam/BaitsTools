@@ -1,19 +1,17 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
-# select_snps 0.4
-# Michael G. Campana, 2015
+# select_snps 0.5
+# Michael G. Campana, 2016
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
 # To be implemented
 # Output non-reference alleles
-# Sequence complexity filter
 # Include/Exclude multi-allelic sites
-# Minimum PIC/Calculate PIC
-# Self-complementarity filter
 
 require 'optparse'
 require 'ostruct'
+require './filter_probes.rb'
 #-----------------------------------------------------------------------------------------------
 class Parser
 	def self.parse(options)
@@ -46,7 +44,7 @@ class Parser
 		args.params = false
 		args.coords = false
 		opt_parser = OptionParser.new do |opts|
-			opts.banner = "Usage: ruby select_snps-0.4.rb [options]"
+			opts.banner = "Usage: ruby select_snps.rb [options]"
 			opts.separator ""
 			opts.separator "Specific options:"
 			opts.separator ""
@@ -127,40 +125,18 @@ class Parser
 			opts.separator "Common options:"
 			opts.on_tail("-h","--help", "Show help") do
 				print "Welcome to select_snps.\n\n"
-				print "To use the interactive interface, enter <ruby select_snps-0.4.rb>.\n\n"
+				print "To use the interactive interface, enter <ruby select_snps.rb>.\n\n"
 				puts opts
 				exit
 			end
 			opts.on_tail("-v","--version","Show version") do
-				print "select_snps 0.4\n"
+				print "select_snps 0.5\n"
 				exit
 			end
 		end
 		opt_parser.parse!(options)
 		return args
 	end
-end
-#-----------------------------------------------------------------------------------------------
-def filter_probes(probe)
-	keep = true
-	keep = false if probe.length < $options.probelength
-	gc = 0.0
-	for i in 0 ... probe.length
-		if probe[i].chr.upcase == "G" or probe[i].chr.upcase == "C"
-			gc += 1.0
-		end
-	end
-	gccont = gc/probe.length.to_f
-	melt = 79.8 + (58.4 * gccont) + (11.8 * (gccont**2.0)) - 820.0/probe.length.to_f + 18.5 * Math::log($options.na)
-	if $options.gc
-		keep = false if gccont * 100.0 < $options.mingc
-		keep = false if gccont * 100.0 > $options.maxgc
-	end
-	if $options.melt
-		keep = false if melt < $options.mint
-		keep = false if melt > $options.maxt
-	end
-	return [keep, probe.length.to_s + "\t" + gc.to_s + "\t" + melt.to_s + "\t" + keep.to_s + "\n"]
 end
 #-----------------------------------------------------------------------------------------------
 begin

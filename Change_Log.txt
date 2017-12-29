@@ -1,0 +1,43 @@
+BaitsTools Change Log
+
+tile_probes
+Version 0.1
+Preliminary script to divide genic/genomic sequences into tiled baits
+
+filter_probes
+Version 0.1
+filter_probes definition removed into separate script for access by other scripts
+
+select_snps
+Version 0.5
+Incorporated into BaitsTools package
+filter_probes definition removed into separate script for access by other scripts
+
+Version 0.4
+Added the option to produce tiled baits for SNPs.
+Added the option to output coordinates tables for the probes.
+Added the option to scale number of SNPs per contig by contig length.
+Added the option to filter by bait melting temperature.
+Added -e option to output probe sequences without selecting SNPs.
+Added the ability to output a table of bait filtering statistics.
+Made filtering option output filtered VCF as well as selected VCF.
+Changed GC filtering defaults and allowed this filter to be skipped if desired.
+Fixed 'ouput' typo
+Removed unnecessary ::Version variable
+
+Version 0.3
+GC content is now floating point.
+Altered the code to use OptionParser/ostruct.
+Set defaults for all major variables.
+Fixed a bug that terminated reference sequence chromosome names only at spaces rather than line breaks.
+
+Version 0.2
+Filters probes based on GC content, length.
+Improved handling of Y/N prompts.
+
+Version 0.1
+Selects SNPs from VCFs.
+Outputs probes based on reference sequence.
+
+Known Issues
+gets command incompatible with windows ruby interpreter (v. 1.9.2)
