@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
-# aln2baits 0.3
+# aln2baits
+ALN2BAITSVER = "0.4"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -101,12 +102,12 @@ def aln2baits
 			for hapno in 1..window.haplotypes.size
 				rng = (window.seqstart+1).to_s+"-"+(window.seqend+1).to_s #Adjust for 1-based indexing
 				baitsout += ">" + window.header[hapno-1] + "_" + rng + "_haplotype" + hapno.to_s + "\n" + window.haplotypes[hapno-1] + "\n"
-				coordline += window.header[hapno-1] + ":" + rng + "\n"
+				coordline += window.header[hapno-1] + "\t" + (window.seqstart+1).to_s + "\t" + (window.seqend+1).to_s + "\n"
 				if $options.filter
 					flt = filter_baits(window.haplotypes[hapno-1])
 					if flt[0]
 						outfilter += ">" + window.header[hapno-1] + "_" + rng + "_haplotype" + hapno.to_s+ "\n" + window.haplotypes[hapno-1] + "\n"
-						filtercoordline += window.header[hapno-1] + ":" + rng + "\n"
+						filtercoordline += window.header[hapno-1] + "\t" + (window.seqstart+1).to_s + "\t" + (window.seqend+1).to_s + "\n"
 					end
 					if $options.params
 						paramline += window.header[hapno-1] + ":" + rng + ":" + hapno.to_s + "\t" + flt[1]
@@ -119,12 +120,12 @@ def aln2baits
 				haplo = nvars[hapno-1] 
 				rng = (window.seqstart+1).to_s + "-" + (window.seqend+1).to_s #Adjust for 1-based indexing
 				baitsout += ">Alignment_" + rng + "_haplotype" + hapno.to_s + "\n" + haplo + "\n" # Original window headers are meaningless
-				coordline += "Alignment:" + rng + "\n" # Original window headers are meaningless
+				coordline += "Alignment\t" + (window.seqstart+1).to_s + "\t" + (window.seqend+1).to_s + "\n" # Original window headers are meaningless
 				if $options.filter
 					flt = filter_baits(haplo)
 					if flt[0]
 						outfilter += ">Alignment_" + rng + "_haplotype" + hapno.to_s+ "\n" + haplo + "\n"
-						filtercoordline += "Alignment:" + rng + "\n"
+						filtercoordline += "Alignment\t" + (window.seqstart+1).to_s + "\t" + (window.seqend+1).to_s + "\n"
 					end
 					if $options.params
 						paramline += "Alignment:" + rng + ":" + hapno.to_s + "\t" + flt[1]

@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
-# tilebaits 0.4
+# tilebaits
+TILEBAITSVER = "0.5"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -26,27 +27,24 @@ def tilebaits(seq_array)
 				seqend = seq.seq.length
 				prb = seq.seq[seqst-1..seqend-1] #Correct for 0-based counting
 				qual = seq.numeric_quality[seqst-1..seqend-1] unless seq.fasta
-				rng = seqst.to_s + "-" + seqend.to_s
 			elsif seqend > seq.seq.length and seq.circular #add beginning of sequence to end
 				seqend -= seq.seq.length
 				prb = seq.seq[seqst-1..seq.seq.length-1] + seq.seq[0..seqend-1] #Correct for 0-based counting
 				qual = seq.numeric_quality[seqst-1..seq.seq.length-1] + seq.numeric_quality[0..seqend-1] unless seq.fasta
-				rng = seqst.to_s + "-" + seqend.to_s
 			else
 				prb = seq.seq[seqst-1..seqend-1] #Correct for 0-based counting
 				qual = seq.numeric_quality[seqst-1..seqend-1] unless seq.fasta
-				rng = seqst.to_s + "-" + seqend.to_s
 			end
-			baitsout += ">" + seq.header + "_" + rng + "\n" + prb + "\n"
-			coordline += seq.header + ":" + rng + "\n"
+			baitsout += ">" + seq.header + "_" + seqst.to_s + "-" + seqend.to_s + "\n" + prb + "\n"
+			coordline += seq.header + "\t" + seqst.to_s + "\t" + seqend.to_s + "\n"
 			if $options.filter
 				flt = filter_baits(prb, qual)
 				if flt[0]
-					outfilter += ">" + seq.header + "_" + rng + "\n" + prb + "\n"
-					filtercoordline += seq.header + ":" + rng + "\n"
+					outfilter += ">" + seq.header + "_" + seqst.to_s + "-" + seqend.to_s + "\n" + prb + "\n"
+					filtercoordline += seq.header + "\t" + seqst.to_s + "\t" + seqend.to_s + "\n"
 				end
 				if $options.params
-					paramline += seq.header + ":" + rng + "\t" + flt[1]
+					paramline += seq.header + ":" + seqst.to_s + "-" + seqend.to_s + "\t" + flt[1]
 				end
 			end
 			seqst += $options.tileoffset

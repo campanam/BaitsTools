@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
-# vcf2baits 0.8
+# vcf2baits
+VCF2BAITSVER = "0.9"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -27,13 +28,14 @@ def vcf2baits
 				line_arr = line.split("\t")
 				reg = line_arr[0]
 				snp = line_arr[1].to_i
+				ref = line_arr[3]
 				alt = line_arr[4].split(",")
 				qual = line_arr[5].to_i
 				@snps[chromosome]=temp_snps
 				temp_snps = [] if chromosome != reg # Empty set if no longer on same chromosome
 				chromosome = reg # Reset chromosome
 				if !$options.varqual_filter or qual > $options.varqual
-					temp_snps.push(Chromo_SNP.new(reg, snp, [], alt, qual, line)) #Now using Chromo_SNPs to be consistent
+					temp_snps.push(Chromo_SNP.new(reg, snp, [], ref, alt, qual, line)) #Now using Chromo_SNPs to be consistent
 				end
 			end
 		end
@@ -41,11 +43,11 @@ def vcf2baits
 	@snps[chromosome]=temp_snps 		#To add last state from last line since otherwise will not loop
 	@snps.delete_if {|key, value| key == ""} # Delete dummy original value
 	@snps.delete_if {|key, value| value == []} # Delete empty contigs due to QUAL filter
-	print "** Selecting variants **\n"
+	print "** Selecting variants **\n" unless $options.every
 	@selectsnps = selectsnps(@snps) 	# Select SNPs
 	filteredsnps = @selectsnps.dup # Hash for filtering
 	# Write VCF & baits
-	vcfout += "##baitstools_vcf2baitsVersion=0.8+BaitsTools-0.5\n##baitstools_vcf2baitsCommand="
+	vcfout += "##baitstools_vcf2baitsVersion=" + VCF2BAITSVER + "+BaitsTools-" + BAITSTOOLSVER + "\n##baitstools_vcf2baitsCommand="
 	cmdline = get_command_line
 	vcffilt = vcfout + cmdline[0] + cmdline[1] + "\n" + columns
 	vcfout += cmdline[0] + "\n" + columns
