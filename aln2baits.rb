@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
-# aln2baits 0.2
-# Michael G. Campana, 2016
+# aln2baits 0.3
+# Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -13,37 +13,64 @@ class Hap_Window # Object defining a haplotype window
 		@seqend = seqend
 		@haplotypes = haplotypes
 	end
-	def var_permutations # Get number of possible variant permutations
-		n_vars = 1 # This code ignores wobble bases completely
+	def var_permutations # Get possible variant permutations
+		varindex = 1 # Index for sequence
+		variants = []
 		for i in 0...@haplotypes[0].length
-			varA = 0 #A allele exists?
-			varT = 0 #T allele exists?
-			varG = 0 #G allele exits?
-			varC = 0 #C allele exists?
-			indel = 0 #Indel allele exists?
-			for seq in @haplotypes
-				case seq[i].upcase
-				when "A"
-					varA = 1
-				when "T"
-					varT = 1
-				when "G"
-					varG = 1
-				when "C"
-					varC = 1
-				when "-"
-					indel = 1
-				end
-				break if varA + varT + varG +varC +indel == 5 #End loop early if all vars present
-			end
-			n_vars *= (varA+varT+varG+varC+indel)
+			variants.push([])
 		end
-		return n_vars
+		for i in 0...@haplotypes[0].length
+			for seq in @haplotypes
+				if !variants[i].include?(seq[i].upcase)
+					case seq[i].upcase
+					when "A","T","G","C","-"
+						variants[i].push(seq[i].upcase)
+					when "R"
+						variants[i].push("A","G")
+					when "Y"
+						variants[i].push("C","T")
+					when "M"
+						variants[i].push("A","C")
+					when "K"
+						variants[i].push("G","T")
+					when "S"
+						variants[i].push("C","G")
+					when "W"
+						variants[i].push("A","T")
+					when "H"
+						variants[i].push("A","C","T")
+					when "B"
+						variants[i].push("C","G","T")
+					when "V"
+						variants[i].push("A","C","G")
+					when "D"
+						variants[i].push("A","G","T")
+					when "N"
+						variants[i].push("A","C","G","T")
+					end
+				end
+			end
+			variants[i].uniq! # Remove duplicate variants due to wobble base handling
+			varindex *= variants[i].size
+		end
+		revised_haplos = []
+		for i in 1..varindex
+			revised_haplos.push("")
+		end
+		for i in 0...@haplotypes[0].length
+			for k in 0...varindex
+				var = k % variants[i].size
+				revised_haplos[k]+=variants[i][var]
+			end
+		end
+		return revised_haplos
 	end
 end
 #-----------------------------------------------------------------------------------------------
 def aln2baits
+	print "** Reading alignment **\n"
 	aln = read_fasta($options.infile)
+	print "** Identifying haplotypes **\n"
 	# Get haplotypes
 	seqstart = 0
 	windows = []
@@ -53,20 +80,19 @@ def aln2baits
 		window = Hap_Window.new([], seqstart, seqend)
 		for seq in aln
 			tmp_seq = seq.seq[seqstart..seqend]
-			unless tmp_seq.include?("-") and $options.no_indels # Exclude sequences with indels if not permitted
-				unless window.haplotypes.include?(tmp_seq) # Add new sequences to haplotype list
-					window.haplotypes.push(tmp_seq) 
-					window.header.push(seq.header)
-				end
+			unless window.haplotypes.include?(tmp_seq) # Add new sequences to haplotype list
+				window.haplotypes.push(tmp_seq) 
+				window.header.push(seq.header)
 			end
 		end
 		windows.push(window)
 		seqstart += $options.tileoffset # Control the window by tiling density
 	end
 	# Get bait candidates
+	print "** Generating and filtering baits **\n"
 	baitsout = ""
 	outfilter = ""
-	paramline = "Sequence:Coordinates:Haplotype\tBaitLength\t%GC\tTm\tKept\n"
+	paramline = "Sequence:Coordinates:Haplotype\tBaitLength\t%GC\tTm\tMeanQuality\tMinQuality\tKept\n"
 	coordline = ""
 	filtercoordline = ""
 	for window in windows
@@ -87,22 +113,21 @@ def aln2baits
 					end
 				end	
 			end
-		when "variants"
-			nvars = window.var_permutations # Get maximum number of sequences
-			for hapno in 1..nvars
-				chosen = rand(window.haplotypes.size) # Choose a random haplotype
-				haplo = window.haplotypes[chosen] 
-				rng = (window.seqstart+1).to_s+"-"+(window.seqend+1).to_s #Adjust for 1-based indexing
-				baitsout += ">" + window.header[chosen] + "_" + rng + "_haplotype" + hapno.to_s + "\n" + haplo + "\n"
-				coordline += window.header[chosen] + ":" + rng + "\n"
+		when "variant"
+			nvars = window.var_permutations # Get window_permutations
+			for hapno in 1..nvars.size
+				haplo = nvars[hapno-1] 
+				rng = (window.seqstart+1).to_s + "-" + (window.seqend+1).to_s #Adjust for 1-based indexing
+				baitsout += ">Alignment_" + rng + "_haplotype" + hapno.to_s + "\n" + haplo + "\n" # Original window headers are meaningless
+				coordline += "Alignment:" + rng + "\n" # Original window headers are meaningless
 				if $options.filter
 					flt = filter_baits(haplo)
 					if flt[0]
-						outfilter += ">" + window.header[chosen] + "_" + rng + "_haplotype" + hapno.to_s+ "\n" + haplo + "\n"
-						filtercoordline += window.header[chosen] + ":" + rng + "\n"
+						outfilter += ">Alignment_" + rng + "_haplotype" + hapno.to_s+ "\n" + haplo + "\n"
+						filtercoordline += "Alignment:" + rng + "\n"
 					end
 					if $options.params
-						paramline += window.header[chosen] + ":" + rng + ":" + hapno.to_s + "\t" + flt[1]
+						paramline += "Alignment:" + rng + ":" + hapno.to_s + "\t" + flt[1]
 					end
 				end	
 			end

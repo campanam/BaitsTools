@@ -1,137 +1,75 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
-# vcf2baits 0.7
-## Michael G. Campana, 2016
+# vcf2baits 0.8
+# Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
-# To be implemented
-# Output non-reference alleles
-# Include/Exclude multi-allelic sites
-
-#-----------------------------------------------------------------------------------------------
 def vcf2baits
 	# Read VCF file
 	@snps = {}
 	chromosome = ""
 	temp_snps = []
+	vcfout = ""
+	columns = ""
+	print "** Reading VCF **\n"
 	File.open($options.infile, 'r') do |snpreg|
 		while line = snpreg.gets
+			vcfout += line if line[0..1] == "##" # Add info lines to header
+			columns = line if line[0..1] == "#C" # Get column header separately so I can insert new information
 			if $options.scale and line[0..12] == "##contig=<ID="
-				reg = ""
-				len = ""
-				count = 13
-				brk = 0
-				while brk == 0 
-					if line[count].chr == ","
-						count += 8
-						brk += 1
-					else
-						reg += line[count].chr
-						count += 1
-					end
-				end
-				while brk == 1
-					if line[count].chr == ">"
-						brk += 1
-					else
-						len += line[count].chr
-						count += 1
-					end
-				end
-				scaled = (len.to_i/$options.distance).floor
+				line_arr = line.split(",")
+				reg = line_arr[0][13..-1] # Get region ID, but remove tag
+				len = line_arr[1].split("=")[1].to_i # Remove length= tag, noting that spacing can be variable
+				scaled = (len/$options.distance).floor
 				$options.scalehash[reg] = scaled
 			elsif line[0].chr != "#"
-				reg = ""
-				snp = ""
-				tab = 0
-				count = 0
-				while tab < 1
-					if line[count].chr == "\t"
-						@snps[chromosome]=temp_snps
-						temp_snps = [] if chromosome != reg
-						chromosome = reg
-						tab += 1
-					else
-						reg += line[count].chr
-					end
-					count += 1
+				line_arr = line.split("\t")
+				reg = line_arr[0]
+				snp = line_arr[1].to_i
+				alt = line_arr[4].split(",")
+				qual = line_arr[5].to_i
+				@snps[chromosome]=temp_snps
+				temp_snps = [] if chromosome != reg # Empty set if no longer on same chromosome
+				chromosome = reg # Reset chromosome
+				if !$options.varqual_filter or qual > $options.varqual
+					temp_snps.push(Chromo_SNP.new(reg, snp, [], alt, qual, line)) #Now using Chromo_SNPs to be consistent
 				end
-				while tab < 2
-					if line[count].chr == "\t"
-						tab += 1
-					else
-						snp += line[count].chr
-					end
-					count += 1
-				end
-				temp_snps.push(snp.to_i)		
 			end
 		end
 	end
 	@snps[chromosome]=temp_snps 		#To add last state from last line since otherwise will not loop
 	@snps.delete_if {|key, value| key == ""} # Delete dummy original value
+	@snps.delete_if {|key, value| value == []} # Delete empty contigs due to QUAL filter
+	print "** Selecting variants **\n"
 	@selectsnps = selectsnps(@snps) 	# Select SNPs
+	filteredsnps = @selectsnps.dup # Hash for filtering
 	# Write VCF & baits
-	search_keys = [] # Array to hold contig/SNP unique search values
-	for i in 0..@selectsnps.size - 1
-		for snp in @selectsnps[@selectsnps.keys[i]]
-			search = @selectsnps.keys[i] + "\t" + snp.to_s + "\t"
-			search_keys.push(search)
-		end
-	end
-	filter_search_keys = search_keys.dup # Array for filtering
-	vcfout = ""
+	vcfout += "##baitstools_vcf2baitsVersion=0.8+BaitsTools-0.5\n##baitstools_vcf2baitsCommand="
+	cmdline = get_command_line
+	vcffilt = vcfout + cmdline[0] + cmdline[1] + "\n" + columns
+	vcfout += cmdline[0] + "\n" + columns
 	if !$options.every
-		File.open($options.infile, 'r') do |snpsel|
-			while line = snpsel.gets
-				if line[0].chr == "#"
-					vcfout += line
-				else
-					search = ""
-					tab = 0
-					count = 0
-					while tab < 2
-						tab += 1 if line[count].chr == "\t"
-						search += line[count].chr
-						count += 1
-					end
-					if search_keys.include?(search)
-						vcfout += line
-						search_keys.delete(search)
-					end
-				end
+		for i in 0...@selectsnps.size
+			for snp in @selectsnps[@selectsnps.keys[i]]
+				vcfout += snp.line
 			end
 		end
 		File.open($options.infile + "-selected.vcf", 'w') do |write|
 			write.puts vcfout
 		end
 	end
-	# Output bait sequences if this option was selected
-	if $options.baits
-		baits = snp_to_baits(@selectsnps, filter_search_keys)
+	# Output bait sequences unless -p
+	if !$options.no_baits
+		print "** Reading reference sequence **\n"
+		refseq = read_fasta($options.refseq)
+		print "** Generating and filtering baits **\n"
+		baits = snp_to_baits(@selectsnps, refseq)
 		write_baits(baits[0], baits[1], baits[2], baits[3], baits[4])
 		if $options.filter
-			filter_search_keys = baits[5]
-			vcffilt = ""
-			File.open($options.infile, 'r') do |snpsel|
-				while line = snpsel.gets
-					if line[0].chr == "#"
-						vcffilt += line
-					else
-						search = ""
-						tab = 0
-						count = 0
-						while tab < 2
-							tab += 1 if line[count].chr == "\t"
-							search += line[count].chr
-							count += 1
-						end
-						if filter_search_keys.include?(search)
-							vcffilt += line
-							filter_search_keys.delete(search)
-						end
-					end
+			for i in 0...baits[5].size # Filtered snps
+				for snp in baits[5][baits[5].keys[i]]
+					vcffilt += snp.line
 				end
 			end
 			File.open($options.infile + "-filtered.vcf", 'w') do |write|
