@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # aln2baits
-ALN2BAITSVER = "0.7"
+ALN2BAITSVER = "1.0"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ def aln2baits(aln)
 	print "** Generating and filtering baits **\n"
 	baitsout = []
 	outfilter = []
-	paramline = ["Sequence:Locus:Coordinates:Haplotype\tBaitLength\tGC%\tTm\tMasked%\tMeanQuality\tMinQuality\tNs\tGaps\tKept\n"]
+	paramline = ["Sequence:Locus:Coordinates:Haplotype\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept\n"]
 	coordline = []
 	filtercoordline = []
 	rbedline = []
@@ -150,6 +150,7 @@ def aln2baits(aln)
 				if Thread.current[:j] % $options.threads == i
 					for Thread.current[:hapno] in 1..@windows[Thread.current[:j]].haplotypes.size
 						Thread.current[:rng] = (@windows[Thread.current[:j]].seqstart+1).to_s+"-"+(@windows[Thread.current[:j]].seqend+1).to_s # Adjust for 1-based indexing
+						@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1] = reversecomp(@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]) if $options.rc  # Output reverse complemented baits if requested
 						@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1].gsub!("T","U") if $options.rna # Will correct both raw and filtered sequences
 						@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1].gsub!("t","u") if $options.rna # Will correct both raw and filtered sequences
 						$options.haplodef == "haplotype" ? Thread.current[:header] = @windows[Thread.current[:j]].header[Thread.current[:hapno]-1] : Thread.current[:header] = "Alignment"

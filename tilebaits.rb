@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # tilebaits
-TILEBAITSVER = "0.8"
+TILEBAITSVER = "1.0"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ def tilebaits(seq_array)
 	# Process FASTA file
 	baitsout = []
 	outfilter = []
-	paramline = ["Chromosome:Coordinates\tBaitLength\tGC%\tTm\tMasked%\tMeanQuality\tMinQuality\tNs\tGaps\tKept\n"]
+	paramline = ["Chromosome:Coordinates\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept\n"]
 	coordline = []
 	filtercoordline = []
 	rbedline = [] # Relative bed coordinates
@@ -54,6 +54,7 @@ def tilebaits(seq_array)
 							Thread.current[:prb] = seq_array[Thread.current[:j]].seq[Thread.current[:seqst]-1..Thread.current[:seqend]-1] #Correct for 0-based counting
 							Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality[Thread.current[:seqst]-1..Thread.current[:seqend]-1] unless seq_array[Thread.current[:j]].fasta
 						end
+						Thread.current[:prb] = reversecomp(Thread.current[:prb]) if $options.rc # Output reverse complemented baits if requested
 						Thread.current[:prb].gsub!("T","U") if $options.rna # RNA output handling
 						Thread.current[:prb].gsub!("t","u") if $options.rna # RNA output handling
 						Thread.current[:prb] = extend_baits(Thread.current[:prb],  seq_array[Thread.current[:j]].seq, Thread.current[:seqst]-1, Thread.current[:seqend]-1) if $options.gaps == "extend"

@@ -107,6 +107,7 @@ A tutorial and example data are available in the example_data subdirectory of th
 `-D, --ncbi`: Denotes that FASTA/FASTQ file headers have NCBI-style descriptors after the sample name separated by spaces (e.g. `>{sample_name} {descriptor1} {descriptor2}`).  
 `-G, --gaps [VALUE]`: Strategy to handle baits that include gap characters (-) (one of `include`, `exclude`,  `extend`). `include` keeps all baits sequences with gaps. `exclude` filters out all baits with gaps. `extend` attempts to extend baits to complete length while removing gap characters.  *WARNING: extended baits will have BED coordinates corresponding to the uncorrected bait sequence.* Default is `include`.  
 `-Y, --rna`: Output bait sequences as RNA rather than DNA.  
+`-R, --rc`: Output reverse-complemented baits.  
 `-X, --threads [VALUE]`: Number of threads (Default = 1)  
 `-h, --help`: Print subcommand-specific help to the screen. Use without other arguments (e.g. `ruby baitstools.rb vcf2baits -h`).  
 `-v, --version`: Print subcommand version to the screen (which may not correspond with the BaitsTools release version). Use without other arguments (e.g. `ruby baitstools.rb vcf2baits -v`).
@@ -124,6 +125,8 @@ A tutorial and example data are available in the example_data subdirectory of th
 `-s, --na [VALUE]`: Sodium concentration for melting temperature estimation. Default is 0.9M.  
 `-f, --formamide [VALUE]`: Formamide concentration for melting temperature estimation. Default is 0.0M.  
 `-K, --maxmask [VALUE]`: Exclude baits with percentage of masked bases greater than the specified value. *NOTE: BaitsTools considers all bases in lower-case as masked sequence*. Default is 25.0%.  
+`-J, --maxhomopoly [VALUE]`: Exclude baits with homopolymers longer than the specified value. Default is 4.  
+`-y, --minlc [VALUE]`: Exclude baits with linguistic complexity scores lower than the specified value. Default is 0.9.  
 `-Q, --meanqual [VALUE]`: Exclude baits with a mean Phred-like base quality below the specified value. Default is 20.0.  
 `-M, --minqual [VALUE]`: Exclude baits with any base below the specified Phred-like base quality. Default is 10.  
 `-F, --fastascore [VALUE]`: Assume the specified Phred-like base quality for all FASTA sequences (e.g. for mixed FASTQ and FASTA datasets). Default is 0.  
@@ -135,6 +138,8 @@ The parameter file is a tab-separated file giving bait-specific filtration infor
 * GC%: Bait GC content in percent  
 * Tm: Bait melting temperature in Celcius  
 * Masked%: Percent of bait masked  
+* MaxHomopolymer: Length of longest homopolymer run  
+* SeqComplexity: Bait linguistic complexity  
 * MeanQuality: Mean Phred-like base quality of the generated bait  
 * MinQuality: Minimum Phred-like base quality of the generated bait  
 * Ns: Whether the bait included Ns  
@@ -199,6 +204,8 @@ pyrad2baits selects variants and generates baits from a PyRAD/ipyrad loci file. 
 ### stacks2baits  
 stacks2baits selects variants and generates baits from a Stacks population summary statistics file and a reference sequence.  
 
+*NOTE: Stacks uses 0-based indexing, while BaitsTools uses 1-based indexing. Variants coordinates will thus differ by 1 between the input/output Stacks TSV files and the remaining BaitsTools output.*  
+
 `-i, --input [FILE]`: Input Stacks summary TSV file name. Include the path to the file if not in the current directory.  
 `-S, --sort`: Sort variants according to variation between or within populations
 `-H, --hwe`: Sort variants within populations according to whether they conform to the expectations of Hardy-Weinberg Equilibrium (HWE). This option implies `-S`.  
@@ -255,7 +262,7 @@ vcf2baits selects variants and generates baits from a VCF file and a reference s
 
 5. If you need to enter a negative value into the command-line interface (e.g. a negative melting temperature), omit the space between the parameter and the value (e.g. `-q-30.0` rather than `-q -30.0`). Including the space will cause a Ruby parsing error.  
 
-6. It is possible to generate baits from paired-end sequences that do not overlap in a single BaitsTools run. Concatenate the two reads (reverse-complementing as appropriate) with a pad of Ns between the two reads. Using the `-N` option will then exclude candidate baits that overlap the N pad. This could be helpful for generating baits from FASTA/FASTQ alignments (e.g. using `aln2baits`) in which some sequences overlap and can be merged, but others have an unsequenced gap between the paired reads. This trick can also be used for unmerged paire-end PyRAD/ipyrad loci in `pyrad2baits`.  
+6. It is possible to generate baits from paired-end sequences that do not overlap in a single BaitsTools run. Concatenate the two reads (reverse-complementing as appropriate) with a pad of Ns between the two reads. Using the `-N` option will then exclude candidate baits that overlap the N pad. This could be helpful for generating baits from FASTA/FASTQ alignments (e.g. using `aln2baits`) in which some sequences overlap and can be merged, but others have an unsequenced gap between the paired reads. This trick can also be used for unmerged paired-end PyRAD/ipyrad loci in `pyrad2baits`.  
 
 ## Bug Reports  
 BaitsTools is a complex program under active development. Bugs and technical issues are inevitable. Please report any issues and associated error reports to <campanam@si.edu>.
@@ -263,4 +270,4 @@ BaitsTools is a complex program under active development. Bugs and technical iss
 
 ## Citation  
 Please cite:  
-Campana, M.G. 2017. *BaitsTools: software for hybridization capture bait design*.
+Campana, M.G. Accepted. BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources*.  

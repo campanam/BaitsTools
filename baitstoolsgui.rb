@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "0.2"
+BAITSTOOLSGUI = "1.0"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -81,6 +81,8 @@ def start_baitstools
 		cmdline += " -T " + $options.bait_type + " -s" + $options.na + " -f" + $options.formamide
 	end
 	cmdline += " -K" + $options.maxmask if $options.maxmask_filter == 1
+	cmdline += " -J" + $options.maxhomopoly if $options.maxhomopoly_filter == 1
+	cmdline += " -y" + $options.lc if $options.lc_filter == 1
 	cmdline += " -Q" + $options.meanqual if $options.meanqual_filter == 1
 	cmdline += " -M" + $options.minqual if $options.minqual_filter == 1
 	cmdline += " -F" + $options.fasta_score if ($options.meanqual_filter == 1 or $options.minqual_filter == 1)
@@ -575,6 +577,11 @@ def general_window
 		text "Output RNA"
 		place('x' => 300, 'y' => 250)
 	end
+	rc = TkCheckButton.new($root) do
+		variable $options.log
+		text "Reverse complement"
+		place('x' => 550, 'y' => 250)
+	end
 	gaps = TkLabel.new($root) do
 		text 'Gap strategy'
 		font TkFont.new('times 20')
@@ -602,12 +609,13 @@ def general_window
 		place('x' => 450, 'y' => 310)
 		width 10
 	end
-	configure_buttons([outdir, bed, rbed, log, ncbi, rna])
+	configure_buttons([outdir, bed, rbed, log, ncbi, rna, rc])
 	bed.state = "disabled" if $options.algorithm == "checkbaits"
 	ncbi.state = "disabled" if $options.algorithm == "pyrad2baits"
 	rbed.state = "disabled" unless $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "tilebaits" or $options.algorithm == "aln2baits"
-	outdir.width = ncbi.width = rbed.width = 20
-	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, log, ncbi, rna, gaps, gapselect, threads, threadentry)
+	outdir.width = rbed.width = rc.width = 20
+	ncbi.width = 15
+	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, log, ncbi, rna, rc, gaps, gapselect, threads, threadentry)
 end
 #-----------------------------------------------------------------------------------------------
 def subcommand_window(subcommand)
@@ -742,12 +750,12 @@ def qc_window
 	complete = TkCheckButton.new ($root) do
 		variable $options.completebait
 		text "Require complete length"
-		place('x' => 300, 'y' => 100)
+		place('x' => 315, 'y' => 100)
 	end
 	noNs = TkCheckButton.new($root) do
 		variable $options.no_Ns
 		text "No Ns"
-		place('x' =>550, 'y' => 100)
+		place('x' =>580, 'y' => 100)
 	end
 	collapse = TkCheckButton.new($root) do
 		variable $options.collapse_ambiguities
@@ -757,14 +765,14 @@ def qc_window
 	maxmask = TkCheckButton.new($root) do
 		variable $options.maxmask_filter
 		text "Max mask%"
-		place('x' => 350, 'y' => 150)
+		place('x' => 390, 'y' => 150)
 		command '$maxmaskentry.state == "disabled" ? $maxmaskentry.state = "normal" : $maxmaskentry.state = "disabled"'
 	end
 	$maxmaskentry = TkEntry.new($root) do
 		textvariable $options.maxmask
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 500, 'y' => 160)
+		place('x' => 580, 'y' => 160)
 		width 10
 	end
 	mingc = TkCheckButton.new($root) do
@@ -777,54 +785,82 @@ def qc_window
 		textvariable $options.mingc
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 200, 'y' => 210)
+		place('x' => 240, 'y' => 210)
 		width 10
 	end
 	maxgc = TkCheckButton.new($root) do
 		variable $options.maxgc_filter
 		text "Max GC%"
-		place('x' => 350, 'y' => 200)
+		place('x' => 390, 'y' => 200)
 		command '$maxgcentry.state == "disabled" ? $maxgcentry.state = "normal" : $maxgcentry.state = "disabled"'
 	end
 	$maxgcentry = TkEntry.new($root) do
 		textvariable $options.maxgc
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 500, 'y' => 210)
+		place('x' => 580, 'y' => 210)
 		width 10
 	end
 	$mingcentry.state = "disabled" if $options.mingc_filter == 0
 	$maxgcentry.state = "disabled" if $options.maxgc_filter == 0
+	homopoly = TkCheckButton.new($root) do
+		variable $options.maxhomopoly_filter
+		text "Max homopolymer"
+		place('x' => 50, 'y' => 250)
+		command '$homopolyentry.state == "disabled" ? $homopolyentry.state = "normal" : $homopolyentry.state = "disabled"'
+	end
+	$homopolyentry = TkEntry.new($root) do
+		textvariable $options.maxhomopoly
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 240, 'y' => 260)
+		width 10
+	end
+	minlc = TkCheckButton.new($root) do
+		variable $options.lc_filter
+		text "Min complexity"
+		place('x' => 390, 'y' => 250)
+		command '$lcentry.state == "disabled" ? $lcentry.state = "normal" : $lcentry.state = "disabled"'
+	end
+	$lcentry = TkEntry.new($root) do
+		textvariable $options.lc
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 580, 'y' => 260)
+		width 10
+	end
+	$homopolyentry.state = "disabled" if $options.maxhomopoly_filter == 0
+	$lcentry.state = "disabled" if $options.lc_filter == 0
 	mint = TkCheckButton.new($root) do
 		variable $options.mint_filter
 		text "Min Tm (°C)"
-		place('x' => 50, 'y' => 250)
+		place('x' => 50, 'y' => 300)
 		command 'update_mint'
 	end
 	$mintentry = TkEntry.new($root) do
 		textvariable $options.mint
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 200, 'y' => 260)
+		place('x' => 240, 'y' => 310)
 		width 10
 	end
 	maxt = TkCheckButton.new($root) do
 		variable $options.maxt_filter
 		text "Max Tm (°C)"
-		place('x' => 350, 'y' => 250)
+		place('x' => 390, 'y' => 300)
 		command 'update_maxt'
 	end
 	$maxtentry = TkEntry.new($root) do
 		textvariable $options.maxt
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 500, 'y' => 260)
+		place('x' => 580, 'y' => 310)
 		width 10
 	end
 	$typelab = TkLabel.new($root) do
 		text 'Hybridization'
 		font TkFont.new('times 20')
-		place('x' => 50, 'y' => 300)
+		place('x' => 50, 'y' => 350)
 		pady 10
 	end
 	$typeselect = Tk::Tile::Combobox.new($root) do
@@ -833,32 +869,32 @@ def qc_window
 		state "readonly"
 		width 10
 		height 3
-		place('x' => 180, 'y' => 310)
+		place('x' => 180, 'y' => 360)
 	end
 	$sodium = TkLabel.new($root) do
 		text 'Sodium (M)'
 		font TkFont.new('times 20')
-		place('x' => 320, 'y' => 300)
+		place('x' => 320, 'y' => 350)
 		pady 10
 	end
 	$sodiumentry = TkEntry.new($root) do
 		textvariable $options.na
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 450, 'y' => 310)
+		place('x' => 450, 'y' => 360)
 		width 10
 	end
 	$formamide = TkLabel.new($root) do
 		text 'Formamide (M)'
 		font TkFont.new('times 20')
-		place('x' => 540, 'y' => 300)
+		place('x' => 540, 'y' => 350)
 		pady 10
 	end
 	$formamideentry = TkEntry.new($root) do
 		textvariable $options.formamide
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 690, 'y' => 310)
+		place('x' => 690, 'y' => 360)
 		width 10
 	end
 	$maxmaskentry.state = "disabled" if $options.maxmask_filter == 0
@@ -868,53 +904,53 @@ def qc_window
 		$formamideentry.state = $formamide.state = "disabled"
 		$sodiumentry.state = $sodium.state = "disabled"
 		$typeselect.state = $typelab.state = "disabled"
-	end
+	end	
 	meanqual = TkCheckButton.new($root) do
 		variable $options.meanqual_filter
 		text "Min mean base Q"
-		place('x' => 50, 'y' => 350)
+		place('x' => 50, 'y' => 400)
 		command '$meanqualentry.state == "disabled" ? $meanqualentry.state = "normal" : $meanqualentry.state = "disabled"'
 	end
 	$meanqualentry = TkEntry.new($root) do
 		textvariable $options.meanqual
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 230, 'y' => 360)
+		place('x' => 230, 'y' => 410)
 		width 10
 	end
 	minqual = TkCheckButton.new($root) do
 		variable $options.minqual_filter
 		text "Min base Q"
-		place('x' => 320, 'y' => 350)
+		place('x' => 320, 'y' => 400)
 		command '$minqualentry.state == "disabled" ? $minqualentry.state = "normal" : $minqualentry.state = "disabled"'
 	end
 	$minqualentry = TkEntry.new($root) do
 		textvariable $options.minqual
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 450, 'y' => 360)
+		place('x' => 450, 'y' => 410)
 		width 10
 	end
 	fastascore = TkLabel.new($root) do
 		text 'Assumed base Q'
 		font TkFont.new('times 20')
-		place('x' => 540, 'y' => 350)
+		place('x' => 540, 'y' => 400)
 		pady 10
 	end
 	$fastascoreentry = TkEntry.new($root) do
 		textvariable $options.fasta_score
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 690, 'y' => 360)
+		place('x' => 690, 'y' => 410)
 		width 10
 	end
 	$meanqualentry.state = "disabled" if $options.meanqual_filter == 0
 	$minqualentry.state = "disabled" if $options.minqual_filter == 0
-	$widgets.push(params, complete, noNs, collapse, maxmask, mingc, maxgc, mint, maxt, meanqual, minqual)
+	$widgets.push(params, complete, noNs, collapse, maxmask, mingc, maxgc, homopoly, minlc, mint, maxt, meanqual, minqual)
 	configure_buttons($widgets)
-	$widgets.push($maxmaskentry, $mingcentry, $maxgcentry, $mintentry, $maxtentry, $typelab, $typeselect, $sodium, $sodiumentry, $formamide, $formamideentry, $meanqualentry, $minqualentry, $fastascoreentry, fastascore)
+	$widgets.push($maxmaskentry, $mingcentry, $maxgcentry, $homopolyentry, $lcentry, $mintentry, $maxtentry, $typelab, $typeselect, $sodium, $sodiumentry, $formamide, $formamideentry, $meanqualentry, $minqualentry, $fastascoreentry, fastascore)
 	params.width = complete.width = collapse.width = 20 
-	meanqual.width = 15
+	meanqual.width = homopoly.width = minlc.width = 15
 end
 #-----------------------------------------------------------------------------------------------
 def update_maxt
@@ -1035,29 +1071,41 @@ def go_forward
 		data_fails = false
 		if $options.maxmask_filter == 1
 			if $options.maxmask < 0.0 or $options.maxmask > 100.0
-				Tk::messageBox :message => 'Max mask% must be between 0 and 100'
+				Tk::messageBox :message => 'Max mask% must be between 0 and 100.'
 				data_fails = true
 				return
 			end
 		elsif $options.mingc_filter == 1
 			if $options.mingc < 0.0 or $options.mingc > 100.0
-				Tk::messageBox :message => 'Min GC% must be between 0 and 100'
+				Tk::messageBox :message => 'Min GC% must be between 0 and 100.'
 				data_fails = true
 				return
 			elsif $options.maxgc_filter == 1
 				if $options.maxgc.to_f < $options.mingc.to_f
-					Tk::messageBox :message => 'Max GC% must be greater than min GC%'
+					Tk::messageBox :message => 'Max GC% must be greater than min GC%.'
 					data_fails = true
 					return
 				elsif $options.maxgc > 100.0
-					Tk::messageBox :message => 'Max GC% must between min GC% and 100'
+					Tk::messageBox :message => 'Max GC% must between min GC% and 100.'
 					data_fails = true
 					return
 				end
 			end
 		elsif $options.maxgc_filter == 1
 			if $options.maxgc < 0.0 or $options.maxgc > 100.0
-				Tk::messageBox :message => 'Max GC% must be between 0 and 100'
+				Tk::messageBox :message => 'Max GC% must be between 0 and 100.'
+				data_fails = true
+				return
+			end
+		elsif $options.maxhomopoly_filter == 1
+			if $options.maxhomopoly < 1
+				Tk::messageBox :message => 'Maximum homopolymer length must be greater than 0.'
+				data_fails = true
+				return
+			end
+		elsif $options.lc_filter == 1
+			if $options.lc < 0.0 or $options.lc > 1.0
+				Tk::messageBox :message => 'Complexity must be between 0.0 and 1.0'
 				data_fails = true
 				return
 			end
@@ -1097,14 +1145,9 @@ def go_forward
 			data_fails = true
 			return
 		end
-		if $options.threads < 1
-			Tk::messageBox :message => 'Threads must be greater than 0.'
-			data_fails = true
-			return
-		end
 		general_window if !data_fails
 	when "General Options"
-		if $options.threads.to_i < 1
+		if $options.threads < 1
 			Tk::messageBox :message => 'Threads must be greater than 0.'
 		else
 			start_baitstools
@@ -1165,6 +1208,10 @@ def set_defaults
 	$options.collapse_ambiguities = TkVariable.new(0) # Flag to collapse ambiguities to a single nucleotide
 	$options.maxmask_filter = TkVariable.new(0) # Flag to filter by % masked sequence
 	$options.maxmask = TkVariable.new(25.0) # Max % masked sequence
+	$options.maxhomopoly_filter = TkVariable.new(0) # Flag to filter by homopolymer length
+	$options.maxhomopoly = TkVariable.new(4) # Max homopolymer length
+	$options.lc_filter = TkVariable.new(0) # Flag to filter by sequence complexity
+	$options.lc = TkVariable.new(0.9) # Minimum complexity
 	$options.mingc_filter = TkVariable.new(0) # Flag to filter by minimum gc content
 	$options.mingc = TkVariable.new(30.0) # Minimum GC content
 	$options.maxgc_filter = TkVariable.new(0) # Flag to filter by maximum gc content
@@ -1188,6 +1235,7 @@ def set_defaults
 	$options.log = TkVariable.new(0) # Flag to output detailed log
 	$options.ncbi = TkVariable.new(0) # Flag whether FASTA/FASTQ headers include NCBI-style descriptors
 	$options.rna = TkVariable.new(0) # Flag whether baits are output as RNA
+	$options.rc = TkVariable.new(0) # Flag to output reverse complement baits
 	$options.gaps = TkVariable.new("include") # Flag to omit bait sequences with gaps
 	$options.threads = TkVariable.new(1) # Number of threads
 end

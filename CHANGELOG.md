@@ -16,6 +16,10 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.0  
+Updated parameters table  
+Can reverse complement baits  
+
 ### Version 0.7  
 Absolute/relative BED coordinates  
 Gap handling options  
@@ -70,7 +74,60 @@ Version constant added to header
 ### Version 0.1  
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
+## baitslib  
+### Version 1.0  
+Library restored for general release  
+Includes all general methods and classes from baitstools  
+filter_baits can filter by linguistic complexity and maximum homopolymer length  
+Filter statistics calculated only when needed since new filters much slower than earlier ones  
+
+### Version 0.4  
+Added an exception to write_baits so that checkbaits does not output unfiltered baits  
+Added @qual to class Fa_Seq to allow it to handle FASTQ files  
+Modified read_fasta so that it can read standard format FASTQ  
+read_fasta can now separate NCBI-style descriptions from sequence names  
+Fixed filter_baits bug that always filtered by bait length completeness  
+GC content output in parameters file in % rather than decimal  
+filter_baits can filter by quality scores  
+filter_baits can remove sequences with Ns and gap characters (-)  
+Improved melting temperature calculations to use formamide concentrations and calculate for DNA hybridization  
+Added method 'mean' to calculate mean value of an array  
+Chromo_SNP updated to allow vcf metadata and store original vcf/stacks lines  
+selectsnps now uses Chromo_SNPs for the SNP data to allow metadata  
+snps_to_baits uses Chromo_SNPs and improved vcf2baits algorithm  
+snps_to_baits now updates to screen when major steps started  
+snps_to_baits can use quality scores as necessary. Parameter header updated  
+snps_to_baits can apply alternate alleles (including indels) from stacks2baits and vcf2baits  
+Fixed bug in snps_to_baits that reread reference sequence every time run in stacks2baits  
+New method get_command_line gets complete command-line for user reference  
+
+### Version 0.3  
+Added class Chromo_SNP as a container for SNP data  
+selectsnps method added (moved from vcf2baits)  
+snps_to_baits method added (moved from vcf2baits)  
+Modified write_baits to allow for different filestems (but defaulting to $options.infile)  
+Fixed bug in params file output that reported raw number of GCes rather than GC%  
+
+### Version 0.2
+filter_probes renamed baitslib  
+The word 'probe' changed to 'baits' in all instances for clarity  
+New method read_fasta handles basic fasta input  
+read_fasta removes #circ from appropriate sequence headers  
+New class Fa_Seq is container for fasta format  
+Fa_Seq is compatible with multi-line sequence fasta files  
+New method write_probes handles basic output  
+
+### Version 0.1  
+filter_probes definition removed into separate script for access by other scripts  
+
 ## baitstools  
+### Version 1.0  
+GC% calculated for uncollapsed ambiguities  
+General methods and classes moved to restored baitslib  
+Linguistic complexity and maximum homopolymer length filters  
+Reverse complement baits option  
+snp_to_baits can reverse complement  
+
 ### Version 0.9  
 Tiling offset default changed to 60 bp  
 Added pyrad2baits method  
@@ -162,6 +219,10 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.0  
+Linguistic complexity and maximum homopolymer length filters  
+Reverse complement option  
+
 ### Version 0.2  
 Tiling offset default changed to 60 bp  
 Fixed bug in start_baitstools for negative parameter values  
@@ -199,6 +260,10 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## checkbaits  
+### Version 1.0  
+Updated parameters table  
+Can reverse complement baits  
+
 ### Version 0.5  
 Param file notes Ns and gaps, mask %  
 Mask handling  
@@ -242,6 +307,10 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
 ## tilebaits  
+### Version 1.0  
+Updated parameters table  
+Can reverse complement baits  
+
 ### Version 0.7  
 Absolute/relative BED coordinates handled  
 Fixed :seqst-1 bug  
@@ -344,45 +413,6 @@ Selects SNPs from VCFs
 Outputs probes based on reference sequence
 
 # Deprecated  
-## baitslib  
-### Version 0.4  
-Added an exception to write_baits so that checkbaits does not output unfiltered baits  
-Added @qual to class Fa_Seq to allow it to handle FASTQ files  
-Modified read_fasta so that it can read standard format FASTQ  
-read_fasta can now separate NCBI-style descriptions from sequence names  
-Fixed filter_baits bug that always filtered by bait length completeness  
-GC content output in parameters file in % rather than decimal  
-filter_baits can filter by quality scores  
-filter_baits can remove sequences with Ns and gap characters (-)  
-Improved melting temperature calculations to use formamide concentrations and calculate for DNA hybridization  
-Added method 'mean' to calculate mean value of an array  
-Chromo_SNP updated to allow vcf metadata and store original vcf/stacks lines  
-selectsnps now uses Chromo_SNPs for the SNP data to allow metadata  
-snps_to_baits uses Chromo_SNPs and improved vcf2baits algorithm  
-snps_to_baits now updates to screen when major steps started  
-snps_to_baits can use quality scores as necessary. Parameter header updated  
-snps_to_baits can apply alternate alleles (including indels) from stacks2baits and vcf2baits  
-Fixed bug in snps_to_baits that reread reference sequence every time run in stacks2baits  
-New method get_command_line gets complete command-line for user reference  
-
-### Version 0.3  
-Added class Chromo_SNP as a container for SNP data  
-selectsnps method added (moved from vcf2baits)  
-snps_to_baits method added (moved from vcf2baits)  
-Modified write_baits to allow for different filestems (but defaulting to $options.infile)  
-Fixed bug in params file output that reported raw number of GCes rather than GC%  
-
-### Version 0.2
-filter_probes renamed baitslib  
-The word 'probe' changed to 'baits' in all instances for clarity  
-New method read_fasta handles basic fasta input  
-read_fasta removes #circ from appropriate sequence headers  
-New class Fa_Seq is container for fasta format  
-Fa_Seq is compatible with multi-line sequence fasta files  
-New method write_probes handles basic output  
-
-### Version 0.1  
-filter_probes definition removed into separate script for access by other scripts  
 
 ## coords2baits  
 Now bed2baits  
