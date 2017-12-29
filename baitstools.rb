@@ -1,10 +1,9 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
-# baitstools 0.3
+# baitstools 0.4
 # Michael G. Campana, 2016
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
-
 # To be implemented
 # Output non-reference alleles
 # Include/Exclude multi-allelic sites
@@ -12,16 +11,17 @@
 require 'optparse'
 require 'ostruct'
 require './baitslib.rb'
-require './selectsnps.rb'
+require './vcf2baits.rb'
 require './tilebaits.rb'
 require './coords2baits.rb'
 require './aln2baits.rb'
+require './stacks2baits.rb'
 #-----------------------------------------------------------------------------------------------
 class Parser
 	def self.parse(options)
 		# Set defaults
 		args = OpenStruct.new
-		algorithms = ["selectsnps", "tilebaits","coords2baits", "aln2baits"]
+		algorithms = ["vcf2baits", "tilebaits","coords2baits", "aln2baits", "stacks2baits"]
 		args.algorithm = ARGV[0] # Define subcommands
 		if algorithms.include?(args.algorithm) #Set interactive mode or whether to kill
 			args.interact = true if ARGV.size == 1
@@ -58,6 +58,9 @@ class Parser
 		args.coords = false
 		args.no_indels = false
 		args.haplodef = "haplotype"
+		args.sort = false
+		args.hwe = false
+		args.alpha = 0.05
 		opt_parser = OptionParser.new do |opts|
 			if algorithms.include?(args.algorithm) #Process correct commands
 				opts.banner = "Command-line usage: ruby baitstools.rb "+args.algorithm+" [options]"
@@ -65,18 +68,80 @@ class Parser
 				opts.separator args.algorithm+"-specific options:"
 				opts.separator ""
 				case args.algorithm
-				when "selectsnps" #selectsnps options
+				when "vcf2baits" #vcf2baits options
 					opts.on("-i","--input [FILE]", String, "Input VCF file") do |vcf|
 						args.infile = vcf
-					end
-					opts.on("-e","--every", "Output bait sequences for every SNP in the input VCF file") do
-						args.every = true
-						args.baits = true
 					end
 						opts.on("-t", "--totalsnps [VALUE]", Integer, "Total requested SNPs (Default = 30,000)") do |tsnps|
 						args.totalsnps = tsnps
 					end
-					opts.on("-j", "--scale", "Scale maximum number of SNPs per contig by contig length (overrides -m)") do
+				when "tilebaits" #tilebaits only options
+					args.baits = true
+					opts.on("-i","--input [FILE]", String, "Input FASTA file") do |fa|
+						args.infile = fa
+					end
+					opts.on("-L", "--length [VALUE]", Integer, "Requested bait length (Default = 120).") do |prblength|
+						args.baitlength = prblength
+					end
+					opts.on("-O", "--offset [VALUE]", Integer, "Base pair offset between tiled baits (Default = 20).") do |toff|
+						args.tileoffset = toff
+					end
+				when "coords2baits" #coords2baits only options
+					args.baits = true
+					opts.on("-i","--input [FILE]", String, "Input coordinates table") do |fa|
+						args.infile = fa
+					end
+					opts.on("-r","--refseq [FILE]", String, "Reference FASTA sequence file") do |ref|
+						args.refseq = ref
+					end
+					opts.on("-L", "--length [VALUE]", Integer, "Requested bait length (Default = 120).") do |prblength|
+						args.baitlength = prblength
+					end
+					opts.on("-O", "--offset [VALUE]", Integer, "Base pair offset between tiled baits (Default = 20).") do |toff|
+						args.tileoffset = toff
+					end
+				when "aln2baits" #aln2baits only options
+					args.baits = true
+					opts.on("-i","--input [FILE]", String, "Input FASTA alignment") do |fa|
+						args.infile = fa
+					end
+					opts.on("-L", "--length [VALUE]", Integer, "Requested bait length (Default = 120).") do |prblength|
+						args.baitlength = prblength
+					end
+					opts.on("-O", "--offset [VALUE]", Integer, "Base pair offset between haplotype windows (Default = 20).") do |toff|
+						args.tileoffset = toff
+					end
+					opts.on("-N", "--no_indels", "Exclude sequences with indels.") do
+						args.no_indels = true
+					end
+					opts.on("-H","--haplo [VALUE]", String, "Window haplotype definition (either 'haplotypes' or 'variants')") do |fa|
+						args.haplodef = fa
+					end
+				when "stacks2baits" #stacks2baits only options
+					opts.on("-i","--input [FILE]", String, "Input Stacks summary tsv") do |fa|
+						args.infile = fa
+					end
+					opts.on("-S", "--sort", "Sort SNPs according to variation between/within populations") do
+						args.sort = true
+					end
+					opts.on("-H", "--hwe", "Sort SNPs within populations according to Hardy-Weinberg Equilibrium (Implies -S)") do
+						args.sort = true
+						args.hwe = true
+					end
+					opts.on("-A", "--alpha", Float, "Set alpha value for HWE test (Either 0.10, 0.05, 0.025, 0.01) (Default = 0.05)") do |alph|
+						args.alpha = alph
+					end
+
+					opts.on("-t", "--totalsnps [VALUE]", Integer, "Total requested SNPs per category (Default = 30,000)") do |tsnps|
+						args.totalsnps = tsnps
+					end
+				end	
+				if args.algorithm == "vcf2baits" or args.algorithm == "stacks2baits" #vcf2baits, stacks2baits shared options
+ 					opts.on("-e","--every", "Output bait sequences for every SNP in the input file (Overrides -t, -j, -d and -m) (Implies -p)") do
+						args.every = true
+						args.baits = true
+					end
+ 					opts.on("-j", "--scale", "Scale maximum number of SNPs per contig by contig length (Overrides -m)") do
 						args.scale = true
 					end
 					opts.on("-m","--maxsnps [VALUE]", Integer, "Maximum number of SNPs per contig (Default = 2)") do |msnps|
@@ -111,46 +176,7 @@ class Parser
 					opts.on("-k", "--depth [VALUE]", Integer, "If tiling baits, requested baits per SNP.") do |tdep|
 						args.tiledepth = tdep
 					end
-				when "tilebaits" #tilebaits only options
-					opts.on("-i","--input [FILE]", String, "Input FASTA file") do |fa|
-						args.infile = fa
-					end
-					opts.on("-L", "--length [VALUE]", Integer, "Requested bait length (Default = 120).") do |prblength|
-						args.baitlength = prblength
-					end
-					opts.on("-O", "--offset [VALUE]", Integer, "Base pair offset between tiled baits (Default = 20).") do |toff|
-						args.tileoffset = toff
-					end
-				when "coords2baits" #coords2baits only options
-					opts.on("-i","--input [FILE]", String, "Input coordinates table") do |fa|
-						args.infile = fa
-					end
-					opts.on("-r","--refseq [FILE]", String, "Reference FASTA sequence file") do |ref|
-						args.refseq = ref
-					end
-					opts.on("-L", "--length [VALUE]", Integer, "Requested bait length (Default = 120).") do |prblength|
-						args.baitlength = prblength
-					end
-					opts.on("-O", "--offset [VALUE]", Integer, "Base pair offset between tiled baits (Default = 20).") do |toff|
-						args.tileoffset = toff
-					end
-				when "aln2baits" #aln2baits only options
-					opts.on("-i","--input [FILE]", String, "Input FASTA alignment") do |fa|
-						args.infile = fa
-					end
-					opts.on("-L", "--length [VALUE]", Integer, "Requested bait length (Default = 120).") do |prblength|
-						args.baitlength = prblength
-					end
-					opts.on("-O", "--offset [VALUE]", Integer, "Base pair offset between haplotype windows (Default = 20).") do |toff|
-						args.tileoffset = toff
-					end
-					opts.on("-N", "--no_indels", "Exclude sequences with indels.") do
-						args.no_indels = true
-					end
-					opts.on("-H","--haplo [VALUE]", String, "Window haplotype definition (either 'haplotypes' or 'variants')") do |fa|
-						args.haplodef = fa
-					end
-				end	
+				end
 				opts.separator "" #bait filtering options
 				opts.separator "Bait filtration options:"
 				opts.separator ""
@@ -197,14 +223,16 @@ class Parser
 				end
 				opts.on_tail("-v","--version","Show subcommand version") do
 					case args.algorithm
-					when "selectsnps"
-						print "selectsnps 0.6\n"
+					when "vcf2baits"
+						print "vcf2baits 0.7\n"
 					when "tilebaits"
 						print "tilebaits 0.3\n"
 					when "coords2baits"
 						print "coords2baits 0.1\n"
 					when "aln2baits"
 						print "aln2baits 0.2\n"
+					when "stacks2baits"
+						print "stacks2baits 0.1\n"
 					end
 					exit
 				end
@@ -213,17 +241,18 @@ class Parser
 					opts.banner = "Common options:"
 					print "Welcome to baitstools.\n\nTo use the interactive interface, enter <ruby baitstools.rb [subcommand]> without command-line options.\nCommand-line usage: ruby baitstools.rb [subcommand] [options]"
 					print "\nAdd '-h' or '--help' to subcommands (without other options) to see their relevant options.\n\nAvailable subcommands:\n\n"
-					print "    selectsnps\t\t\t\tSelect SNPs from a VCF\n"
+					print "    vcf2baits\t\t\t\tSelect SNPs from a VCF\n"
 					print "    tilebaits\t\t\t\tGenerate tiled baits from FASTA sequences\n"
 					print "    coords2baits\t\t\tGenerate tiled baits from a coordinates table and a reference sequence\n"
-					print "    aln2baits\t\t\t\tGenerate weighted baits from a FASTA alignment\n\n"
+					print "    aln2baits\t\t\t\tGenerate weighted baits from a FASTA alignment\n"
+					print "    stacks2baits\t\t\tGenerate baits from a Stacks summary tsv file\n\n"
 				end
 				opts.on_tail("-h","--help", "Show help") do
 					puts opts
 					exit
 				end				
 				opts.on_tail("-v","--version","Show baitstools version") do
-					print "baitstools 0.3\n"
+					print "baitstools 0.4\n"
 					exit
 				end
 			end
@@ -246,17 +275,40 @@ begin
 		$options.infile = gets.chomp
 	end
 	case $options.algorithm #algorithm-specific options
-	when "selectsnps" 
+	when "vcf2baits","stacks2baits"
 		if $options.interact
-			print "Output baits for all SNPs in VCF? (y/n)\n"
+			print "Output baits for all SNPs in input file? (y/n)\n"
 			t = gets.chomp.upcase
 			if t == "Y" or t == "YES"
 				$options.every = true
 				$options.baits = true
 			end
+			if $options.algorithm == "stacks2baits"
+				print "Sort SNPs according to variation between/within populations?\n"
+				t = gets.chomp.upcase
+				if t == "Y" or t == "YES"
+					$options.sort = true
+					print "Sort SNPs within populations according to Hardy-Weinberg Equilibrium?\n"
+					t = gets.chomp.upcase
+					if t == "Y" or t == "YES"
+						$options.hwe = true
+						print "Alpha value for HWE (alpha = 0.10, 0.05, 0.025, 0.01)?\n"
+						$options.alpha = gets.chomp.to_f
+						alphas = [0.10, 0.05, 0.025, 0.01]
+						while !alphas.include?($options.alpha)
+							print "Alpha value must be 0.10, 0.05, 0.025, 0.01. Re-enter.\n"
+							$options.alpha = gets.chomp.to_f
+						end
+					end
+				end
+			end
 		end
 		if $options.interact and !$options.every
-			print "Enter total number of requested SNPs.\n"
+			if $options.algorithm == "vcf2baits"
+				print "Enter total number of requested SNPs.\n"
+			else
+				print "Enter total number of requested SNPs per category.\n"
+			end
 			$options.totalsnps = gets.chomp.to_i
 		end
 		while $options.totalsnps < 1
@@ -416,7 +468,7 @@ begin
 			$options.haplodef = gets.chomp
 		end
 	end
-	if $options.interact
+	if $options.interact and $options.baits
 		print "Filter baits? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
@@ -491,13 +543,15 @@ begin
 		end
 	end
 	case $options.algorithm
-	when "selectsnps"
-		selectsnps
+	when "vcf2baits"
+		vcf2baits
 	when "tilebaits"
 		tilebaits($options.infile)
 	when "coords2baits"
 		coords2baits
 	when "aln2baits"
 		aln2baits
+	when "stacks2baits"
+		stacks2baits
 	end
 end

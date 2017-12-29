@@ -1,12 +1,12 @@
-{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf470
+{\rtf1\ansi\ansicpg1252\cocoartf1348\cocoasubrtf170
 {\fonttbl\f0\fswiss\fcharset0 Helvetica;}
 {\colortbl;\red255\green255\blue255;}
 \margl1440\margr1440\vieww23140\viewh16680\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
 
 \f0\b\fs36 \cf0 BaitsTools Change Log
 \b0\fs24 \
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
 
 \b\fs28 \cf0 aln2baits
 \b0\fs24 \
@@ -21,13 +21,22 @@ Version 0.1
 \b0 \
 Preliminary script to generate weighted bait set from a fasta alignment
 \b\fs28 \
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
 
 \b0\fs24 \cf0 \
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
 
 \b\fs28 \cf0 baitslib
 \b0\fs24  (formerly filter_probes)\
+
+\b Version 0.3
+\b0 \
+Added class Chromo_SNP as a container for SNP data\
+selectsnps method added (moved from vcf2baits)\
+snps_to_baits method added (moved from vcf2baits)\
+Modified write_baits to allow for different filestems (but defaulting to $options.infile)\
+Fixed bug in params file output that reported raw number of GCes rather than GC%\
+\
 
 \b Version 0.2
 \b0 \
@@ -48,8 +57,17 @@ filter_probes definition removed into separate script for access by other script
 baitstools
 \b0\fs24 \
 
-\b Version 0.3\
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\b Version 0.4\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b0 \cf0 Added stacks2baits method\
+Fixed bug in selectsnps algorithm call that asked to filter baits even when bait output not selected\
+Set tilebaits, coords2baits, and aln2baits to have $options.baits = true since these algorithms only output baits\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b \cf0 \
+Version 0.3\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
 
 \b0 \cf0 Added aln2baits to general help output for baitstools\
 Fixed no_tiling bug for command-line -N option
@@ -65,7 +83,7 @@ New front-end for baitstools package (hence inconsistent version number)\
 The word \'91probe\'92 changed to \'91baits\'92 in all instances for clarity\
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)\
 \
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
 
 \b\fs28 \cf0 coords2baits
 \b0\fs24 \
@@ -76,8 +94,15 @@ Preliminary script to turn a coordinates table and a reference sequence into bai
 \
 \
 
-\b\fs28 selectsnps
-\b0\fs24  (formerly select_snps)\
+\b\fs28 vcf2baits
+\b0\fs24  (formerly selectsnps, select_snps)\
+
+\b Version 0.7
+\b0 \
+Method involved in actual snp selection moved to baitslib as method selectsnps.\
+Method involved in bait generation moved to baitslib as method snp_to_baits.\
+Renamed to vcf2baits to be more consistent with nomenclature of other subprograms.\
+\
 
 \b Version 0.6
 \b0 \
@@ -130,6 +155,14 @@ Selects SNPs from VCFs.\
 Outputs probes based on reference sequence.\
 \
 
+\b\fs28 stacks2baits
+\b0\fs24 \
+
+\b Version 0.1
+\b0 \
+Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits.\
+\
+
 \b\fs28 tilebaits 
 \b0\fs24 (formerly tile_probes)\
 
@@ -151,4 +184,16 @@ Output now controlled by baitslib write_probes function\
 \b Version 0.1
 \b0 \
 Preliminary script to divide genic/genomic sequences into tiled baits\
+\
+\
+
+\b\fs28 Known Issues
+\b0\fs24 \
+Stacks uses 0-based sequence indexing. BaitsTools uses 1-based indexing (although Ruby is 0-based). This means SNPs will be 1 nucleotide position different than the TSV file.\
+stacks2baits does not output a filtered stacks summary tsv (to be addressed)\
+gets command incompatible with windows ruby interpreter (v. 1.9.2)\
+Ns and wobble bases not handled\
+Indel hyphens need processing\
+aln2baits and coords2baits cannot handle circular sequences\
+baits cannot go around circular sequences more than once in each direction\
 }
