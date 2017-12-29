@@ -1,14 +1,88 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
-# select_snps 0.2
+# select_snps 0.3
 # Michael G. Campana, 2015
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
-$completeprobe = false # Dummy variables to allow compilation
-$probelength = 0
-$mingc = 0
-$maxgc = 100
+::Version = "select_snps 0.3"
+require 'optparse'
+require 'ostruct'
+class Parser
+	def self.parse(options)
+		# Set defaults
+		args = OpenStruct.new
+		args.vcfin = ""
+		args.totalsnps = 30000
+		args.maxsnps = 2
+		args.distance = 10000
+		args.probes = false
+		args.refseq = ""
+		args.lenbef = 60
+		args.lenaft = 59
+		args.filter = false
+		args.completeprobe = false
+		args.probelength = 120
+		args.mingc = 0.0
+		args.maxgc = 100.0
+		opt_parser = OptionParser.new do |opts|
+			opts.banner = "Usage: ruby select_snps-0.3.rb [options]"
+			opts.separator ""
+			opts.separator "Specific options:"
+			opts.separator ""
+			opts.on("-i","--input [FILE]", String, "Input VCF file") do |vcf|
+				args.vcfin = vcf
+			end
+			opts.on("-t", "--totalsnps [VALUE]", Integer, "Total requested SNPs (Default = 30,000)") do |tsnps|
+				args.totalsnps = tsnps
+			end
+			opts.on("-m","--maxsnps [VALUE]", Integer, "Maximum number of SNPs per contig (Default = 2)") do |msnps|
+				args.maxsnps = msnps
+			end
+			opts.on("-d","--distance [VALUE]", Integer, "Minimum distance between SNPs within a contig (Default = 10,000)") do |dist|
+				args.distance = dist
+			end
+			opts.on("-p","--probes", "Output probe sequences") do
+				args.probes = true
+			end
+			opts.on("-r","--refseq [FILE]", String, "If probe ouput selected, the reference sequence file") do |ref|
+				args.refseq= ref
+			end
+			opts.on("-b", "--lenbef [VALUE]", Integer, "If probe output selected, the number of bases before the SNP (Default = 60)") do |b4|
+				args.lenbef = b4
+			end
+			opts.on("-a", "--lenaft [VALUE]", Integer, "If probe output selected, the number of bases before the SNP (Default = 59)") do |af|
+				args.lenaft = af
+			end
+			opts.on("-f","--filter", "If probes selected, filter probe sequences") do
+				args.filter = true
+			end
+			opts.on("-c","--complete", "If filtering, require probes be full length") do
+				args.completeprobe = true
+			end
+			opts.on("-n","--mingc [VALUE]", Float, "If filtering, minimum GC content (Default = 0.0)") do |mgc|
+				args.mingc = mgc
+			end
+			opts.on("-g","--maxgc [VALUE]", Float, "If filtering, maximum GC content (Default = 100.0)") do |xgc|
+				args.maxgc = xgc
+			end
+			opts.separator ""
+			opts.separator "Common options:"
+			opts.on_tail("-h","--help", "Show help") do
+				print "Welcome to select_snps.\n\n"
+				print "To use the interactive interface, enter <ruby select_snps-0.3.rb>.\n\n"
+				puts opts
+				exit
+			end
+			opts.on_tail("-v","--version","Show version") do
+				puts ::Version
+				exit
+			end
+		end
+		opt_parser.parse!(options)
+		return args
+	end
+end
 def filter_probes(probe)
 	# Sequence complexity
 	# Include/Exclude multi-allelic sites
@@ -16,173 +90,114 @@ def filter_probes(probe)
 	# Melting Temperature
 	# Self-complementarity
 	keep = true
-	keep = false if probe.length < $probelength
+	keep = false if probe.length < $options.probelength
 	gc = 0
 	for i in 0 ... probe.length
 		if probe[i].chr.upcase == "G" or probe[i].chr.upcase == "C"
 			gc += 1
 		end
 	end
-	keep = false if (gc * 100/probe.length) < $mingc
-	keep = false if (gc * 100/probe.length) > $maxgc
+	keep = false if (gc * 100/probe.length) < $options.mingc
+	keep = false if (gc * 100/probe.length) > $options.maxgc
 	return keep
 end
 begin
 	# Data options block
-	if ARGV[0] == "--help" or ARGV[0] == "-h"
-		print "Welcome to select_snps.\n\n"
-		print "To use the interactive interface, enter no options after the command, e.g. <ruby select_snps.rb>\n"
-		print "Otherwise, the parameters should be entered in the following order:\n\n"
-		print "* Input vcf file\n"
-		print "* Total requested SNPs\n"
-		print "* Maximum number of SNPs per contig\n"
-		print "* Minimum distance between SNPs within a contig\n"
-        print "* --probes to output probes (otherwise leave blank)\n"
-    	print "* If probe ouput selected, the reference sequence file (otherwise blank)\n"
-    	print "* If probe output selected, the number of bases before the SNP (otherwise blank)\n"
-    	print "* If probe output selected, the number of bases after the SNP (otherwise blank)\n"
-		print "* --filter to filter candidate probes (otherwise leave blank)\n"
-		print "* --complete to require probes be the full length (if not filtering, leave blank)\n"
-		print "* Minimum GC content (if not filtering, leave blank)\n"
-		print "* Maximum GC content (if not filtering, leave blank)\n\n"
-		print "For example, the command <ruby select_snps.rb input.vcf 5000 2 1000> would select 5000 SNPs, with\n"
-		print "a maximum of 2 SNPs per contig and a minimum distance of 1000 bp between SNPs from file input.vcf.\n\n"
-        print "Appending, <--probes refseq.fa 60 59> to the previous command would ouput probes based on refseq.fa, with\n"
-        print "the SNP appearing at the 61st postion of a 120 bp probe.\n\n"
-		print "Appending, <--filter --complete 40 60> to the previous command would filter probes requiring the complete\n"
-		print "120 bp probe length and a GC content range of 40 to 60%.\n\n"
-		exit # Kill the program rather than proceed without data
-	elsif ARGV[0].nil?
+	interact = true if ARGV.size == 0
+	$options = Parser.parse(ARGV)
+	if interact
 		print "Enter input file.\n"
-		@vcfin = gets.chomp
-		while !FileTest.exist?(@vcfin)
-			print "VCF file not found. Please re-enter.\n"
-			@vcfin = gets.chomp
-		end
-		print "Total requested SNPs.\n"
-		@total_snps = gets.chomp.to_i
-		while @total_snps < 1
-			print "The total number of SNPs must be greater than 0. Please re-enter.\n"
-			@total_snps = gets.chomp.to_i
-		end
-		print "Maximum number of SNPs per contig\n"
-		@max_snps = gets.chomp.to_i
-		while @max_snps < 1
-			print "The maximum number of SNPs per contig must be greater than 0. Please re-enter.\n"
-			@max_snps = gets.chomp.to_i
-		end
-		print "Minimum distance between SNPs within a contig\n"
-		@min_distance = gets.chomp.to_i
-		while @min_distance < 1
-			print "The minimum distance between SNPs must be greater than 0. Please re-enter.\n"
-			@min_distance = gets.chomp.to_i
-		end
+		$options.vcfin = gets.chomp
+	end
+	while !FileTest.exist?($options.vcfin)
+		print "VCF file not found. Please re-enter.\n"
+		$options.vcfin = gets.chomp
+	end
+	if interact
+		print "Enter total number of requested SNPs.\n"
+		$options.totalsnps = gets.chomp.to_i
+	end
+	while $options.totalsnps < 1
+		print "The total number of SNPs must be greater than 0. Please re-enter.\n"
+		$options.totalsnps = gets.chomp.to_i
+	end
+	if interact
+		print "Enter maximum number of SNPs per contig.\n"
+		$options.maxsnps = gets.chomp.to_i
+	end
+	while $options.maxsnps < 1
+		print "The maximum number of SNPs per contig must be greater than 0. Please re-enter.\n"
+		$options.maxsnps = gets.chomp.to_i
+	end
+	if interact
+		print "Enter minimum distance between SNPs within a contig.\n"
+		$options.distance = gets.chomp.to_i
+	end
+	while $options.distance < 1
+		print "The minimum distance between SNPs must be greater than 0. Please re-enter.\n"
+		$options.distance = gets.chomp.to_i
+	end
+	if interact
 		print "Output probes? (y/n)\n"
-        @probes = false
-		@filter = false
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
-        	@probes = true
+			$options.probes = true
 		end
-        if @probes
-       		print "Enter reference sequence.\n"
-        	@refseq = gets.chomp
-            while !FileTest.exist?(@refseq)
-        		print "Reference sequence not found. Please re-enter.\n"
-        		@refseq = gets.chomp
-    		end
-            print "Number of bases before SNP in probe\n"
-            @lenbef = gets.chomp.to_i
-            while @lenbef < 0
-            	print "The number of probe bases before the SNP must be at least 0. Please re-enter.\n"
-            	@lenbef = gets.chomp.to_i
-        	end
-            print "Number of bases after SNP in probe\n"
-            @lenaft = gets.chomp.to_i
-            while @lenaft < 0
-            	print "The number of probe bases after the SNP must be at least 0. Please re-enter.\n"
-            	@lenaft = gets.chomp.to_i
-        	end
-			$probelength = @lenbef + @lenaft + 1
+	end
+	if $options.probes
+		if interact
+			print "Enter reference sequence.\n"
+			$options.refseq = gets.chomp
+		end
+		while !FileTest.exist?($options.refseq)
+			print "Reference sequence not found. Please re-enter.\n"
+			$options.refseq = gets.chomp
+		end
+		if interact
+			print "Enter number of bases before SNP in probe.\n"
+			$options.lenbef = gets.chomp.to_i
+		end
+		while $options.lenbef < 0
+			print "The number of probe bases before the SNP must be at least 0. Please re-enter.\n"
+			$options.lenbef = gets.chomp.to_i
+		end
+		if interact
+			print "Enter number of bases after SNP in probe.\n"
+			$options.lenaft = gets.chomp.to_i
+		end
+		while $options.lenaft < 0
+			print "The number of probe bases after the SNP must be at least 0. Please re-enter.\n"
+			$options.lenaft = gets.chomp.to_i
+		end
+		$options.probelength = $options.lenbef + $options.lenaft + 1
+		if interact
 			print "Filter probes?\n"
 			t = gets.chomp.upcase
 			if t == "Y" or t == "YES"
-				@filter = true
+				$options.filter = true
 			end
-			if @filter
+		end
+		if $options.filter
+			if interact
 				print "Require complete length probe?\n"
 				t = gets.chomp.upcase
 				if t == "Y" or t == "YES"
-					$completeprobe = true 
+					$options.completeprobe = true
 				end
 				print "Enter minimum GC content.\n"
-				$mingc = gets.chomp.to_i
-				while $mingc < 0 or $mingc > 100
-					print "Minimum GC content must be between 0 and 100. Please re-enter.\n"
-					$mingc = gets.chomp.to_i
-				end
-				print "Enter maximum GC content.\n"
-				$maxgc = gets.chomp.to_i
-				while $maxgc < $mingc or $maxgc > 100
-					print "Maximum GC content must be between minimum GC content and 100. Re-enter.\n"
-					$maxgc = gets.chomp.to_i
-				end
+				$options.mingc = gets.chomp.to_f
 			end
-        end
-	else
-		@vcfin = ARGV[0]
-		while !FileTest.exist?(@vcfin)
-			print "VCF file not found. Please re-enter.\n"
-			@vcfin = $stdin.gets.chomp
-		end
-		@total_snps = ARGV[1].to_i
-		while @total_snps < 1
-			print "The total number of SNPs must be greater than 0. Please re-enter.\n"
-			@total_snps = $stdin.gets.chomp.to_i
-		end
-		@max_snps = ARGV[2].to_i
-		while @max_snps < 1
-			print "The maximum number of SNPs per contig must be greater than 0. Please re-enter.\n"
-			@max_snps = $stdin.gets.chomp.to_i
-		end
-		@min_distance = ARGV[3].to_i
-		while @min_distance < 1
-			print "The minimum distance between SNPs must be greater than 0. Please re-enter.\n"
-			@min_distance = $stdin.gets.chomp.to_i
-		end
-        @probes = false
-		@filter = false
-        @probes = true if ARGV[4] == "--probes"
-		@filter = true if ARGV[8] == "--filter"
-		$completeprobe = true if ARGV[9] == "--complete"
-        if @probes
-        	@refseq = ARGV[5]
-        	while !FileTest.exist?(@refseq)
-            	print "Reference sequence not found. Please re-enter.\n"
-            	@refseq = $stdin.gets.chomp
-        	end
-            @lenbef = ARGV[6].to_i
-            while @lenbef < 0
-            	print "The number of probe bases before the SNP must be at least 0. Please re-enter.\n"
-            	@lenbef = $stdin.gets.chomp.to_i
-        	end
-            @lenaft = ARGV[7].to_i
-            while @lenaft < 0
-            	print "The number of probe bases after the SNP must be at least 0. Please re-enter.\n"
-            	@lenaft = $stdin.gets.chomp.to_i
-        	end
-        end
-		$probelength = @lenbef + @lenaft + 1
-		if @filter
-			$mingc = ARGV[10].to_i
-			while $mingc < 0 or $mingc > 100
+			while $options.mingc < 0.0 or $options.mingc > 100.0
 				print "Minimum GC content must be between 0 and 100. Please re-enter.\n"
-				$mingc = $stdin.gets.chomp.to_i
+				$options.mingc = gets.chomp.to_f
 			end
-			$maxgc = ARGV[11].to_i
-			while $maxgc < $mingc or $maxgc > 100
+			if interact
+				print "Enter maximum GC content.\n"
+				$options.maxgc = gets.chomp.to_f
+			end
+			while $options.maxgc < $options.mingc or $options.maxgc > 100.0
 				print "Maximum GC content must be between minimum GC content and 100. Re-enter.\n"
-				$maxgc = $stdin.gets.chomp.to_i
+				$options.maxgc = gets.chomp.to_f
 			end
 		end
 	end
@@ -190,7 +205,7 @@ begin
 	@snps = {}
 	chromosome = ""
 	temp_snps = []
-	File.open(@vcfin, 'r') do |snpreg|
+	File.open($options.vcfin, 'r') do |snpreg|
 		while line = snpreg.gets
 			if line[0].chr != "#"
 				reg = ""
@@ -225,100 +240,100 @@ begin
 	# Select SNPs
 	temp_snps = @snps.dup #Avoid messing with the original hash just in case. Re-use the temporary variable.
 	@select_snps = {}
-	for i in 1..@total_snps
+	for i in 1..$options.totalsnps
 		break if temp_snps.size == 0 # Stop selecting SNPs when all contigs deleted from consideration
 		selected_contig = temp_snps.keys[rand(temp_snps.size)] # Get name of contig
 		selected_snp = temp_snps[selected_contig][rand(temp_snps[selected_contig].size)]
 		#Check SNP/Probe for suitability
 		# Delete SNPs that are too close
-        tmp = temp_snps[selected_contig].dup # Duplicate this subsection so that during deletion there are not errors
+		tmp = temp_snps[selected_contig].dup # Duplicate this subsection so that during deletion there are not errors
 		for i in 0 .. tmp.size - 1
-			if tmp[i] < selected_snp && selected_snp - tmp[i] < @min_distance
+			if tmp[i] < selected_snp && selected_snp - tmp[i] < $options.distance
 				temp_snps[selected_contig].delete(tmp[i])
-			elsif tmp[i] > selected_snp && tmp[i] - selected_snp < @min_distance
+			elsif tmp[i] > selected_snp && tmp[i] - selected_snp < $options.distance
 				temp_snps[selected_contig].delete(tmp[i])
 			end
 		end
 		# Add SNP to selected pool and delete contigs if maximum number of SNPs reached or no remaining SNPs on contig
-        @select_snps[selected_contig] = [] if @select_snps[selected_contig].nil?
+		@select_snps[selected_contig] = [] if @select_snps[selected_contig].nil?
 		@select_snps[selected_contig].push(selected_snp)
-        temp_snps[selected_contig].delete(selected_snp) # So it cannot be reselected
-		if @select_snps[selected_contig].size == @max_snps or temp_snps[selected_contig].size == 0
+		temp_snps[selected_contig].delete(selected_snp) # So it cannot be reselected
+		if @select_snps[selected_contig].size == $options.maxsnps or temp_snps[selected_contig].size == 0
 			temp_snps.delete_if {|key, value | key == selected_contig}
 		end
 	end
 	# Write VCF & Probes
-    search_keys = [] # Array to hold contig/SNP unique search values
-    for i in 0..@select_snps.size - 1
-        for snp in @select_snps[@select_snps.keys[i]]
-            search = @select_snps.keys[i] + "\t" + snp.to_s + "\t"
-            search_keys.push(search)
-        end
-    end
-    vcfout = ""
-    File.open(@vcfin, 'r') do |snpsel|
-        while line = snpsel.gets
-            if line[0].chr == "#"
-                vcfout += line
-            else
-                search = ""
+	search_keys = [] # Array to hold contig/SNP unique search values
+	for i in 0..@select_snps.size - 1
+		for snp in @select_snps[@select_snps.keys[i]]
+			search = @select_snps.keys[i] + "\t" + snp.to_s + "\t"
+			search_keys.push(search)
+		end
+	end
+	vcfout = ""
+	File.open($options.vcfin, 'r') do |snpsel|
+		while line = snpsel.gets
+			if line[0].chr == "#"
+				vcfout += line
+			else
+				search = ""
 				tab = 0
 				count = 0
 				while tab < 2
 					tab += 1 if line[count].chr == "\t"
-                    search += line[count].chr
+					search += line[count].chr
 					count += 1
 				end
-                if search_keys.include?(search)
-                    vcfout += line
-                    search_keys.delete(search)
-                end
-            end
-        end
-    end
-	File.open(@vcfin + "-selected.vcf", 'w') do |write|
+				if search_keys.include?(search)
+					vcfout += line
+					search_keys.delete(search)
+				end
+			end
+		end
+	end
+	File.open($options.vcfin + "-selected.vcf", 'w') do |write|
 		write.puts vcfout
 	end
-    # Output probe sequences if this option was selected
-    if @probes
-        probesout = ""
+	# Output probe sequences if this option was selected
+	if $options.probes
+		probesout = ""
 		outfilter = ""
-        File.open(@refseq, 'r') do |seqget|
-            while line = seqget.gets
-                if line[0].chr == ">"
-                    count = 1 #start at 1 to avoid the > symbol
-                    chromo = ""
-                    while line[count].chr != " "
-                        chromo += line[count].chr
-                        count += 1
-                    end
-                    if @select_snps.keys.include?(chromo)
-                        getsnps = true
-                    else
-                        getsnps = false
-                    end
-                elsif getsnps
-                    for snp in @select_snps[chromo]
-                        be4 = snp - @lenbef
-                        after = snp + @lenaft
-                        be4 = 0 if be4 < 0
-                        after = line.length - 2 if after >= line.length - 1 # Final char is line break
-                        seq = ">" + chromo + "\t" + snp.to_s + "\n" + line[be4 .. after] + "\n"
-                        probesout += seq
-						if @filter
+		File.open($options.refseq, 'r') do |seqget|
+		while line = seqget.gets
+			if line[0].chr == ">"
+				count = 1 #start at 1 to avoid the > symbol
+				chromo = ""
+				while line[count].chr != "\n"
+					chromo += line[count].chr
+					count += 1
+				end
+				if @select_snps.keys.include?(chromo)
+					getsnps = true
+				else
+					getsnps = false
+				end
+			elsif getsnps
+				for snp in @select_snps[chromo]
+					be4 = snp - $options.lenbef
+					after = snp + $options.lenaft
+					be4 = 0 if be4 < 0
+					after = line.length - 2 if after >= line.length - 1 # Final char is line break
+					seq = ">" + chromo + "\t" + snp.to_s + "\n" + line[be4 .. after] + "\n"
+					probesout += seq
+						if $options.filter
 							outfilter += seq if filter_probes(line[be4 .. after])
 						end
-                    end
-                end
-            end
-        end
-        File.open(@vcfin + "-selected-probes.fa", 'w') do |write|
-            write.puts probesout
-        end
-		if @filter
-			File.open(@vcfin + "-filtered-probes.fa", 'w') do |write|
+					end
+				end
+			end
+		end
+		File.open($options.vcfin + "-selected-probes.fa", 'w') do |write|
+			write.puts probesout
+		end
+		if $options.filter
+			File.open($options.vcfin + "-filtered-probes.fa", 'w') do |write|
 				write.puts outfilter
 			end
 		end
-    end
+	end
 end
