@@ -1,11 +1,10 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # vcf2baits
-VCF2BAITSVER = "0.9"
+VCF2BAITSVER = "0.10"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
-
 
 def vcf2baits
 	# Read VCF file
@@ -58,7 +57,7 @@ def vcf2baits
 				vcfout += snp.line
 			end
 		end
-		File.open($options.infile + "-selected.vcf", 'w') do |write|
+		File.open($options.outdir + "/" + $options.outprefix + "-selected.vcf", 'w') do |write|
 			write.puts vcfout
 		end
 	end
@@ -75,7 +74,7 @@ def vcf2baits
 					vcffilt += snp.line
 				end
 			end
-			File.open($options.infile + "-filtered.vcf", 'w') do |write|
+			File.open($options.outdir + "/" + $options.outprefix + "-filtered.vcf", 'w') do |write|
 				write.puts vcffilt
 			end
 		end

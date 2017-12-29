@@ -1,11 +1,10 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # stacks2baits
 STACKS2BAITSVER = "0.3"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
-
 
 class Popvar # Population-specific SNP data object
 	attr_accessor :pop, :alleles, :no_ind, :pfreq, :hetobs, :line 
@@ -57,7 +56,7 @@ def write_stacks(header, snps, tag) # Method to write stacks output since repeat
 			header += ssnp.line
 		end
 	end
-	File.open($options.infile + tag + ".tsv", 'w') do |write|
+	File.open($options.outdir + "/" + $options.outprefix + tag + ".tsv", 'w') do |write|
 		write.puts header
 	end
 end

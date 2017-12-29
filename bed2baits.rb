@@ -1,11 +1,10 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # bed2baits
-BED2BAITSVER = "0.3"
+BED2BAITSVER = "0.4"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
-
 
 def bed2baits
 	#Import reference sequence
@@ -25,22 +24,22 @@ def bed2baits
 			seqst = line_arr[1].to_i
 			seqend = line_arr[2].to_i
 			if refhash.include?(chromosome)
-				if seqst < 1
+				if seqst < 0
 					print "** Chromosome " + chromosome + " starting coordinate set to 1. **\n"
-					seqst = 1
+					seqst = 0
 				end
 				if seqend > refhash[chromosome].seq.length 
 					print "** Chromosome " + chromosome + " final coordinate set to " + refhash[chromosome].seq.length.to_s + " **\n"
 					seqend = refhash[chromosome].seq.length
 				end
 				if refhash[chromosome].fasta
-					seq = Fa_Seq.new(chromosome + "_" + seqst.to_s + "-" + seqend.to_s, false, true)
+					seq = Fa_Seq.new(chromosome + "_" + (seqst+1).to_s + "-" + seqend.to_s, false, true)
 				else
-					seq = Fa_Seq.new(chromosome + "_" + seqst.to_s + "-" + seqend.to_s, false, false)
-					seq.qual = refhash[chromosome].qual[seqst-1..seqend-1] #Correct for 0-based counting
+					seq = Fa_Seq.new(chromosome + "_" + (seqst+1).to_s + "-" + seqend.to_s, false, false)
+					seq.qual = refhash[chromosome].qual[seqst..seqend-1] #Correct for 0/1-based counting
 					seq.calc_quality
 				end
-				seq.seq = refhash[chromosome].seq[seqst-1..seqend-1] #Correct for 0-based counting
+				seq.seq = refhash[chromosome].seq[seqst..seqend-1] #Correct for 0-based counting
 				regions.push(seq)
 			else
 				print "** Chromosome " + chromosome + " not found in reference sequence file. **\n"
@@ -52,7 +51,7 @@ def bed2baits
 	for reg in regions
 		outfasta += ">" + reg.header + "\n" + reg.seq + "\n"
 	end
-	File.open($options.infile+"-regions.fa", 'w') do |out|
+	File.open($options.outdir+"/"+$options.outprefix+"-regions.fa", 'w') do |out|
 		out.puts outfasta
 	end
 	#Generate probes using methods from tilebaits

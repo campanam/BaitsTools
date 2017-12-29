@@ -7,6 +7,7 @@ Contact: campanam@si.edu
 [aln2baits](#aln2baits)  
 [annot2baits](#annot2baits)  
 [baitstools](#baitstools)  
+[baitstoolsgui](#baitstoolsgui)  
 [bed2baits](#bed2baits)  
 [checkbaits](#checkbaits)  
 [stacks2baits](#stacks2baits)  
@@ -15,9 +16,15 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 0.6  
+Rubinius threading compatibility  
+BED start index bug fixed  
+
 ### Version 0.5  
 Upcasing removed since now read as upcased  
 RNA output handling added  
+Added multi-threading support  
+Improved algorithm of generating baits  
 
 ### Version 0.4  
 Version constant added to header  
@@ -39,6 +46,9 @@ Corrected double-tabbed output in parameters output
 Preliminary script to generate weighted bait set from a fasta alignment  
 
 ## annot2baits  
+### Version 0.4  
+Output directory and prefix can be named  
+
 ### Version 0.3  
 Upcasing removed  
 
@@ -49,6 +59,12 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitstools  
+### Version 0.8  
+Rubinius threading compatibility  
+Output directory and prefix can be named  
+Fixed bug in interactive prompts to ensure foramide entered and no negative Na/Formamide concentrations  
+BED start index bug fixed  
+
 ### Version 0.7  
 -H defaults to haplotype  
 Ambiguity collapsing added to bait filtration  
@@ -57,6 +73,8 @@ make_dna upcases all sequences for later analyses
 read_fasta calls make_dna after each sequence read in  
 frontend handling for RNA bait output  
 RNA output handling for snp_to_baits and collapse_ambiguity  
+Basic multithreading added for read_fasta, snp_to_baits  
+Frontend control for threading (-X)  
 
 ### Version 0.6  
 Incorporated baitslib into baitstools main script  
@@ -113,7 +131,15 @@ New front-end for baitstools package (hence inconsistent version number)
 The word 'probe' changed to 'baits' in all instances for clarity  
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
+## baitstoolsgui  
+### Version 0.1  
+Basic GUI compatible with baitstools 0.8  
+
 ## bed2baits  
+### Version 0.4  
+Output directory and prefix can be named  
+BED start index bug fixed  
+
 ### Version 0.3  
 BaitsTools-specific coordinates table was more-or-less BED format with excess symbols. Converted the coordinates table to BED format.  
 Version constant added to header  
@@ -127,8 +153,12 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## checkbaits  
+### Version 0.4  
+Rubinius threading compatibility  
+
 ### Version 0.3  
 RNA output handling added  
+Added multi-threading support  
 
 ### Version 0.2  
 Version constant added to header  
@@ -137,6 +167,9 @@ Version constant added to header
 Preliminary script to filter predefined baits through quality filters  
 
 ## stacks2baits  
+### Version 0.4  
+Output directory and prefix can be named  
+
 ### Version 0.3  
 Version constant added to header  
 
@@ -153,8 +186,13 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
 ## tilebaits  
+### Version 0.7  
+Rubinius threading compatibility  
+BED start index bug fixed  
+
 ### Version 0.6  
 RNA output handling added  
+Added multi-threading support  
 
 ### Version 0.5  
 Returns BED format information rather than coordinates tables  
@@ -180,6 +218,9 @@ Output now controlled by baitslib write_probes function
 Preliminary script to divide genic/genomic sequences into tiled baits
 
 ## vcf2baits  
+### Version 0.10  
+Output directory and prefix can be named  
+
 ### Version 0.9  
 Now records reference allele to allow proper application of indel variants  
 Version constant added to header  

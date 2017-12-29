@@ -1,11 +1,10 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # annot2baits
-ANNOT2BAITSVER = "0.2"
+ANNOT2BAITSVER = "0.3"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
-
 
 def annot2baits
 	#Import reference sequence
@@ -47,7 +46,7 @@ def annot2baits
 	for reg in regions
 		outfasta += ">" + reg.header + "\n" + reg.seq + "\n"
 	end
-	File.open($options.infile+"-regions.fa", 'w') do |out|
+	File.open($options.outdir+"/"+$options.outprefix+"-regions.fa", 'w') do |out|
 		out.puts outfasta
 	end
 	#Generate probes using methods from tilebaits

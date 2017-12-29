@@ -1,11 +1,10 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "0.7"
+BAITSTOOLSVER = "0.8"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
-
 
 require 'optparse'
 require 'ostruct'
@@ -72,7 +71,7 @@ class Chromo_SNP # Container for SNPs
 		end
 		return @line
 	end
-	def alt_alleles 
+	def alt_alleles
 		if @alt.nil? # Get alternate alleles for stacks2baits (once)
 			@alt = []
 			for pop in @popvar_data
@@ -125,7 +124,7 @@ def filter_baits(bait, qual = [0])
 	# To be implemented:
 	# Sequence complexity filter
 	# Self-complementarity filter
-	
+
 	bait = collapse_ambiguity(bait) if $options.collapse_ambiguities # Ambiguity handling
 	keep = true
 	keep = false if (bait.length < $options.baitlength && $options.completebait)
@@ -145,7 +144,7 @@ def filter_baits(bait, qual = [0])
 		melt = 79.8 + (58.4 * gccont) + (11.8 * (gccont**2.0)) - 820.0/bait.length.to_f + 18.5 * Math::log($options.na) - 0.50 * $options.formamide
 	when "DNA-DNA"
 		melt = 81.5 + (41.0 * gccont) - 500.0/bait.length.to_f + 16.6 * Math::log($options.na) - 0.62 * $options.formamide
-	end	
+	end
 	meanqual = mean(qual)
 	minqual = qual.min
 	keep = false if (gccont * 100.0 < $options.mingc && $options.mingc_filter)
@@ -157,7 +156,12 @@ def filter_baits(bait, qual = [0])
 	return [keep, bait.length.to_s + "\t" + (gccont * 100.0).to_s + "\t" + melt.to_s + "\t" + meanqual.to_s + "\t" + minqual.to_s + "\t" + keep.to_s + "\n"]
 end
 #-----------------------------------------------------------------------------------------------
-def write_baits(baitsout = "", outfilter = "", paramline = "", coordline = "", filtercoordline = "", filestem = $options.infile)
+def write_baits(baitsout = [""], outfilter = [""], paramline = [""], coordline = [""], filtercoordline = [""], filestem = $options.outdir + "/" + $options.outprefix)
+	[baitsout,outfilter,paramline,coordline,filtercoordline].each do |output|
+		output.flatten!
+		output.delete(nil)
+		output.join("\n")
+	end
 	unless $options.algorithm == "checkbaits"
 		File.open(filestem + "-baits.fa", 'w') do |write|
 			write.puts baitsout
@@ -194,8 +198,6 @@ def read_fasta(file) # Read fasta and fastq files
 			unless line == "\n" # Remove extraneous line breaks
 				if line[0].chr == ">" and qual == false
 					if !faseq.nil? # push previously completed sequence into array
-						faseq.calc_quality unless faseq.fasta # Calculate quality scores
-						faseq.make_dna # Convert RNA sequences to DNA for internal algorithms and upcase sequences
 						seq_array.push(faseq)
 					end
 					header = line[1...-1] # Remove final line break and beginning >
@@ -212,13 +214,11 @@ def read_fasta(file) # Read fasta and fastq files
 					faseq = Fa_Seq.new(header, circular, true)
 				elsif qual and faseq.qual.length < faseq.seq.length # Test if quality line is complete
 					faseq.qual += line[0...-1] #Exclude final line break, allow multi-line fastq
-			 	elsif line[0].chr == "@" # Start new sequence 	
+			 	elsif line[0].chr == "@" # Start new sequence
 					qual = false
 					if !faseq.nil? # push previously completed sequence into array
-						faseq.calc_quality unless faseq.fasta # Calculate quality scores
-						faseq.make_dna # Convert RNA sequences to DNA for internal algorithms and upcase sequences
 						seq_array.push(faseq)
-					end 
+					end
 					header = line[1...-1] # Remove final line break and beginning >
 					if header[-5..-1] == "#circ" #Adding this to the end of a sequence denotes as circular
 						circular = true
@@ -239,9 +239,19 @@ def read_fasta(file) # Read fasta and fastq files
 			end
 		end
 	end
-	faseq.calc_quality unless faseq.fasta # Calculate quality scores
-	faseq.make_dna # Convert RNA sequences to DNA for internal algorithms and upcase sequences
 	seq_array.push(faseq) # Put last sequence into fasta array
+	threads = [] # Array to hold treads
+	$options.threads.times do |i|
+		threads[i] = Thread.new {
+			for Thread.current[:j] in 0 ... seq_array.size
+				if Thread.current[:j] % $options.threads == i
+					seq_array[Thread.current[:j]].calc_quality
+					seq_array[Thread.current[:j]].make_dna
+				end
+			end
+		}
+	end
+	threads.each { |thr| thr.join }
 	return seq_array
 end
 #-----------------------------------------------------------------------------------------------
@@ -283,108 +293,126 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 end
 #-----------------------------------------------------------------------------------------------
 def snp_to_baits(selectedsnps, refseq)
-	baitsout = ""
-	outfilter = ""
-	paramline = "Chromosome:Coordinates\tSNP\tBaitLength\t%GC\tTm\tMeanQuality\tMinQuality\tKept\n"
-	coordline = ""
-	filtercoordline = ""
-	filteredsnps = selectedsnps.dup
-	for rseq in refseq
-		if selectedsnps.keys.include?(rseq.header)
-			for snp in selectedsnps[rseq.header]
-				if $options.tiling
-					tiling = $options.tiledepth
-				else
-					tiling = 1
-					$options.tileoffset = 1
-				end
-				rseq_vars = [rseq]
-				if $options.alt_alleles
-					for altvar in snp.alt_alleles
-						tmpseq = rseq.seq.dup # Need to duplicate to prevent changes to original sequence
-						if snp.ref.nil?
-							tmpseq[snp.snp-1]=altvar
-						else
-							tmpseq[snp.snp-1..snp.snp+snp.ref.length-2]=altvar
-						end
-						tmpheader = rseq.header.dup + "-" + altvar + "-variant"
-						tmp = Fa_Seq.new(tmpheader, rseq.circular, rseq.fasta, tmpseq, rseq.qual)
-						unless rseq.fasta
-							qual_arr = []
-							tmpqual = rseq.qual_array.dup
-							if $options.algorithm == "vcf2baits"
-								qual = snp.qual
-								qual = 40 if qual > 40 # Adjust for quality scores beyond typical sequence capability
+	baitsout = []
+	outfilter = []
+	paramline = ["Chromosome:Coordinates\tSNP\tBaitLength\t%GC\tTm\tMeanQuality\tMinQuality\tKept\n"]
+	coordline = []
+	filtercoordline = []
+	refseq.size.times do
+		baitsout.push([])
+		outfilter.push([])
+		paramline.push([])
+		coordline.push([])
+		filtercoordline.push([])
+	end
+	filteredsnps = {}
+	threads = []
+	$options.threads.times do |i|
+		threads[i] = Thread.new {
+			for Thread.current[:j] in 0...refseq.size
+				if Thread.current[:j] % $options.threads == i
+					if selectedsnps.keys.include?(refseq[Thread.current[:j]].header)
+						for Thread.current[:snp] in selectedsnps[refseq[Thread.current[:j]].header]
+							if $options.tiling
+								Thread.current[:tiling] = $options.tiledepth
 							else
-								qual = rseq.numeric_quality[snp.snp-1] # Assume quality is equal across the variants since no quality information
+								Thread.current[:tiling] = 1
+								$options.tileoffset = 1
 							end
-							for i in 1..altvar.length # Apply quality score to all bases in alternate allele
-								qual_arr.push(qual)
+							Thread.current[:rseq_vars] = [refseq[Thread.current[:j]]]
+							if $options.alt_alleles
+								for Thread.current[:altvar] in Thread.current[:snp].alt_alleles
+									Thread.current[:tmpseq] = refseq[Thread.current[:j]].seq.dup # Need to duplicate to prevent changes to original sequence
+									if Thread.current[:snp].ref.nil?
+										Thread.current[:tmpseq][Thread.current[:snp].snp-1]=Thread.current[:altvar]
+									else
+										Thread.current[:tmpseq][Thread.current[:snp].snp-1..Thread.current[:snp].snp+Thread.current[:snp].ref.length-2]=Thread.current[:altvar]
+									end
+									Thread.current[:tmpheader] = refseq[Thread.current[:j]].header.dup + "-" + Thread.current[:altvar] + "-variant"
+									Thread.current[:tmp] = Fa_Seq.new(Thread.current[:tmpheader], refseq[Thread.current[:j]].circular, refseq[Thread.current[:j]].fasta, Thread.current[:tmpseq], refseq[Thread.current[:j]].qual)
+									unless refseq[Thread.current[:j]].fasta
+										Thread.current[:qual_arr] = []
+										Thread.current[:tmpqual] = refseq[Thread.current[:j]].qual_array.dup
+										if $options.algorithm == "vcf2baits"
+											Thread.current[:qual] = Thread.current[:snp].qual
+											Thread.current[:qual] = 40 if Thread.current[:qual] > 40 # Adjust for quality scores beyond typical sequence capability
+										else
+											Thread.current[:qual] = refseq[Thread.current[:j]].numeric_quality[Thread.current[:snp].snp-1] # Assume quality is equal across the variants since no quality information
+										end
+										for Thread.current[:i] in 1..Thread.current[:altvar].length # Apply quality score to all bases in alternate allele
+											Thread.current[:qual_arr].push(Thread.current[:qual])
+										end
+										Thread.current[:tmpqual][Thread.current[:snp].snp-1]=Thread.current[:qual_arr]
+										Thread.current[:tmp].qual_array = Thread.current[:tmpqual].flatten
+									end
+									Thread.current[:rseq_vars].push(Thread.current[:tmp]) # Add alternate variants to the sequence
+								end
 							end
-							tmpqual[snp.snp-1]=qual_arr
-							tmp.qual_array = tmpqual.flatten
-						end
-						rseq_vars.push(tmp) # Add alternate variants to the sequence
-					end
-				end
-				all_removed = 0 # Determine whether to remove whole site from filtered SNPs
-				for rseq_var in rseq_vars
-					for tile in 0...tiling
-						be4 = snp.snp - $options.lenbef + tile * $options.tileoffset
-						after = snp.snp + $options.lenaft + tile * $options.tileoffset
-						be4 = 1 if (be4 < 1 and !rseq_var.circular)
-						qual = [$options.fasta_score]
-						if after > rseq_var.seq.length and !rseq_var.circular
-							after = rseq_var.seq.length
-						if be4 < 1
-							prb = rseq_var.seq[be4-1..-1] + rseq_var.seq[0..after-1]  #Correct for 0-based counting
-							qual = rseq_var.numeric_quality[be4-1..-1] + rseq_var.numeric_quality[0..after-1] unless rseq_var.fasta
-						else
-							prb = rseq_var.seq[be4-1..after-1]  #Correct for 0-based counting
-							qual = rseq_var.numeric_quality[be4-1..after-1] unless rseq_var.fasta
-						end 
-						elsif after > rseq_var.seq.length and rseq_var.circular
-							after -= rseq_var.seq.length
-							if be4 < 1
-								prb = rseq_var.seq[be4-1..-1] + rseq_var.seq[be4-1..rseq_var.seq.length-1]+rseq_var.seq[0..after-1] #Correct for 0-based counting and end of sequence
-								qual = rseq_var.numeric_quality[be4-1..-1] + rseq_var.numeric_quality[be4-1..rseq_var.seq.length-1]+rseq_var.numeric_quality[0..after-1] unless rseq_var.fasta
-							else
-								prb = rseq_var.seq[be4-1..rseq_var.seq.length-1]+rseq_var.seq[0..after-1]  #Correct for 0-based counting and end of sequence
-								qual = rseq_var.numeric_quality[be4-1..rseq_var.seq.length-1]+rseq.numeric_quality[0..after-1] unless rseq_var.fasta
-							end
-						else
-							if be4 < 1
-								prb = rseq_var.seq[be4-1..-1] + rseq_var.seq[0..after-1]
-								qual = rseq_var.numeric_quality[be4-1..-1] + rseq_var.numeric_quality[0..after-1] unless rseq_var.fasta
-							else
-								prb = rseq_var.seq[be4-1..after-1]  #Correct for 0-based counting
-								qual = rseq_var.numeric_quality[be4-1..after-1] unless rseq_var.fasta
-							end
-						end
-						prb.gsub!("T","U") if $options.rna # RNA output handling
-						seq = ">" + rseq_var.header + "\t" + snp.snp.to_s + "\n" + prb + "\n"
-						baitsout += seq
-						be4 = rseq_var.seq.length + be4 if be4 < 1
-						coord = rseq_var.header + "\t" + be4.to_s + "\t" + after.to_s + "\n"
-						coordline += coord
-						if $options.filter
-							parameters = filter_baits(prb, qual) # U should not affect filtration
-							if parameters[0]
-								outfilter += seq
-								filtercoordline += coord 
-							else 
-								all_removed += 1
-								filteredsnps[rseq.header].delete(snp) if all_removed == rseq_vars.size # Only remove completely if NO variant survives
-							end
-							if $options.params
-								paramline += rseq_var.header + ":" + be4.to_s + "-" + after.to_s + "\t" + snp.snp.to_s + "\t" + parameters[1]
+							for Thread.current[:rseq_var] in Thread.current[:rseq_vars]
+								for Thread.current[:tile] in 0...Thread.current[:tiling]
+									Thread.current[:be4] = Thread.current[:snp].snp - $options.lenbef + Thread.current[:tile] * $options.tileoffset
+									Thread.current[:after] = Thread.current[:snp].snp + $options.lenaft + Thread.current[:tile] * $options.tileoffset
+									Thread.current[:be4] = 1 if (Thread.current[:be4] < 1 and !Thread.current[:rseq_var].circular)
+									Thread.current[:qual] = [$options.fasta_score]
+									if Thread.current[:after] > Thread.current[:rseq_var].seq.length and !Thread.current[:rseq_var].circular
+										Thread.current[:after] = Thread.current[:rseq_var].seq.length
+										if Thread.current[:be4] < 1
+											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].seq[0..Thread.current[:after]-1]  #Correct for 0-based counting
+											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].numeric_quality[0..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
+										else
+											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:after]-1]  #Correct for 0-based counting
+											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
+										end
+									elsif Thread.current[:after] > Thread.current[:rseq_var].seq.length and Thread.current[:rseq_var].circular
+										Thread.current[:after] -= Thread.current[:rseq_var].seq.length
+										if Thread.current[:be4] < 1
+											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:rseq_var].seq.length-1]+Thread.current[:rseq_var].seq[0..Thread.current[:after]-1] #Correct for 0-based counting and end of sequence
+											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:rseq_var].seq.length-1]+Thread.current[:rseq_var].numeric_quality[0..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
+										else
+											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:rseq_var].seq.length-1]+Thread.current[:rseq_var].seq[0..Thread.current[:after]-1]  #Correct for 0-based counting and end of sequence
+											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:rseq_var].seq.length-1]+rseq.numeric_quality[0..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
+										end
+									else
+										if Thread.current[:be4] < 1
+											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].seq[0..Thread.current[:after]-1]
+											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].numeric_quality[0..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
+										else
+											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:after]-1]  #Correct for 0-based counting
+											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
+										end
+									end
+									Thread.current[:prb].gsub!("T","U") if $options.rna # RNA output handling
+									Thread.current[:seq] = ">" + Thread.current[:rseq_var].header + "\t" + Thread.current[:snp].snp.to_s + "\n" + Thread.current[:prb] + "\n"
+									Thread.current[:be4] = Thread.current[:rseq_var].seq.length + Thread.current[:be4] if Thread.current[:be4] < 1
+									Thread.current[:coord] = Thread.current[:rseq_var].header + "\t" + Thread.current[:be4-1].to_s + "\t" + Thread.current[:after].to_s + "\n"
+									baitsout[Thread.current[:j]].push(Thread.current[:seq])
+									coordline[Thread.current[:j]].push(Thread.current[:coord])
+									if $options.filter
+										Thread.current[:parameters] = filter_baits(Thread.current[:prb], Thread.current[:qual]) # U should not affect filtration
+										if Thread.current[:parameters][0]
+											outfilter[Thread.current[:j]].push(Thread.current[:seq])
+											filtercoordline[Thread.current[:j]].push(Thread.current[:coord])
+											if filteredsnps[refseq[Thread.current[:j]].header].nil?
+												filteredsnps[refseq[Thread.current[:j]].header] = [Thread.current[:snp]]
+											else
+												filteredsnps[refseq[Thread.current[:j]].header].push(Thread.current[:snp])
+												filteredsnps[refseq[Thread.current[:j]].header].uniq!
+											end
+										end
+										if $options.params
+											Thread.current[:param] = Thread.current[:rseq_var].header + ":" + Thread.current[:be4].to_s + "-" + Thread.current[:after].to_s + "\t" + Thread.current[:snp].snp.to_s + "\t" + Thread.current[:parameters][1]
+											paramline[Thread.current[:j]+1].push(Thread.current[:param])
+										end
+									end
+								end
 							end
 						end
 					end
 				end
 			end
-		end
+		}
 	end
+	threads.each { |thr| thr.join }
 	return [baitsout, outfilter, paramline, coordline, filtercoordline, filteredsnps]
 end
 #-----------------------------------------------------------------------------------------------
@@ -436,11 +464,14 @@ def get_command_line # Get command line for summary output
 				cmdline += feature + ","
 			end
 			cmdline = cmdline[0...-1] # Remove final , from feature list
-		end		
+		end
 	end
+	cmdline += " -o " + $options.outprefix
+	cmdline += " -Z " + $options.outdir
 	cmdline += " -B" if $options.coords
 	cmdline += " -D" if $options.ncbi
 	cmdline += " -Y" if $options.rna
+	cmdline += " -X " + $options.threads.to_s
 	# Generate filtration options
 	fltline = ""
 	fltline += " -w" if $options.params
@@ -474,6 +505,7 @@ class Parser
 			args.kill = true # kill the program if neither interactive nor command line
 		end
 		ARGV.delete_at(0) # Remove subcommand from input otherwise crashes
+		args.threads = 1 # Number of threads
 		args.infile = "" # Primary input file
 		args.every = false # Flag that baits will be generated from every SNP
 		args.totalsnps = 30000 # Maximum requested SNPs
@@ -522,6 +554,8 @@ class Parser
 		args.alt_alleles = false # Flag to apply alternate alleles
 		args.varqual_filter = false # Flag to determine whether to filter vcf variants by QUAL scores
 		args.varqual = 30 # Minimum vcf variant QUAL score
+		args.outdir = File.expand_path("./") # Output directory
+		args.outprefix = "out" # Output prefix
 		opt_parser = OptionParser.new do |opts|
 			if algorithms.include?(args.algorithm) # Process correct commands
 				opts.banner = "Command-line usage: ruby baitstools.rb "+args.algorithm+" [options]"
@@ -541,7 +575,7 @@ class Parser
 						args.totalsnps = tsnps if tsnps != nil
 					end
 				when "stacks2baits" #stacks2baits only options
-					opts.on("-i","--input [FILE]", String, "Input Stacks summary tsv") do |fa|
+					opts.on("-i","--input [FILE]", String, "Input Stacks summary tsv file") do |fa|
 						args.infile = fa
 					end
 					opts.on("-S", "--sort", "Sort variants according to variation between/within populations") do
@@ -563,7 +597,7 @@ class Parser
 						inputstr = "Input BED file"
 					when "annot2baits"
 						inputstr = "Input GFF/GTF table"
-					else 
+					else
 						inputstr = "Input FASTA/FASTQ file"
 					end
 					opts.on("-i","--input [FILE]", String, inputstr) do |fa|
@@ -591,7 +625,7 @@ class Parser
 							args.haplodef = fa if fa != nil
 						end
 					end
-				end	
+				end
 				if args.algorithm == "vcf2baits" or args.algorithm == "stacks2baits" #vcf2baits, stacks2baits shared options
  					opts.on("-j", "--scale", "Scale maximum number of variants per contig by contig length (Overrides -m)") do
 						args.scale = true
@@ -646,7 +680,7 @@ class Parser
 				end
 				opts.on("-G", "--nogaps", "Exclude bait sequences with gaps (-)") do
 					args.no_gaps = true
-				end	
+				end
 				opts.on("-N", "--noNs", "Exclude bait sequences with Ns") do
 					args.no_Ns = true
 				end
@@ -660,7 +694,7 @@ class Parser
 				opts.on("-x","--maxgc [VALUE]", Float, "Maximum GC content (Default = 50.0)") do |xgc|
 					args.maxgc = xgc if xgc != nil
 					args.maxgc_filter = true
-				end			
+				end
 				opts.on("-q","--mint [VALUE]", Float, "Minimum melting temperature (Default = 0.0)") do |mt|
 					args.mint = mt if mt != nil
 					args.mint_filter = true # Force bait filtration if called
@@ -694,6 +728,12 @@ class Parser
 				opts.separator ""
 				opts.separator "Common options:"
 				opts.separator ""
+				opts.on("-o", "--outprefix [VALUE]", String, "Output file prefix (Default = out)") do |out|
+					args.outprefix = out if out != nil
+				end
+				opts.on("-Z", "--outdir [VALUE]", String, "Output directory path (Default is ./)") do |outdir|
+					args.outdir = File.expand_path(outdir)  if outdir != nil
+				end
 				unless args.algorithm == "checkbaits" # checkbaits does not get coordinate information to output
 					opts.on("-B", "--bed", "Output BED file for the candidate baits") do
 						args.coords = true
@@ -704,6 +744,9 @@ class Parser
 				end
 				opts.on("-Y","--rna", "Output baits as RNA rather than DNA") do
 					args.rna = true
+				end
+				opts.on("-X", "--threads [VALUE]", Integer, "Number of threads (Default = 1)") do |thr|
+					args.threads = thr if thr != nil
 				end
 				opts.on_tail("-h","--help", "Show help") do
 					print "Welcome to baitstools " + args.algorithm + '.' +"\n\n"
@@ -735,7 +778,7 @@ class Parser
 				print "Welcome to baitstools " + BAITSTOOLSVER + "\n\nTo use the interactive interface, enter <ruby baitstools.rb [subcommand]> without command-line options.\nCommand-line usage: ruby baitstools.rb [subcommand] [options]"
 				print "\nAdd '-h' or '--help' to subcommands (without other options) to see their relevant options.\n\nAvailable subcommands:\n\n"
 				print "    aln2baits\t\t\t\tGenerate weighted baits from a FASTA/FASTQ alignment\n"
-				print "    annot2baits\t\t\t\tGenerate tiled baits from a GFF/GTF file and a reference sequence\n"				
+				print "    annot2baits\t\t\t\tGenerate tiled baits from a GFF/GTF file and a reference sequence\n"
 				print "    bed2baits\t\t\t\tGenerate tiled baits from BED file and a reference sequence\n"
 				print "    checkbaits\t\t\t\tFilter a FASTA/FASTQ of candidate baits by quality\n"
 				print "    stacks2baits\t\t\tSelect variants and generate baits from a Stacks summary tsv file\n"
@@ -769,6 +812,17 @@ begin
 	while !FileTest.exist?($options.infile)
 		print "Input file not found. Please re-enter.\n"
 		$options.infile = gets.chomp
+	end
+	if $options.interact
+		print "Enter output file prefix.\n"
+		$options.outprefix = gets.chomp
+		print "Enter output file directory.\n"
+		$options.outdir = File.expand_path(gets.chomp)
+	end
+	Dir.mkdir ($options.outdir) if !FileTest.directory?($options.outdir)
+	if $options.interact
+		print "Number of threads?\n"
+		$options.threads = gets.chomp.to_i
 	end
 	case $options.algorithm #algorithm-specific options
 	when "vcf2baits","stacks2baits"
@@ -945,7 +999,7 @@ begin
 				print "Please choose a haplotype definition (haplotype or variant)\n"
 				$options.haplodef = gets.chomp
 			end
-		end	
+		end
 	end
 	if $options.interact and !$options.no_baits
 		print "Do FASTA/FASTQ sequence headers include NCBI-style descriptions? (y/n)\n"
@@ -989,7 +1043,7 @@ begin
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
 			$options.rna = true
-		end		
+		end
 		print "Filter by minimum GC content? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
@@ -1030,7 +1084,7 @@ begin
 			while $options.maxt < $options.mint
 				print "Maximum melting temperature cannot be less than minimum melting temperature. Re-enter maximum temperature.\n"
 				$options.maxt = gets.chomp.to_f
-			end			
+			end
 		end
 	end
 	if ($options.mint_filter or $options.maxt_filter)
@@ -1038,10 +1092,18 @@ begin
 			$options.bait_type = "" # Turn off bait_type default so that interactive mode can choose
 			print "Enter sodium concentration.\n"
 			$options.na = gets.chomp.to_f
-			while $options.na < 0.0
-				print "Sodium concentrations cannot be negative. Re-enter.\n"
-				$options.na = gets.chomp.to_f
-			end
+		end
+		while $options.na < 0.0
+			print "Sodium concentrations cannot be negative. Re-enter.\n"
+			$options.na = gets.chomp.to_f
+		end
+		if $options.interact
+			print "Enter formamide concentration.\n"
+			$options.formamide = gets.chomp.to_f
+		end
+		while $options.formamide < 0.0
+			print "Formamide concentrations cannot be negative. Re-enter.\n"
+			$options.formamide = gets.chomp.to_f
 		end
 		while $options.bait_type != 'RNA-RNA' and $options.bait_type != 'DNA-DNA' and $options.bait_type != 'RNA-DNA'
 			print "Please choose a hybridization type ('DNA-DNA', 'RNA-RNA' or 'RNA-DNA')\n"
