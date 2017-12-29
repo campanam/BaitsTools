@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
-# tilebaits 0.2
+# tilebaits 0.3
 # Michael G. Campana, 2016
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ def tilebaits(seq_array)
 					filtercoordline += seq.header + ":" + rng + "\n"
 				end
 				if $options.params
-					paramline += seq.header + ":" + rng + "\t" + "\t" + flt[1]
+					paramline += seq.header + ":" + rng + "\t" + flt[1]
 				end
 			end
 			seqst += $options.tileoffset

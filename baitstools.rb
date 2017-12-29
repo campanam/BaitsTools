@@ -1,9 +1,10 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
-# baitstools 0.2
+# baitstools 0.3
 # Michael G. Campana, 2016
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
+
 # To be implemented
 # Output non-reference alleles
 # Include/Exclude multi-allelic sites
@@ -59,7 +60,7 @@ class Parser
 		args.haplodef = "haplotype"
 		opt_parser = OptionParser.new do |opts|
 			if algorithms.include?(args.algorithm) #Process correct commands
-				opts.banner = "Command-line usage: ruby baitstools "+args.algorithm+" [options]"
+				opts.banner = "Command-line usage: ruby baitstools.rb "+args.algorithm+" [options]"
 				opts.separator ""
 				opts.separator args.algorithm+"-specific options:"
 				opts.separator ""
@@ -134,7 +135,7 @@ class Parser
 						args.tileoffset = toff
 					end
 				when "aln2baits" #aln2baits only options
-					opts.on("-i","--input [FILE]", String, "Input fasta alignment") do |fa|
+					opts.on("-i","--input [FILE]", String, "Input FASTA alignment") do |fa|
 						args.infile = fa
 					end
 					opts.on("-L", "--length [VALUE]", Integer, "Requested bait length (Default = 120).") do |prblength|
@@ -144,7 +145,7 @@ class Parser
 						args.tileoffset = toff
 					end
 					opts.on("-N", "--no_indels", "Exclude sequences with indels.") do
-						args.tiling = true
+						args.no_indels = true
 					end
 					opts.on("-H","--haplo [VALUE]", String, "Window haplotype definition (either 'haplotypes' or 'variants')") do |fa|
 						args.haplodef = fa
@@ -190,7 +191,7 @@ class Parser
 				opts.separator "Common options:"
 				opts.on_tail("-h","--help", "Show help") do
 					print "Welcome to baitstools " + args.algorithm + '.' +"\n\n"
-					print "To use the interactive interface, enter <ruby selectsnps.rb " + args.algorithm + "> without command-line options.\n"
+					print "To use the interactive interface, enter <ruby baitstools.rb " + args.algorithm + "> without command-line options.\n"
 					puts opts
 					exit
 				end
@@ -199,29 +200,30 @@ class Parser
 					when "selectsnps"
 						print "selectsnps 0.6\n"
 					when "tilebaits"
-						print "tilebaits 0.2\n"
+						print "tilebaits 0.3\n"
 					when "coords2baits"
 						print "coords2baits 0.1\n"
 					when "aln2baits"
-						print "aln2baits 0.1\n"
+						print "aln2baits 0.2\n"
 					end
 					exit
 				end
 			else
 				if !ARGV.include?("-v") and !ARGV.include?("--version")
 					opts.banner = "Common options:"
-					print "Welcome to baitstools.\n\nTo use the interactive interface, enter <ruby selectsnps.rb [subcommand]> without command-line options.\nCommand-line usage: ruby baitstools [subcommand] [options]"
+					print "Welcome to baitstools.\n\nTo use the interactive interface, enter <ruby baitstools.rb [subcommand]> without command-line options.\nCommand-line usage: ruby baitstools.rb [subcommand] [options]"
 					print "\nAdd '-h' or '--help' to subcommands (without other options) to see their relevant options.\n\nAvailable subcommands:\n\n"
 					print "    selectsnps\t\t\t\tSelect SNPs from a VCF\n"
 					print "    tilebaits\t\t\t\tGenerate tiled baits from FASTA sequences\n"
-					print "    coords2baits\t\t\t\tGenerate tiled baits from a coordinates table and a reference sequence\n\n"
+					print "    coords2baits\t\t\tGenerate tiled baits from a coordinates table and a reference sequence\n"
+					print "    aln2baits\t\t\t\tGenerate weighted baits from a FASTA alignment\n\n"
 				end
 				opts.on_tail("-h","--help", "Show help") do
 					puts opts
 					exit
 				end				
 				opts.on_tail("-v","--version","Show baitstools version") do
-					print "baitstools 0.2\n"
+					print "baitstools 0.3\n"
 					exit
 				end
 			end

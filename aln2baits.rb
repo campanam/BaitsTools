@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 #-----------------------------------------------------------------------------------------------
-# aln2baits 0.1
+# aln2baits 0.2
 # Michael G. Campana, 2016
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -50,11 +50,14 @@ def aln2baits
 	while seqstart < aln[0].seq.length
 		seqend = seqstart + $options.baitlength - 1
 		seqend = aln[0].seq.length - 1 if seqend > aln[0].seq.length-1 # Correct for circular sequences later
-		window = Hap_Window.new(aln[0].header, seqstart, seqend)
+		window = Hap_Window.new([], seqstart, seqend)
 		for seq in aln
 			tmp_seq = seq.seq[seqstart..seqend]
 			unless tmp_seq.include?("-") and $options.no_indels # Exclude sequences with indels if not permitted
-				window.haplotypes.push(tmp_seq) unless window.haplotypes.include?(tmp_seq) # Add new sequences to haplotype list
+				unless window.haplotypes.include?(tmp_seq) # Add new sequences to haplotype list
+					window.haplotypes.push(tmp_seq) 
+					window.header.push(seq.header)
+				end
 			end
 		end
 		windows.push(window)
@@ -63,44 +66,43 @@ def aln2baits
 	# Get bait candidates
 	baitsout = ""
 	outfilter = ""
-	paramline = "AlignmentReference:Coordinates:Haplotype\tBaitLength\t%GC\tTm\tKept\n"
+	paramline = "Sequence:Coordinates:Haplotype\tBaitLength\t%GC\tTm\tKept\n"
 	coordline = ""
 	filtercoordline = ""
 	for window in windows
 		case $options.haplodef
 		when "haplotype"
-			hapno = 1
-			for haplo in window.haplotypes
+			for hapno in 1..window.haplotypes.size
 				rng = (window.seqstart+1).to_s+"-"+(window.seqend+1).to_s #Adjust for 1-based indexing
-				baitsout += ">" + window.header + "_" + rng + "_haplotype" + hapno.to_s + "\n" + haplo + "\n"
-				coordline += window.header + ":" + rng + "\n"
+				baitsout += ">" + window.header[hapno-1] + "_" + rng + "_haplotype" + hapno.to_s + "\n" + window.haplotypes[hapno-1] + "\n"
+				coordline += window.header[hapno-1] + ":" + rng + "\n"
 				if $options.filter
-					flt = filter_baits(haplo)
+					flt = filter_baits(window.haplotypes[hapno-1])
 					if flt[0]
-						outfilter += ">" + window.header + "_" + rng + "_haplotype" + hapno.to_s+ "\n" + haplo + "\n"
-						filtercoordline += window.header + ":" + rng + "\n"
+						outfilter += ">" + window.header[hapno-1] + "_" + rng + "_haplotype" + hapno.to_s+ "\n" + window.haplotypes[hapno-1] + "\n"
+						filtercoordline += window.header[hapno-1] + ":" + rng + "\n"
 					end
 					if $options.params
-						paramline += window.header + ":" + rng + ":" + hapno.to_s + "\t" + "\t" + flt[1]
+						paramline += window.header[hapno-1] + ":" + rng + ":" + hapno.to_s + "\t" + flt[1]
 					end
 				end	
-				hapno += 1
 			end
 		when "variants"
 			nvars = window.var_permutations # Get maximum number of sequences
 			for hapno in 1..nvars
-				haplo = window.haplotypes[rand(window.haplotypes.size)] # Choose a random haplotype
+				chosen = rand(window.haplotypes.size) # Choose a random haplotype
+				haplo = window.haplotypes[chosen] 
 				rng = (window.seqstart+1).to_s+"-"+(window.seqend+1).to_s #Adjust for 1-based indexing
-				baitsout += ">" + window.header + "_" + rng + "_haplotype" + hapno.to_s + "\n" + haplo + "\n"
-				coordline += window.header + ":" + rng + "\n"
+				baitsout += ">" + window.header[chosen] + "_" + rng + "_haplotype" + hapno.to_s + "\n" + haplo + "\n"
+				coordline += window.header[chosen] + ":" + rng + "\n"
 				if $options.filter
 					flt = filter_baits(haplo)
 					if flt[0]
-						outfilter += ">" + window.header + "_" + rng + "_haplotype" + hapno.to_s+ "\n" + haplo + "\n"
-						filtercoordline += window.header + ":" + rng + "\n"
+						outfilter += ">" + window.header[chosen] + "_" + rng + "_haplotype" + hapno.to_s+ "\n" + haplo + "\n"
+						filtercoordline += window.header[chosen] + ":" + rng + "\n"
 					end
 					if $options.params
-						paramline += window.header + ":" + rng + ":" + hapno.to_s + "\t" + "\t" + flt[1]
+						paramline += window.header[chosen] + ":" + rng + ":" + hapno.to_s + "\t" + flt[1]
 					end
 				end	
 			end
