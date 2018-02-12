@@ -77,6 +77,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.0.4  
+pyrad2baits can produce an uncollapsed reference sequence  
+
 ### Version 1.0.3  
 Fixed bug in snp_to_baits that added 2 bp to bait lengths.  
 baitstools and baitslib version will now track package version (even if no updates to these scripts) for package clarity. Individual version numbers left only to subcommands/GUI.  
@@ -127,6 +130,9 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.0.4  
+pyrad2baits can produce an uncollapsed reference sequence  
+
 ### Version 1.0.3  
 baitstools and baitslib version will now track package version (even if no updates to these scripts) for package clarity. Individual version numbers left only to subcommands/GUI.  
 
@@ -231,6 +237,9 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.0.4  
+pyrad2baits can produce an uncollapsed reference sequence  
+
 ### Version 1.0  
 Linguistic complexity and maximum homopolymer length filters  
 Reverse complement option  
@@ -303,6 +312,9 @@ Versioning added to header of script
 RVM default bug fixed  
 
 ## pyrad2baits  
+### Version 1.0.4  
+pyrad2baits can produce an uncollapsed reference sequence  
+
 ### Version 0.1  
 Preliminary script to generate baits from PyRAD/ipyrad loci files  
 
