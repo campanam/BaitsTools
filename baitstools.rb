@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.0.3"
+BAITSTOOLSVER = "1.0.4"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -67,6 +67,7 @@ class Parser
 		args.no_Ns = false # Flag to omit bait sequences with Ns
 		args.collapse_ambiguities = false # Flag to collapse ambiguities to a single nucleotide
 		args.haplodef = "haplotype" # Haplotype definition for aln2baits
+		args.uncollapsed_ref = false # Flag to keep ambiguities in pyrad reference sequence
 		args.sort = false # Flag to sort stack2baits SNPs by between/within population variation
 		args.hwe = false # Flag to sort stacks2baits SNPs by Hardy-Weinberg Equilibrium
 		args.alpha = 0.05 # HWE test alpha value
@@ -146,6 +147,9 @@ class Parser
 					end
 					opts.on("-H","--haplo [VALUE]", String, "If using alignment strategy, window haplotype definition (haplotype or variant) (Default = haplotype)") do |fa|
 						args.haplodef = fa if fa != nil
+					end
+					opts.on("--uncollapsedref","Keep ambiguities in pyrad2baits reference sequence") do
+						args.uncollapsed_ref = true
 					end
 					opts.on("-a", "--alt", "If using SNPs or informative strategies, generate baits for alternate alleles") do
  						args.alt_alleles = true
@@ -603,6 +607,11 @@ begin
 			end
 			if $options.strategy != "alignment"
 				if $options.interact
+					print "Keep ambiguities in pyrad2baits reference sequence? (y/n)\n"
+					t = gets.chomp.upcase
+					if t == "Y" or t == "YES"
+						$options.uncollapsed_ref = true
+					end
 					print "Enter total number of requested variants.\n"
 					$options.totalsnps = gets.chomp.to_i
 				end

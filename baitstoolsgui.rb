@@ -55,6 +55,7 @@ def start_baitstools
 			cmdline += " -U " + $options.features.value.upcase
 		end
 		if $options.algorithm == "pyrad2baits" && $options.strategy != "alignment"
+			cmdline += " --uncollapsed-ref" if $options.uncollapsed_ref == 1
 			cmdline += " -t" + $options.totalsnps + " -m" + $options.maxsnps + " -d" + $options.distance + " -k" + $options.tiledepth
 			cmdline += " -a" if $options.alt_alleles
 		end
@@ -136,10 +137,15 @@ def pyrad_windows
 		place('x' => 180, 'y' => 310)
 		width 10
 	end
-	$alts = TkCheckButton.new ($root) do
+	$alts = TkCheckButton.new($root) do
 		variable $options.alt_alleles
 		text "Alternate alleles"
 		place('x' => 550, 'y' => 350)
+	end
+	$uncollapsedref = TkCheckButton.new($root) do
+		variable $options.uncollapsed_ref
+		text "Uncollapsed reference"
+		place('x' => 550, 'y' => 200)
 	end
 	$maxsnps = TkLabel.new($root) do
 		text 'SNPs per locus'
@@ -194,9 +200,9 @@ def pyrad_windows
 		width 10
 	end
 	$widgets.push(minind, minindentry, strategy, strategyselect, $alts, $maxsnps, $maxsnpentry, $distance, $distanceentry, $totalsnps, $totalsnpentry, $lenbef, $lenbefentry, $tiledepth, $tiledepthentry)
-	configure_buttons([$alts]) # Do not configure widgets since will configure everything
+	configure_buttons([$alts, $uncollapsedref]) # Do not configure widgets since will configure everything
 	update_strategy
-	$alts.width = 20
+	$alts.width = $uncollapsedref.width = 20
 end
 #-----------------------------------------------------------------------------------------------
 def update_strategy
@@ -207,6 +213,7 @@ def update_strategy
 		$lenbef.state = $lenbefentry.state = "disabled"
 		$tiledepth.state = $tiledepthentry.state = "disabled"
 		$alts.state = "disabled"
+		$uncollapsedref.state = "disabled"
 		$haplo.state = $haploselect.state = "normal"
 	else
 		$maxsnpentry.state = $maxsnps.state = "normal"
@@ -215,6 +222,7 @@ def update_strategy
 		$lenbef.state = $lenbefentry.state = "normal"
 		$tiledepth.state = $tiledepthentry.state = "normal"
 		$alts.state = "normal"
+		$uncollapsedref.state = "normal"
 		$haplo.state = $haploselect.state = "disabled"
 	end
 end
@@ -731,11 +739,11 @@ def create_root_menu
 	end
 	$widgets = [aln2baits_btn, annot2baits_btn, bed2baits_btn, checkbaits_btn, pyrad2baits_btn, stacks2baits_btn, tilebaits_btn, vcf2baits_btn]
 	configure_buttons($widgets)
-#	poonheli = TkLabel.new($root) do
-#		image TkPhotoImage.new(:file => "~/baitstools/poonheli.gif")
-#		place('height' => 118, 'width' => 118, 'x' => 341, 'y' => 400)
-#	end
-#	$widgets.push(poonheli)
+	poonheli = TkLabel.new($root) do
+		image TkPhotoImage.new(:file => "~/baitstools/poonheli.gif")
+		place('height' => 118, 'width' => 118, 'x' => 341, 'y' => 400)
+	end
+	$widgets.push(poonheli)
 	$labelVar.value = "Choose Subcommand"
 end
 #-----------------------------------------------------------------------------------------------
@@ -1196,6 +1204,7 @@ def set_defaults
 	$options.varqual = TkVariable.new(30) # Minimum vcf variant QUAL score
 	$options.minind = TkVariable.new(1) # Minimum individuals to include locus
 	$options.strategy = TkVariable.new("alignment") # Strategy for LOCI files
+	$options.uncollapsed_ref = TkVariable.new(0) # Flag to output uncollapsed reference sequence
 	$options.lenbef = TkVariable.new(60) # Length before SNP in bait
 	$options.tiledepth = TkVariable.new(1) # Tiling depth	
 	$options.sort = TkVariable.new(0) # Flag to sort stack2baits SNPs by between/within population variation

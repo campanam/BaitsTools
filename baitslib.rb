@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.0.3"
+BAITSLIBVER = "1.0.4"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -762,6 +762,7 @@ def get_command_line # Get command line for summary output
 			cmdline = cmdline[0...-1] # Remove final , from feature list
 		end
 		if $options.algorithm == "pyrad2baits" && $options.strategy != "alignment"
+			cmdline += " --uncollapsed-ref" if $options.uncollapsed_ref
 			cmdline += " -t" + $options.totalsnps.to_s + " -m" + $options.maxsnps.to_s + " -d" + $options.distance.to_s + " -k" + $options.tiledepth.to_s
 			cmdline += " -a" if $options.alt_alleles
 		end
