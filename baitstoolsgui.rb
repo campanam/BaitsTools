@@ -55,7 +55,7 @@ def start_baitstools
 			cmdline += " -U " + $options.features.value.upcase
 		end
 		if $options.algorithm == "pyrad2baits" && $options.strategy != "alignment"
-			cmdline += " --uncollapsed-ref" if $options.uncollapsed_ref == 1
+			cmdline += " --uncollapsedref" if $options.uncollapsed_ref == 1
 			cmdline += " -t" + $options.totalsnps + " -m" + $options.maxsnps + " -d" + $options.distance + " -k" + $options.tiledepth
 			cmdline += " -a" if $options.alt_alleles
 		end
