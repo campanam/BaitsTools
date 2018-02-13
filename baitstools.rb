@@ -84,6 +84,7 @@ class Parser
 		args.lc = 0.9 # Minimum sequence complexity
 		args.features = [] # Array holding desired features
 		args.pad = 0 # BP to pad ends of extracted regions
+		args.shuffle = false # Flag whether baits are shuffled to account for end of contigs
 		args.ncbi = false # Flag whether FASTA/FASTQ headers include NCBI-style descriptors
 		args.rna = false # Flag whether baits are output as RNA
 		args.alt_alleles = false # Flag to apply alternate alleles
@@ -324,6 +325,9 @@ class Parser
 						opts.on("-E", "--rbed", "Output BED file for the baits relative to extracted sequences") do
 							args.rbed = true
 						end
+					end
+					opts.on("--shuffle", "Shuffle baits to compensate for extending beyond contig ends") do
+						args.shuffle = true
 					end
 				end
 				unless args.algorithm == "pyrad2baits"
@@ -687,6 +691,11 @@ begin
 				if t == "Y" or t == "YES"
 					$options.rbed = true
 				end
+			end
+			print "Shuffle baits to compensate for extending beyond contig ends? (y/n)\n"
+			t = gets.chomp.upcase
+			if t == "Y" or t == "YES"
+				$options.shuffle = true
 			end
 		end
 		print "Output bait statistics table? (y/n)\n"

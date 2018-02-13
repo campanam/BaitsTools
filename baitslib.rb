@@ -772,6 +772,7 @@ def get_command_line # Get command line for summary output
 	cmdline += " -l" if $options.log
 	cmdline += " -B" if $options.coords
 	cmdline += " -E" if $options.rbed
+	cmdline += " --shuffle" if $options.shuffle
 	cmdline += " -D" if $options.ncbi
 	cmdline += " -Y" if $options.rna
 	cmdline += " -R" if $options.rc
