@@ -199,7 +199,7 @@ def pyrad_windows
 		place('x' => 421, 'y' => 360)
 		width 10
 	end
-	$widgets.push(minind, minindentry, strategy, strategyselect, $alts, $maxsnps, $maxsnpentry, $distance, $distanceentry, $totalsnps, $totalsnpentry, $lenbef, $lenbefentry, $tiledepth, $tiledepthentry)
+	$widgets.push(minind, minindentry, strategy, strategyselect, $alts, $uncollapsedref, $maxsnps, $maxsnpentry, $distance, $distanceentry, $totalsnps, $totalsnpentry, $lenbef, $lenbefentry, $tiledepth, $tiledepthentry)
 	configure_buttons([$alts, $uncollapsedref]) # Do not configure widgets since will configure everything
 	update_strategy
 	$alts.width = $uncollapsedref.width = 20
