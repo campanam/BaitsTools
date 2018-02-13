@@ -195,7 +195,7 @@ pyrad2baits selects variants and generates baits from a PyRAD/ipyrad loci file. 
 `-I, --minind [VALUE]`: Minimum number of individuals to include locus. Default is 1.  
 `-W, --strategy [VALUE]`: Strategy to generate baits from loci (`alignment`, `SNPs`, or `informative`). `alignment` treats the individual loci as FASTA alignments and passes the alignments to [aln2baits](#aln2baits) to generate weighted alignments. `SNPs` and `informative` select and generate baits for identified variable sites. `SNPs` includes all identified sites, whereas `informative` includes only phylogenetically informative sites. Default is `alignment`.  
 `-H, --haplo [VALUE]`: If using `alignment` strategy, alignment window haplotype definition (`haplotype` or `variant`). `haplotype` will cause the program to identify all unique haplotypes within each bait tiling window observed in the data. `variant` will cause the program to generate all possible permutations of single nucleotide variants observed within the window. Default is `haplotype`.  
-`--uncollapsed-ref`: If using `SNPs` or `informative` strategies, choose a random reference sequence and keep ambiguities for each locus.  
+`--uncollapsedref`: If using `SNPs` or `informative` strategies, choose a random reference sequence and keep ambiguities for each locus.  
 `-a, --alt`: If using `SNPs` or `informative` strategies, generate baits for alternate alleles.  
 `-t, --totalvars [VALUE]`: If using `SNPs` or `informative` strategies, total requested variants. Default is 30,000.  
 `-m, --maxsnps [VALUE]`: If using `SNPs` or `informative` strategies, maximum number of SNPs per locus. Default is 1.  
