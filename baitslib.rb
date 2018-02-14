@@ -625,13 +625,12 @@ def snp_to_baits(selectedsnps, refseq)
 									Thread.current[:qual] = [$options.fasta_score]
 									if Thread.current[:after] > Thread.current[:rseq_var].seq.length and !Thread.current[:rseq_var].circular
 										Thread.current[:after] = Thread.current[:rseq_var].seq.length
-										if Thread.current[:be4] < 1
-											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].seq[0..Thread.current[:after]-1]  #Correct for 0-based counting
-											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].numeric_quality[0..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
-										else
-											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:after]-1]  #Correct for 0-based counting
-											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
+										if $options.shuffle
+											Thread.current[:be4] = $options.baitlength - Thread.current[:after] - 1
+											Thread.current[:be4] = 1 if Thread.current[:be4] < 1
 										end
+										Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:after]-1]  #Correct for 0-based counting
+										Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
 									elsif Thread.current[:after] > Thread.current[:rseq_var].seq.length and Thread.current[:rseq_var].circular
 										Thread.current[:after] -= Thread.current[:rseq_var].seq.length
 										if Thread.current[:be4] < 1
