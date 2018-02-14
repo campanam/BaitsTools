@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.0"
+BAITSTOOLSGUI = "1.0.4"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -745,11 +745,11 @@ def create_root_menu
 	end
 	$widgets = [aln2baits_btn, annot2baits_btn, bed2baits_btn, checkbaits_btn, pyrad2baits_btn, stacks2baits_btn, tilebaits_btn, vcf2baits_btn]
 	configure_buttons($widgets)
-	poonheli = TkLabel.new($root) do
-		image TkPhotoImage.new(:file => "~/baitstools/poonheli.gif")
-		place('height' => 118, 'width' => 118, 'x' => 341, 'y' => 400)
-	end
-	$widgets.push(poonheli)
+	#poonheli = TkLabel.new($root) do
+	#	image TkPhotoImage.new(:file => "~/baitstools/poonheli.gif")
+	#	place('height' => 118, 'width' => 118, 'x' => 341, 'y' => 400)
+	#end
+	#$widgets.push(poonheli)
 	$labelVar.value = "Choose Subcommand"
 end
 #-----------------------------------------------------------------------------------------------
