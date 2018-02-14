@@ -18,6 +18,9 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.0.4  
+Added ability to shuffle final bait if contig end reached  
+
 ### Version 1.0  
 Updated parameters table  
 Can reverse complement baits  
@@ -79,6 +82,7 @@ Preliminary script to generate baits from an annotation file and a reference seq
 ## baitslib  
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
+Added ability to shuffle final bait if contig end reached  
 
 ### Version 1.0.3  
 Fixed bug in snp_to_baits that added 2 bp to bait lengths.  
@@ -132,6 +136,7 @@ filter_probes definition removed into separate script for access by other script
 ## baitstools  
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
+Added ability to shuffle final bait if contig end reached  
 
 ### Version 1.0.3  
 baitstools and baitslib version will now track package version (even if no updates to these scripts) for package clarity. Individual version numbers left only to subcommands/GUI.  
@@ -239,6 +244,7 @@ Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_
 ## baitstoolsgui  
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
+Added ability to shuffle final bait if contig end reached  
 
 ### Version 1.0  
 Linguistic complexity and maximum homopolymer length filters  
@@ -339,6 +345,9 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
 ## tilebaits  
+### Version 1.0.4  
+Added ability to shuffle final bait if contig end reached  
+
 ### Version 1.0  
 Updated parameters table  
 Can reverse complement baits  
