@@ -272,4 +272,4 @@ BaitsTools is a complex program under active development. Bugs and technical iss
 
 ## Citation  
 Please cite:  
-Campana, M.G. 2017. BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources*. doi: [10.1111/1755-0998.12721](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract).  
+Campana, M.G. 2018. BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources*. 18: 356-361. doi: [10.1111/1755-0998.12721](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract).  
