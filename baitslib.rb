@@ -704,7 +704,7 @@ def snp_to_baits(selectedsnps, refseq)
 				vlogs[1].push(logs[i][l][3])
 			end
 		end
-		$options.logtext += "\nTotalBaitCoverage(√ó)\tFilteredBaitCoverage(√ó)\n"
+		$options.logtext += "\nTotalBaitCoverage(x)\tFilteredBaitCoverage(x)\n"
 		if $options.filter
 			$options.logtext += mean(vlogs[0]).to_s + "\t" + mean(vlogs[1]).to_s + "\n"
 		else
