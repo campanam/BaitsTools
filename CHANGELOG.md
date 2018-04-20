@@ -80,6 +80,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.1.0  
+get_command_line and read_fasta use << to improve performance  
+
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
 Added ability to shuffle final bait if contig end reached  
@@ -242,6 +245,10 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+## baitslib  
+### Version 1.1.0  
+start_baitstools uses << to improve performance  
+
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
 Added ability to shuffle final bait if contig end reached  
