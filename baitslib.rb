@@ -6,7 +6,7 @@ BAITSLIBVER = "1.1.0"
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
-class Fa_Seq #container for fasta/fastq sequences
+class Fa_Seq #container for fasta/fastq sexquences
 	attr_accessor :header, :circular, :fasta, :seq, :qual, :qual_array, :bedstart, :locus
 	def initialize(header = "", circular = false, fasta = false, seq = "", qual = "", bedstart = 0, locus = "")
 		@header = header # Sequence header
@@ -333,74 +333,61 @@ def filter_baits(bait, qual = [0])
 		seqcomp = linguistic_complexity(bait)
 		keep = false if (seqcomp < $options.lc && $options.lc_filter)
 	end
-	return [keep, bait.length.to_s + "\t" + (gccont * 100.0).to_s + "\t" + melt.to_s + "\t" + maskcont.to_s + "\t" +  maxhomopoly.to_s + "\t" + seqcomp.to_s + "\t" + meanqual.to_s + "\t" + minqual.to_s + "\t" + bait.include?("N").to_s + "\t" + bait.include?("-").to_s + "\t" + keep.to_s + "\n"]
+	return [keep, bait.length.to_s + "\t" + (gccont * 100.0).to_s + "\t" + melt.to_s + "\t" + maskcont.to_s + "\t" +  maxhomopoly.to_s + "\t" + seqcomp.to_s + "\t" + meanqual.to_s + "\t" + minqual.to_s + "\t" + bait.include?("N").to_s + "\t" + bait.include?("-").to_s + "\t" + keep.to_s]
 end
 #-----------------------------------------------------------------------------------------------
 def setup_output
-	filestem = $options.outdir + "/" + $options.outprefix
-	File.open($options.outdir + "/" + $options.outprefix + ".log.txt", 'w') if $options.log
+	$options.filestem = $options.outdir + "/" + $options.outprefix
+	$options.default_files.push(".log.txt") if $options.log
 	unless $options.no_baits
-		File.open(filestem + "-baits.fa", 'w') unless $options.algorithm == "checkbaits"
-		File.open(filestem + "-baits.bed", 'w') if $options.coords
-		File.open(filestem + "-baits-relative.bed", 'w') if $options.rbed
-	end
-	File.open($options.outdir + "/" + $options.outprefix + "-selected.vcf", 'w') if ($options.algorithm == "vcf2baits" and !$options.every)
-	if $options.algorithm == "stacks2baits"
-		File.open($options.outdir + "/" + $options.outprefix + "-betweenpops.tsv", 'w')
-		if $options.sort and $options.hwe
-			File.open($options.outdir + "/" + $options.outprefix + "-inhwe.tsv", 'w')
-			File.open($options.outdir + "/" + $options.outprefix + "-outhwe.tsv", 'w')	
-		elsif $options.sort
-			File.open($options.outdir + "/" + $options.outprefix + "-withinpops.tsv", 'w')
-		end
+		$options.default_files.push("-baits.fa") unless $options.algorithm == "checkbaits"
+		$options.default_files.push("-baits.bed") if $options.coords
+		$options.default_files.push("-baits-relative.bed") if $options.rbed
 	end
 	if $options.filter
-		File.open(filestem + "-filtered-baits.fa", 'w')
-		File.open(filestem + "-filtered-params.txt", 'w') if $options.params
-		File.open(filestem + "-filtered-baits.bed", 'w') if $options.coords
-		File.open(filestem + "-filtered-baits-relative.bed", 'w') if $options.rbed
+		$options.default_files.push("-filtered-baits.fa")
+		$options.default_files.push("-filtered-params.txt") if $options.params
+		$options.default_files.push("-filtered-baits.bed") if $options.coords
+		$options.default_files.push("-filtered-baits-relative.bed") if $options.rbed
+	end
+	File.open($options.filestem + "-selected.vcf", 'w') if ($options.algorithm == "vcf2baits" and !$options.every)
+	if $options.algorithm == "stacks2baits"
+		File.open($options.filestem + "-betweenpops.tsv", 'w')
+		if $options.sort and $options.hwe
+			File.open($options.filestem + "-inhwe.tsv", 'w')
+			File.open($options.filestem + "-outhwe.tsv", 'w')	
+		elsif $options.sort
+			File.open($options.filestem + "-withinpops.tsv", 'w')
+		end
+	end
+
+end
+#-----------------------------------------------------------------------------------------------
+def setup_temp(datasize, files = $options.default_files)
+	$options.threads > datasize ? $options.used_threads = datasize : $options.used_threads = $options.threads
+	splits = []
+	val = 0
+	crit = (datasize.to_f/$options.used_threads.to_f).ceil
+	while val < datasize
+		splits.push(val)
+		val += crit
+	end
+	splits.push(datasize)
+	return splits
+end
+#-----------------------------------------------------------------------------------------------
+def write_file(fileid, message, tmp = false, tmpfile = 0)
+	(tmp && tmpfile != 0) ? file = $options.filestem + ".tmp" + tmpfile.to_s + fileid : file = $options.filestem + fileid 
+	File.open(file, 'a') do |write|
+		write << message + "\n"
 	end
 end
 #-----------------------------------------------------------------------------------------------
-def write_baits(baitsout = [""], outfilter = [""], paramline = [""], coordline = [""], filtercoordline = [""], filestem = $options.outdir + "/" + $options.outprefix, rbedline = [""], rfilterline = [""])
-	[baitsout,outfilter,paramline,coordline,filtercoordline, rbedline, rfilterline].each do |output|
-		output.flatten!
-		output.delete(nil)
-		output.join("\n")
-	end
-	unless $options.algorithm == "checkbaits"
-		File.open(filestem + "-baits.fa", 'w') do |write|
-			write.puts baitsout
-		end
-	end
-	if $options.coords
-		File.open(filestem + "-baits.bed", 'w') do |write|
-			write.puts coordline
-		end
-	end
-	if $options.rbed
-		File.open(filestem + "-baits-relative.bed", 'w') do |write|
-			write.puts rbedline
-		end
-	end
-	if $options.filter
-		File.open(filestem + "-filtered-baits.fa", 'w') do |write|
-			write.puts outfilter
-		end
-		if $options.params
-			File.open(filestem + "-filtered-params.txt", 'w') do |write|
-				write.puts paramline
-			end
-		end
-		if $options.coords
-			File.open(filestem + "-filtered-baits.bed", 'w') do |write|
-				write.puts filtercoordline
-			end
-		end
-		if $options.rbed
-			File.open(filestem + "-filtered-baits-relative.bed", 'w') do |write|
-				write.puts rfilterline
-			end
+def cat_files(files = $options.default_files)
+	for file in files
+		for i in 1 ... $options.used_threads
+			system("cat #{$options.filestem + '.tmp' + i.to_s + file} >> #{$options.filestem + file}")
+			system("rm", $options.filestem + ".tmp" + i.to_s + file)
 		end
 	end
 end
@@ -487,7 +474,7 @@ def read_fasta(file) # Read fasta and fastq files
 	end
 	threads.each { |thr| thr.join }
 	if $options.log
-		$options.logtext += "SequencesRead\nType\tNumberCircular\tNumberLinear\tTotalNumber\tCircularBp\tLinearBp\tTotalBp\n"
+		logtext = "SequencesRead\nType\tNumberCircular\tNumberLinear\tTotalNumber\tCircularBp\tLinearBp\tTotalBp\n"
 		facirc = 0
 		falin = 0
 		facircbp = 0
@@ -511,9 +498,10 @@ def read_fasta(file) # Read fasta and fastq files
 				fqlinbp += seq.seq.length
 			end
 		end
-		$options.logtext += "FASTA\t" + facirc.to_s + "\t" + falin.to_s + "\t" + (facirc + falin).to_s + "\t" + facircbp.to_s + "\t" + falinbp.to_s + "\t" + (facircbp + falinbp).to_s + "\n"
-		$options.logtext += "FASTQ\t" + fqcirc.to_s + "\t" + fqlin.to_s + "\t" + (fqcirc + fqlin).to_s + "\t" + fqcircbp.to_s + "\t" + fqlinbp.to_s + "\t" + (fqcircbp + fqlinbp).to_s + "\n"
-		$options.logtext += "Total\t" + (facirc + fqcirc).to_s + "\t" + (falin + fqlin).to_s + "\t" + (facirc + falin + fqcirc + fqlin).to_s + "\t" + (facircbp + fqcircbp).to_s + "\t" + (falinbp + fqlinbp).to_s + "\t" + (facircbp + falinbp + fqcircbp + fqlinbp).to_s + "\n\n"
+		logtext << "FASTA\t" + facirc.to_s + "\t" + falin.to_s + "\t" + (facirc + falin).to_s + "\t" + facircbp.to_s + "\t" + falinbp.to_s + "\t" + (facircbp + falinbp).to_s + "\n"
+		logtext << "FASTQ\t" + fqcirc.to_s + "\t" + fqlin.to_s + "\t" + (fqcirc + fqlin).to_s + "\t" + fqcircbp.to_s + "\t" + fqlinbp.to_s + "\t" + (fqcircbp + fqlinbp).to_s + "\n"
+		logtext << "Total\t" + (facirc + fqcirc).to_s + "\t" + (falin + fqlin).to_s + "\t" + (facirc + falin + fqcirc + fqlin).to_s + "\t" + (facircbp + fqcircbp).to_s + "\t" + (falinbp + fqlinbp).to_s + "\t" + (facircbp + falinbp + fqcircbp + fqlinbp).to_s + "\n"
+		write_file(".log.txt", logtext)
 	end
 	return seq_array
 end
@@ -730,7 +718,7 @@ def snp_to_baits(selectedsnps, refseq)
 				vlogs[1].push(logs[i][l][3])
 			end
 		end
-		$options.logtext += "\nTotalBaitCoverage(x)\tFilteredBaitCoverage(x)\n"
+		$options.logtext += "\nTotalBaitCoverage(×)\tFilteredBaitCoverage(×)\n"
 		if $options.filter
 			$options.logtext += mean(vlogs[0]).to_s + "\t" + mean(vlogs[1]).to_s + "\n"
 		else

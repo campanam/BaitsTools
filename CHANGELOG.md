@@ -83,6 +83,9 @@ Preliminary script to generate baits from an annotation file and a reference seq
 ### Version 1.1.0  
 get_command_line and read_fasta use << to improve performance  
 File start called with setup_output  
+setup_temp method sets up temporary files  
+concat_file concatenates temporary files  
+removal of write_baits  
 
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
@@ -140,6 +143,7 @@ filter_probes definition removed into separate script for access by other script
 ## baitstools  
 ### Version 1.1.0  
 File start called with setup_output  
+Reworking to use new temp file methods  
 
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
@@ -356,6 +360,9 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
 ## tilebaits  
+### Version 1.1.0  
+Reworking to use new temp file methods  
+
 ### Version 1.0.4  
 Added ability to shuffle final bait if contig end reached  
 
