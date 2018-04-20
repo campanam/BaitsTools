@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.0.4"
-# Michael G. Campana, 2017
+BAITSLIBVER = "1.1.0"
+# Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -720,81 +720,81 @@ def get_command_line # Get command line for summary output
 	case $options.algorithm
 	when "vcf2baits", "stacks2baits"
 		if $options.every
-			cmdline += " -e"
-			cmdline += " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
+			cmdline << " -e"
+			cmdline << " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
 		else
-			cmdline += " -t" + $options.totalsnps.to_s + " -d" + $options.distance.to_s
+			cmdline << " -t" + $options.totalsnps.to_s + " -d" + $options.distance.to_s
 			if $options.scale
-				cmdline += " -j"
+				cmdline << " -j"
 			else
-				cmdline += " -m" + $options.maxsnps.to_s
+				cmdline << " -m" + $options.maxsnps.to_s
 			end
 			if $options.no_baits
-				cmdline += " -p"
+				cmdline << " -p"
 			else
-				cmdline += " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
+				cmdline << " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
 			end
 		end
-		cmdline += " -r " + $options.refseq unless $options.no_baits
-		cmdline += " -a" if $options.alt_alleles
-		cmdline += " -V" + $options.varqual.to_s if $options.varqual_filter
-		cmdline += " -S" if $options.sort
-		cmdline += " -H -A" + $options.alpha.to_s if $options.hwe
+		cmdline << " -r " + $options.refseq unless $options.no_baits
+		cmdline << " -a" if $options.alt_alleles
+		cmdline << " -V" + $options.varqual.to_s if $options.varqual_filter
+		cmdline << " -S" if $options.sort
+		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe
 	else
 		if $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits"
-			cmdline += " -r " + $options.refseq
-			cmdline += " -P" + $options.pad.to_s
+			cmdline << " -r " + $options.refseq
+			cmdline << " -P" + $options.pad.to_s
 		end
-		cmdline += " -L" + $options.baitlength.to_s
-		cmdline += " -O" + $options.tileoffset.to_s unless $options.algorithm == "checkbaits"
+		cmdline << " -L" + $options.baitlength.to_s
+		cmdline << " -O" + $options.tileoffset.to_s unless $options.algorithm == "checkbaits"
 		if $options.algorithm == "pyrad2baits"
-			cmdline += " -I" + $options.minind.to_s
-			cmdline += " -W " + $options.strategy
+			cmdline << " -I" + $options.minind.to_s
+			cmdline << " -W " + $options.strategy
 		end
 		if $options.algorithm == "aln2baits" or ($options.algorithm == "pyrad2baits" && $options.strategy == "alignment")
-			cmdline += " -H " + $options.haplodef
+			cmdline << " -H " + $options.haplodef
 		elsif $options.algorithm == "annot2baits"
-			cmdline += " -U "
+			cmdline << " -U "
 			for feature in $options.features
-				cmdline += feature + ","
+				cmdline << feature + ","
 			end
 			cmdline = cmdline[0...-1] # Remove final , from feature list
 		end
 		if $options.algorithm == "pyrad2baits" && $options.strategy != "alignment"
-			cmdline += " --uncollapsedref" if $options.uncollapsed_ref
-			cmdline += " -t" + $options.totalsnps.to_s + " -m" + $options.maxsnps.to_s + " -d" + $options.distance.to_s + " -k" + $options.tiledepth.to_s
-			cmdline += " -a" if $options.alt_alleles
+			cmdline << " --uncollapsedref" if $options.uncollapsed_ref
+			cmdline << " -t" + $options.totalsnps.to_s + " -m" + $options.maxsnps.to_s + " -d" + $options.distance.to_s + " -k" + $options.tiledepth.to_s
+			cmdline << " -a" if $options.alt_alleles
 		end
 	end
-	cmdline += " -o " + $options.outprefix
-	cmdline += " -Z " + $options.outdir
-	cmdline += " -l" if $options.log
-	cmdline += " -B" if $options.coords
-	cmdline += " -E" if $options.rbed
-	cmdline += " --shuffle" if $options.shuffle
-	cmdline += " -D" if $options.ncbi
-	cmdline += " -Y" if $options.rna
-	cmdline += " -R" if $options.rc
-	cmdline += " -G " + $options.gaps
-	cmdline += " -X" + $options.threads.to_s
+	cmdline << " -o " + $options.outprefix
+	cmdline << " -Z " + $options.outdir
+	cmdline << " -l" if $options.log
+	cmdline << " -B" if $options.coords
+	cmdline << " -E" if $options.rbed
+	cmdline << " --shuffle" if $options.shuffle
+	cmdline << " -D" if $options.ncbi
+	cmdline << " -Y" if $options.rna
+	cmdline << " -R" if $options.rc
+	cmdline << " -G " + $options.gaps
+	cmdline << " -X" + $options.threads.to_s
 	# Generate filtration options
 	fltline = ""
-	fltline += " -w" if $options.params
-	fltline += " -c" if $options.completebait
-	fltline += " -N" if $options.no_Ns
-	fltline += " -C" if $options.collapse_ambiguities
-	fltline += " -n" + $options.mingc.to_s if $options.mingc_filter
-	fltline += " -x" + $options.maxgc.to_s if $options.maxgc_filter
-	fltline += " -q" + $options.mint.to_s if $options.mint_filter
-	fltline += " -z" + $options.maxt.to_s if $options.maxt_filter
+	fltline << " -w" if $options.params
+	fltline << " -c" if $options.completebait
+	fltline << " -N" if $options.no_Ns
+	fltline << " -C" if $options.collapse_ambiguities
+	fltline << " -n" + $options.mingc.to_s if $options.mingc_filter
+	fltline << " -x" + $options.maxgc.to_s if $options.maxgc_filter
+	fltline << " -q" + $options.mint.to_s if $options.mint_filter
+	fltline << " -z" + $options.maxt.to_s if $options.maxt_filter
 	if $options.mint_filter or $options.maxt_filter
-		fltline += " -T " + $options.bait_type + " -s" + $options.na.to_s + " -f" + $options.formamide.to_s
+		fltline << " -T " + $options.bait_type + " -s" + $options.na.to_s + " -f" + $options.formamide.to_s
 	end
-	fltline += " -K" + $options.maxmask.to_s if $options.maxmask_filter
-	fltline += " -J" + $options.maxhomopoly.to_s if $options.maxhomopoly_filter
-	fltline += " -y" + $options.lc.to_s if $options.lc_filter
-	fltline += " -Q" + $options.meanqual.to_s if $options.meanqual_filter
-	fltline += " -M" + $options.minqual.to_s if $options.minqual_filter
-	fltline += " -F" + $options.fasta_score.to_s if ($options.meanqual_filter or $options.minqual_filter)
+	fltline << " -K" + $options.maxmask.to_s if $options.maxmask_filter
+	fltline << " -J" + $options.maxhomopoly.to_s if $options.maxhomopoly_filter
+	fltline << " -y" + $options.lc.to_s if $options.lc_filter
+	fltline << " -Q" + $options.meanqual.to_s if $options.meanqual_filter
+	fltline << " -M" + $options.minqual.to_s if $options.minqual_filter
+	fltline << " -F" + $options.fasta_score.to_s if ($options.meanqual_filter or $options.minqual_filter)
 	return [cmdline,fltline]
 end
