@@ -412,7 +412,7 @@ def read_fasta(file) # Read fasta and fastq files
 					faseq.bedstart = bedstart
 					faseq.locus = locus[3..-1] unless locus.nil?
 				elsif qual and faseq.qual.length < faseq.seq.length # Test if quality line is complete
-					faseq.qual += line[0...-1] #Exclude final line break, allow multi-line fastq
+					faseq.qual << line[0...-1] #Exclude final line break, allow multi-line fastq
 			 	elsif line[0].chr == "@" # Start new sequence
 					qual = false
 					if !faseq.nil? # push previously completed sequence into array
@@ -442,7 +442,7 @@ def read_fasta(file) # Read fasta and fastq files
 				elsif line[0].chr == "+"
 					qual = true
 				else
-					faseq.seq += line[0...-1] #Exclude final line break, allow multi-line fasta/fastq
+					faseq.seq << line[0...-1] #Exclude final line break, allow multi-line fasta/fastq
 				end
 			end
 		end
