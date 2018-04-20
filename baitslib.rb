@@ -336,6 +336,32 @@ def filter_baits(bait, qual = [0])
 	return [keep, bait.length.to_s + "\t" + (gccont * 100.0).to_s + "\t" + melt.to_s + "\t" + maskcont.to_s + "\t" +  maxhomopoly.to_s + "\t" + seqcomp.to_s + "\t" + meanqual.to_s + "\t" + minqual.to_s + "\t" + bait.include?("N").to_s + "\t" + bait.include?("-").to_s + "\t" + keep.to_s + "\n"]
 end
 #-----------------------------------------------------------------------------------------------
+def setup_output
+	filestem = $options.outdir + "/" + $options.outprefix
+	File.open($options.outdir + "/" + $options.outprefix + ".log.txt", 'w') if $options.log
+	unless $options.no_baits
+		File.open(filestem + "-baits.fa", 'w') unless $options.algorithm == "checkbaits"
+		File.open(filestem + "-baits.bed", 'w') if $options.coords
+		File.open(filestem + "-baits-relative.bed", 'w') if $options.rbed
+	end
+	File.open($options.outdir + "/" + $options.outprefix + "-selected.vcf", 'w') if ($options.algorithm == "vcf2baits" and !$options.every)
+	if $options.algorithm == "stacks2baits"
+		File.open($options.outdir + "/" + $options.outprefix + "-betweenpops.tsv", 'w')
+		if $options.sort and $options.hwe
+			File.open($options.outdir + "/" + $options.outprefix + "-inhwe.tsv", 'w')
+			File.open($options.outdir + "/" + $options.outprefix + "-outhwe.tsv", 'w')	
+		elsif $options.sort
+			File.open($options.outdir + "/" + $options.outprefix + "-withinpops.tsv", 'w')
+		end
+	end
+	if $options.filter
+		File.open(filestem + "-filtered-baits.fa", 'w')
+		File.open(filestem + "-filtered-params.txt", 'w') if $options.params
+		File.open(filestem + "-filtered-baits.bed", 'w') if $options.coords
+		File.open(filestem + "-filtered-baits-relative.bed", 'w') if $options.rbed
+	end
+end
+#-----------------------------------------------------------------------------------------------
 def write_baits(baitsout = [""], outfilter = [""], paramline = [""], coordline = [""], filtercoordline = [""], filestem = $options.outdir + "/" + $options.outprefix, rbedline = [""], rfilterline = [""])
 	[baitsout,outfilter,paramline,coordline,filtercoordline, rbedline, rfilterline].each do |output|
 		output.flatten!

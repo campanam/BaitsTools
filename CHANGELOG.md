@@ -82,6 +82,7 @@ Preliminary script to generate baits from an annotation file and a reference seq
 ## baitslib  
 ### Version 1.1.0  
 get_command_line and read_fasta use << to improve performance  
+File start called with setup_output  
 
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
@@ -137,6 +138,9 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.1.0  
+File start called with setup_output  
+
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
 Added ability to shuffle final bait if contig end reached  

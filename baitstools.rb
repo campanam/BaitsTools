@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.0.4"
-# Michael G. Campana, 2017
+BAITSTOOLSVER = "1.1.0"
+# Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -882,7 +882,12 @@ begin
 	print "** Starting program with the following options: **\n"
 	print "** Basic command: " + cmdline[0] + " **\n"
 	print "** Filtration options:" + cmdline[1] + " **\n" # filtered line always starts with a space if present
-	$options.logtext += cmdline[0] + cmdline[1] + "\n\n" if $options.log
+	setup_output
+	 if $options.log
+		File.open($options.outdir + "/" + $options.outprefix + ".log.txt", 'a') do |write|
+			write << cmdline[0] + cmdline[1] + "\n\n"
+		end
+	end
 	case $options.algorithm
 	when "aln2baits"
 		aln2baits($options.infile)
@@ -900,11 +905,6 @@ begin
 		tilebaits($options.infile)
 	when "vcf2baits"
 		vcf2baits
-	end
-	if $options.log
-		File.open($options.outdir + "/" + $options.outprefix + ".log.txt", 'w') do |write|
-			write.puts $options.logtext
-		end
 	end
 	print "** Program complete **\n"
 end
