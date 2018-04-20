@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.0.3"
+BAITSLIBVER = "1.0.4"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -625,13 +625,12 @@ def snp_to_baits(selectedsnps, refseq)
 									Thread.current[:qual] = [$options.fasta_score]
 									if Thread.current[:after] > Thread.current[:rseq_var].seq.length and !Thread.current[:rseq_var].circular
 										Thread.current[:after] = Thread.current[:rseq_var].seq.length
-										if Thread.current[:be4] < 1
-											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].seq[0..Thread.current[:after]-1]  #Correct for 0-based counting
-											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].numeric_quality[0..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
-										else
-											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:after]-1]  #Correct for 0-based counting
-											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
+										if $options.shuffle
+											Thread.current[:be4] = $options.baitlength - Thread.current[:after] - 1
+											Thread.current[:be4] = 1 if Thread.current[:be4] < 1
 										end
+										Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:after]-1]  #Correct for 0-based counting
+										Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
 									elsif Thread.current[:after] > Thread.current[:rseq_var].seq.length and Thread.current[:rseq_var].circular
 										Thread.current[:after] -= Thread.current[:rseq_var].seq.length
 										if Thread.current[:be4] < 1
@@ -762,6 +761,7 @@ def get_command_line # Get command line for summary output
 			cmdline = cmdline[0...-1] # Remove final , from feature list
 		end
 		if $options.algorithm == "pyrad2baits" && $options.strategy != "alignment"
+			cmdline += " --uncollapsedref" if $options.uncollapsed_ref
 			cmdline += " -t" + $options.totalsnps.to_s + " -m" + $options.maxsnps.to_s + " -d" + $options.distance.to_s + " -k" + $options.tiledepth.to_s
 			cmdline += " -a" if $options.alt_alleles
 		end
@@ -771,6 +771,7 @@ def get_command_line # Get command line for summary output
 	cmdline += " -l" if $options.log
 	cmdline += " -B" if $options.coords
 	cmdline += " -E" if $options.rbed
+	cmdline += " --shuffle" if $options.shuffle
 	cmdline += " -D" if $options.ncbi
 	cmdline += " -Y" if $options.rna
 	cmdline += " -R" if $options.rc

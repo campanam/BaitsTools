@@ -104,6 +104,7 @@ A tutorial and example data are available in the example_data subdirectory of th
 `-l, --log`: Output detailed log including subcommand-specific summary information such as retained loci, total selected SNPs, SNP coverage after filtration, etc.  
 `-B, --bed`: Output BED file listing the absolute coordinates of baits in comparison to the reference sequences. Unless otherwise specified using the #bed annotation (see [Sequence Annotations](#sequence-annotations)), the default starting position of input FASTA/FASTQ sequences is assumed to be postion 1 (BED coordinate 0). *Recommended*.   
 `-E, --rbed`: Output BED file listing the coordinates of baits relative to input sequences. For example, if a gene is at neighboring positions 570-900 of a reference genome, a bait at positions 570-689 will have BED coordinates 0-120 rather than 569-689.  
+`--shuffle`: Shuffle the last bait forward to compensate for reaching the end of a contig  
 `-D, --ncbi`: Denotes that FASTA/FASTQ file headers have NCBI-style descriptors after the sample name separated by spaces (e.g. `>{sample_name} {descriptor1} {descriptor2}`).  
 `-G, --gaps [VALUE]`: Strategy to handle baits that include gap characters (-) (one of `include`, `exclude`,  `extend`). `include` keeps all baits sequences with gaps. `exclude` filters out all baits with gaps. `extend` attempts to extend baits to complete length while removing gap characters.  *WARNING: extended baits will have BED coordinates corresponding to the uncorrected bait sequence.* Default is `include`.  
 `-Y, --rna`: Output bait sequences as RNA rather than DNA.  
@@ -195,6 +196,7 @@ pyrad2baits selects variants and generates baits from a PyRAD/ipyrad loci file. 
 `-I, --minind [VALUE]`: Minimum number of individuals to include locus. Default is 1.  
 `-W, --strategy [VALUE]`: Strategy to generate baits from loci (`alignment`, `SNPs`, or `informative`). `alignment` treats the individual loci as FASTA alignments and passes the alignments to [aln2baits](#aln2baits) to generate weighted alignments. `SNPs` and `informative` select and generate baits for identified variable sites. `SNPs` includes all identified sites, whereas `informative` includes only phylogenetically informative sites. Default is `alignment`.  
 `-H, --haplo [VALUE]`: If using `alignment` strategy, alignment window haplotype definition (`haplotype` or `variant`). `haplotype` will cause the program to identify all unique haplotypes within each bait tiling window observed in the data. `variant` will cause the program to generate all possible permutations of single nucleotide variants observed within the window. Default is `haplotype`.  
+`--uncollapsedref`: If using `SNPs` or `informative` strategies, choose a random reference sequence and keep ambiguities for each locus.  
 `-a, --alt`: If using `SNPs` or `informative` strategies, generate baits for alternate alleles.  
 `-t, --totalvars [VALUE]`: If using `SNPs` or `informative` strategies, total requested variants. Default is 30,000.  
 `-m, --maxsnps [VALUE]`: If using `SNPs` or `informative` strategies, maximum number of SNPs per locus. Default is 1.  

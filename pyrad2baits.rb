@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # pyrad2baits
-PYRAD2BAITSVER = "0.1"
+PYRAD2BAITSVER = "1.0.4"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -23,7 +23,11 @@ class Pyrad_Locus
 		vars.flatten!.uniq!
 	end
 	def make_reference # Create a random reference for bait generation
-		seq = collapse_ambiguity(@diplotypes[rand(@diplotypes.size)].seq)
+		if $options.uncollapsed_ref
+			seq = @diplotypes[rand(@diplotypes.size)].seq
+		else
+			seq = collapse_ambiguity(@diplotypes[rand(@diplotypes.size)].seq)
+		end
 		@refseq = Fa_Seq.new(locus_id.to_s, false, true)
 		@refseq.seq = seq
 	end

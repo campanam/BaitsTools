@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.0"
+BAITSTOOLSGUI = "1.0.4"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -55,6 +55,7 @@ def start_baitstools
 			cmdline += " -U " + $options.features.value.upcase
 		end
 		if $options.algorithm == "pyrad2baits" && $options.strategy != "alignment"
+			cmdline += " --uncollapsedref" if $options.uncollapsed_ref == 1
 			cmdline += " -t" + $options.totalsnps + " -m" + $options.maxsnps + " -d" + $options.distance + " -k" + $options.tiledepth
 			cmdline += " -a" if $options.alt_alleles
 		end
@@ -64,6 +65,7 @@ def start_baitstools
 	cmdline += " -l" if $options.log == 1
 	cmdline += " -B" if $options.coords == 1
 	cmdline += " -E" if $options.rbed == 1
+	cmdline += " --shuffle" if $options.shuffle == 1
 	cmdline += " -D" if $options.ncbi == 1
 	cmdline += " -Y" if $options.rna == 1
 	cmdline += " -G " + $options.gaps
@@ -136,10 +138,15 @@ def pyrad_windows
 		place('x' => 180, 'y' => 310)
 		width 10
 	end
-	$alts = TkCheckButton.new ($root) do
+	$alts = TkCheckButton.new($root) do
 		variable $options.alt_alleles
 		text "Alternate alleles"
 		place('x' => 550, 'y' => 350)
+	end
+	$uncollapsedref = TkCheckButton.new($root) do
+		variable $options.uncollapsed_ref
+		text "Uncollapsed reference"
+		place('x' => 550, 'y' => 200)
 	end
 	$maxsnps = TkLabel.new($root) do
 		text 'SNPs per locus'
@@ -193,10 +200,10 @@ def pyrad_windows
 		place('x' => 421, 'y' => 360)
 		width 10
 	end
-	$widgets.push(minind, minindentry, strategy, strategyselect, $alts, $maxsnps, $maxsnpentry, $distance, $distanceentry, $totalsnps, $totalsnpentry, $lenbef, $lenbefentry, $tiledepth, $tiledepthentry)
-	configure_buttons([$alts]) # Do not configure widgets since will configure everything
+	$widgets.push(minind, minindentry, strategy, strategyselect, $alts, $uncollapsedref, $maxsnps, $maxsnpentry, $distance, $distanceentry, $totalsnps, $totalsnpentry, $lenbef, $lenbefentry, $tiledepth, $tiledepthentry)
+	configure_buttons([$alts, $uncollapsedref]) # Do not configure widgets since will configure everything
 	update_strategy
-	$alts.width = 20
+	$alts.width = $uncollapsedref.width = 20
 end
 #-----------------------------------------------------------------------------------------------
 def update_strategy
@@ -207,6 +214,7 @@ def update_strategy
 		$lenbef.state = $lenbefentry.state = "disabled"
 		$tiledepth.state = $tiledepthentry.state = "disabled"
 		$alts.state = "disabled"
+		$uncollapsedref.state = "disabled"
 		$haplo.state = $haploselect.state = "normal"
 	else
 		$maxsnpentry.state = $maxsnps.state = "normal"
@@ -215,6 +223,7 @@ def update_strategy
 		$lenbef.state = $lenbefentry.state = "normal"
 		$tiledepth.state = $tiledepthentry.state = "normal"
 		$alts.state = "normal"
+		$uncollapsedref.state = "normal"
 		$haplo.state = $haploselect.state = "disabled"
 	end
 end
@@ -562,30 +571,35 @@ def general_window
 		text "Output relative BED"
 		place('x' => 300, 'y' => 200)
 	end
+	shuffle = TkCheckButton.new($root) do
+		variable $options.shuffle
+		text "Shuffle baits"
+		place('x' => 550, 'y' => 200)
+	end
 	log = TkCheckButton.new($root) do
 		variable $options.log
 		text "Output log"
-		place('x' => 550, 'y' => 200)
+		place('x' => 50, 'y' => 250)
 	end
 	ncbi = TkCheckButton.new ($root) do
 		variable $options.ncbi
 		text "NCBI headers"
-		place('x' => 50, 'y' => 250)
+		place('x' => 300, 'y' => 250)
 	end
 	rna = TkCheckButton.new ($root) do
 		variable $options.rna
 		text "Output RNA"
-		place('x' => 300, 'y' => 250)
+		place('x' => 550, 'y' => 250)
 	end
 	rc = TkCheckButton.new($root) do
 		variable $options.log
 		text "Reverse complement"
-		place('x' => 550, 'y' => 250)
+		place('x' => 50, 'y' => 300)
 	end
 	gaps = TkLabel.new($root) do
 		text 'Gap strategy'
 		font TkFont.new('times 20')
-		place('x' => 50, 'y' => 300)
+		place('x' => 300, 'y' => 300)
 		pady 10
 	end
 	gapselect = Tk::Tile::Combobox.new($root) do
@@ -594,28 +608,28 @@ def general_window
 		state "readonly"
 		width 10
 		height 2
-		place('x' => 170, 'y' => 310)
+		place('x' => 420, 'y' => 310)
 	end
 	threads = TkLabel.new($root) do
 		text 'Threads'
 		font TkFont.new('times 20')
-		place('x' => 310, 'y' => 300)
+		place('x' => 560, 'y' => 300)
 		pady 10
 	end
 	threadentry = TkEntry.new($root) do
 		textvariable $options.threads
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 450, 'y' => 310)
+		place('x' => 640, 'y' => 310)
 		width 10
 	end
-	configure_buttons([outdir, bed, rbed, log, ncbi, rna, rc])
-	bed.state = "disabled" if $options.algorithm == "checkbaits"
+	configure_buttons([outdir, bed, rbed, shuffle, log, ncbi, rna, rc])
+	bed.state = shuffle.state = "disabled" if $options.algorithm == "checkbaits"
 	ncbi.state = "disabled" if $options.algorithm == "pyrad2baits"
 	rbed.state = "disabled" unless $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "tilebaits" or $options.algorithm == "aln2baits"
 	outdir.width = rbed.width = rc.width = 20
 	ncbi.width = 15
-	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, log, ncbi, rna, rc, gaps, gapselect, threads, threadentry)
+	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, gaps, gapselect, threads, threadentry)
 end
 #-----------------------------------------------------------------------------------------------
 def subcommand_window(subcommand)
@@ -731,11 +745,11 @@ def create_root_menu
 	end
 	$widgets = [aln2baits_btn, annot2baits_btn, bed2baits_btn, checkbaits_btn, pyrad2baits_btn, stacks2baits_btn, tilebaits_btn, vcf2baits_btn]
 	configure_buttons($widgets)
-#	poonheli = TkLabel.new($root) do
-#		image TkPhotoImage.new(:file => "~/baitstools/poonheli.gif")
-#		place('height' => 118, 'width' => 118, 'x' => 341, 'y' => 400)
-#	end
-#	$widgets.push(poonheli)
+	#poonheli = TkLabel.new($root) do
+	#	image TkPhotoImage.new(:file => "~/baitstools/poonheli.gif")
+	#	place('height' => 118, 'width' => 118, 'x' => 341, 'y' => 400)
+	#end
+	#$widgets.push(poonheli)
 	$labelVar.value = "Choose Subcommand"
 end
 #-----------------------------------------------------------------------------------------------
@@ -1196,6 +1210,7 @@ def set_defaults
 	$options.varqual = TkVariable.new(30) # Minimum vcf variant QUAL score
 	$options.minind = TkVariable.new(1) # Minimum individuals to include locus
 	$options.strategy = TkVariable.new("alignment") # Strategy for LOCI files
+	$options.uncollapsed_ref = TkVariable.new(0) # Flag to output uncollapsed reference sequence
 	$options.lenbef = TkVariable.new(60) # Length before SNP in bait
 	$options.tiledepth = TkVariable.new(1) # Tiling depth	
 	$options.sort = TkVariable.new(0) # Flag to sort stack2baits SNPs by between/within population variation
@@ -1232,6 +1247,7 @@ def set_defaults
 	$options.outdir = TkVariable.new(File.expand_path("./")) # Output directory
 	$options.coords = TkVariable.new(0) # Flag to output BED table of baits
 	$options.rbed = TkVariable.new(0) # Flag to output relative BED table of baits
+	$options.shuffle = TkVariable.new(0) # Flag to shuffle baits if extend beyond contig
 	$options.log = TkVariable.new(0) # Flag to output detailed log
 	$options.ncbi = TkVariable.new(0) # Flag whether FASTA/FASTQ headers include NCBI-style descriptors
 	$options.rna = TkVariable.new(0) # Flag whether baits are output as RNA

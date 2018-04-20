@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # aln2baits
-ALN2BAITSVER = "1.0"
+ALN2BAITSVER = "1.0.4"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -95,9 +95,15 @@ def aln2baits(aln)
 					Thread.current[:seqstart] = 0
 					Thread.current[:windows] = []
 					Thread.current[:aln] = aln_hash[aln_hash.keys[Thread.current[:j]]]
-					while Thread.current[:seqstart] <Thread.current[:aln][0].seq.length
+					while Thread.current[:seqstart] < Thread.current[:aln][0].seq.length
 						Thread.current[:seqend] = Thread.current[:seqstart] + $options.baitlength - 1
-						Thread.current[:seqend] = Thread.current[:aln][0].seq.length - 1 if Thread.current[:seqend] > Thread.current[:aln][0].seq.length-1 # Correct for circular sequences later
+						if Thread.current[:seqend] > Thread.current[:aln][0].seq.length-1 # Correct for circular sequences later
+							Thread.current[:seqend] = Thread.current[:aln][0].seq.length - 1
+							if $options.shuffle
+								Thread.current[:seqstart] = Thread.current[:seqend] - $options.baitlength + 1
+								Thread.current[:seqstart] = 0 if Thread.current[:seqstart] < 0
+							end
+						end
 						Thread.current[:window] = Hap_Window.new([], Thread.current[:seqstart], Thread.current[:seqend])
 						Thread.current[:window].locus = Thread.current[:aln][0].locus
 						for Thread.current[:seq] in Thread.current[:aln]

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.0.3"
+BAITSTOOLSVER = "1.0.4"
 # Michael G. Campana, 2017
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -67,6 +67,7 @@ class Parser
 		args.no_Ns = false # Flag to omit bait sequences with Ns
 		args.collapse_ambiguities = false # Flag to collapse ambiguities to a single nucleotide
 		args.haplodef = "haplotype" # Haplotype definition for aln2baits
+		args.uncollapsed_ref = false # Flag to keep ambiguities in pyrad reference sequence
 		args.sort = false # Flag to sort stack2baits SNPs by between/within population variation
 		args.hwe = false # Flag to sort stacks2baits SNPs by Hardy-Weinberg Equilibrium
 		args.alpha = 0.05 # HWE test alpha value
@@ -83,6 +84,7 @@ class Parser
 		args.lc = 0.9 # Minimum sequence complexity
 		args.features = [] # Array holding desired features
 		args.pad = 0 # BP to pad ends of extracted regions
+		args.shuffle = false # Flag whether baits are shuffled to account for end of contigs
 		args.ncbi = false # Flag whether FASTA/FASTQ headers include NCBI-style descriptors
 		args.rna = false # Flag whether baits are output as RNA
 		args.alt_alleles = false # Flag to apply alternate alleles
@@ -146,6 +148,9 @@ class Parser
 					end
 					opts.on("-H","--haplo [VALUE]", String, "If using alignment strategy, window haplotype definition (haplotype or variant) (Default = haplotype)") do |fa|
 						args.haplodef = fa if fa != nil
+					end
+					opts.on("--uncollapsedref","Keep ambiguities in pyrad2baits reference sequence") do
+						args.uncollapsed_ref = true
 					end
 					opts.on("-a", "--alt", "If using SNPs or informative strategies, generate baits for alternate alleles") do
  						args.alt_alleles = true
@@ -320,6 +325,9 @@ class Parser
 						opts.on("-E", "--rbed", "Output BED file for the baits relative to extracted sequences") do
 							args.rbed = true
 						end
+					end
+					opts.on("--shuffle", "Shuffle baits to compensate for extending beyond contig ends") do
+						args.shuffle = true
 					end
 				end
 				unless args.algorithm == "pyrad2baits"
@@ -603,6 +611,11 @@ begin
 			end
 			if $options.strategy != "alignment"
 				if $options.interact
+					print "Keep ambiguities in pyrad2baits reference sequence? (y/n)\n"
+					t = gets.chomp.upcase
+					if t == "Y" or t == "YES"
+						$options.uncollapsed_ref = true
+					end
 					print "Enter total number of requested variants.\n"
 					$options.totalsnps = gets.chomp.to_i
 				end
@@ -678,6 +691,11 @@ begin
 				if t == "Y" or t == "YES"
 					$options.rbed = true
 				end
+			end
+			print "Shuffle baits to compensate for extending beyond contig ends? (y/n)\n"
+			t = gets.chomp.upcase
+			if t == "Y" or t == "YES"
+				$options.shuffle = true
 			end
 		end
 		print "Output bait statistics table? (y/n)\n"
