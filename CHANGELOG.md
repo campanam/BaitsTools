@@ -18,6 +18,9 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.1.0  
+Reworking to use new temp file methods  
+
 ### Version 1.0.4  
 Added ability to shuffle final bait if contig end reached  
 

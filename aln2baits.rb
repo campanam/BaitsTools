@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # aln2baits
-ALN2BAITSVER = "1.0.4"
-# Michael G. Campana, 2017
+ALN2BAITSVER = "1.1.0"
+# Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -129,86 +129,73 @@ def aln2baits(aln)
 	@windows.flatten!
 	# Get bait candidates
 	print "** Generating and filtering baits **\n"
-	baitsout = []
-	outfilter = []
-	paramline = ["Sequence:Locus:Coordinates:Haplotype\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept\n"]
-	coordline = []
-	filtercoordline = []
-	rbedline = []
-	rfilterline = []
-	threads = []
+	if $options.params
+		paramline = "Sequence:Locus:Coordinates:Haplotype\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept"
+		write_file("-filtered-params.txt", paramline)
+	end
 	if $options.log
 		logs = []
-		$options.logtext += "Windows\nLocus\tWindowStart\tWindowEnd\tNumberHaplotypes\tRetainedBaits\tExcludedBaits\n"
+		write_file(".log.txt", "Windows\nLocus\tWindowStart\tWindowEnd\tNumberHaplotypes\tRetainedBaits\tExcludedBaits") 
 	end
-	@windows.size.times do
-		baitsout.push([])
-		outfilter.push([])
-		paramline.push([])
-		coordline.push([])
-		filtercoordline.push([])
-		rbedline.push([])
-		rfilterline.push([])
-	end
+	threads = []
+	@splits = setup_temp(@windows.size)
 	$options.threads.times do |i|
 		threads[i] = Thread.new {
-			for Thread.current[:j] in 0 ... @windows.size
-				if Thread.current[:j] % $options.threads == i
-					for Thread.current[:hapno] in 1..@windows[Thread.current[:j]].haplotypes.size
-						Thread.current[:rng] = (@windows[Thread.current[:j]].seqstart+1).to_s+"-"+(@windows[Thread.current[:j]].seqend+1).to_s # Adjust for 1-based indexing
-						@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1] = reversecomp(@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]) if $options.rc  # Output reverse complemented baits if requested
-						@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1].gsub!("T","U") if $options.rna # Will correct both raw and filtered sequences
-						@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1].gsub!("t","u") if $options.rna # Will correct both raw and filtered sequences
-						$options.haplodef == "haplotype" ? Thread.current[:header] = @windows[Thread.current[:j]].header[Thread.current[:hapno]-1] : Thread.current[:header] = "Alignment"
-						Thread.current[:bait] = ">" + Thread.current[:header] +"_locus" + @windows[Thread.current[:j]].locus + "_" + Thread.current[:rng] + "_haplotype" + Thread.current[:hapno].to_s + "\n" + @windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1] + "\n"
-						Thread.current[:bedstart] = (@windows[Thread.current[:j]].seqstart + @windows[Thread.current[:j]].bedstarts[Thread.current[:hapno]-1]).to_s
-						Thread.current[:bedend] =  (@windows[Thread.current[:j]].seqend+1 + @windows[Thread.current[:j]].bedstarts[Thread.current[:hapno]-1]).to_s
-						Thread.current[:coord] = Thread.current[:header] + "\t" + Thread.current[:bedstart] + "\t" + Thread.current[:bedend] + "\n"
-						Thread.current[:rbed] = Thread.current[:header] + "\t" + @windows[Thread.current[:j]].seqstart.to_s + "\t" + (@windows[Thread.current[:j]].seqend+1).to_s + "\n"
-						baitsout[Thread.current[:j]].push(Thread.current[:bait])
-						coordline[Thread.current[:j]].push(Thread.current[:coord])
-						rbedline[Thread.current[:j]].push(Thread.current[:rbed])
-						if $options.filter
-							Thread.current[:flt] = filter_baits(@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]) # U won't affect filtration
-							if Thread.current[:flt][0]
-								outfilter[Thread.current[:j]].push(Thread.current[:bait])
-								filtercoordline[Thread.current[:j]].push(Thread.current[:coord])
-								rfilterline[Thread.current[:j]].push(Thread.current[:rbed])
-							end
-							if $options.params
-								Thread.current[:param] = Thread.current[:header] + ":" + @windows[Thread.current[:j]].locus + Thread.current[:rng] + ":" + Thread.current[:hapno].to_s + "\t" + Thread.current[:flt][1]
-								paramline[Thread.current[:j]+1].push(Thread.current[:param])
-							end
+			for Thread.current[:j] in @splits[i] ... @splits[i+1]
+				for Thread.current[:hapno] in 1..@windows[Thread.current[:j]].haplotypes.size
+					Thread.current[:rng] = (@windows[Thread.current[:j]].seqstart+1).to_s+"-"+(@windows[Thread.current[:j]].seqend+1).to_s # Adjust for 1-based indexing
+					@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1] = reversecomp(@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]) if $options.rc  # Output reverse complemented baits if requested
+					@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1].gsub!("T","U") if $options.rna # Will correct both raw and filtered sequences
+					@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1].gsub!("t","u") if $options.rna # Will correct both raw and filtered sequences
+					$options.haplodef == "haplotype" ? Thread.current[:header] = @windows[Thread.current[:j]].header[Thread.current[:hapno]-1] : Thread.current[:header] = "Alignment"
+					Thread.current[:bait] = ">" + Thread.current[:header] +"_locus" + @windows[Thread.current[:j]].locus + "_" + Thread.current[:rng] + "_haplotype" + Thread.current[:hapno].to_s + "\n" + @windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]
+					Thread.current[:bedstart] = (@windows[Thread.current[:j]].seqstart + @windows[Thread.current[:j]].bedstarts[Thread.current[:hapno]-1]).to_s
+					Thread.current[:bedend] =  (@windows[Thread.current[:j]].seqend+1 + @windows[Thread.current[:j]].bedstarts[Thread.current[:hapno]-1]).to_s
+					Thread.current[:coord] = Thread.current[:header] + "\t" + Thread.current[:bedstart] + "\t" + Thread.current[:bedend]
+					Thread.current[:rbed] = Thread.current[:header] + "\t" + @windows[Thread.current[:j]].seqstart.to_s + "\t" + (@windows[Thread.current[:j]].seqend+1).to_s
+					write_file("-baits.fa", Thread.current[:bait], true, i)
+					write_file("-baits.bed", Thread.current[:coord], true, i) if $options.coords
+					write_file("-baits-relative.bed", Thread.current[:rbed], true, i) if $options.rbed
+					if $options.filter
+						Thread.current[:flt] = filter_baits(@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]) # U won't affect filtration
+						if Thread.current[:flt][0]
+							write_file("-filtered-baits.fa", Thread.current[:bait], true, i)
+							write_file("-filtered-baits.bed", Thread.current[:coord], true, i) if $options.coords
+							write_file("-filtered-baits-relative.bed", Thread.current[:rbed], true, i) if $options.rbed
+						end
+						if $options.params
+							Thread.current[:param] = Thread.current[:header] + ":" + @windows[Thread.current[:j]].locus + Thread.current[:rng] + ":" + Thread.current[:hapno].to_s + "\t" + Thread.current[:flt][1]
+							write_file("-filtered-params.txt", Thread.current[:param], true, i)
 						end
 					end
-					if $options.log
-						logs[Thread.current[:j]] = [@windows[Thread.current[:j]].locus,@windows[Thread.current[:j]].seqstart+1, @windows[Thread.current[:j]].seqend+1, @windows[Thread.current[:j]].haplotypes.size]
-						if $options.filter
-							logs[Thread.current[:j]].push(outfilter[Thread.current[:j]].size, @windows[Thread.current[:j]].haplotypes.size - outfilter[Thread.current[:j]].size)
-						else
-							logs[Thread.current[:j]].push(@windows[Thread.current[:j]].haplotypes.size, "NA")
-						end
+				end
+				if $options.log
+					logs[Thread.current[:j]] = [@windows[Thread.current[:j]].locus,@windows[Thread.current[:j]].seqstart+1, @windows[Thread.current[:j]].seqend+1, @windows[Thread.current[:j]].haplotypes.size]
+					if $options.filter
+						logs[Thread.current[:j]].push(outfilter[Thread.current[:j]].size, @windows[Thread.current[:j]].haplotypes.size - outfilter[Thread.current[:j]].size)
+					else
+						logs[Thread.current[:j]].push(@windows[Thread.current[:j]].haplotypes.size, "NA")
 					end
 				end
 			end
 		}
 	end
 	threads.each { |thr| thr.join }
+	cat_files
 	if $options.log
 		vlogs = [[],[],[],[]]
 		for i in 0 ... logs.size
-			$options.logtext += logs[i].join("\t") + "\n"
+			write_file(".log.txt", logs[i].join("\t"))
 			vlogs[0].push(logs[i][1])
 			vlogs[1].push(logs[i][2])
 			vlogs[2].push(logs[i][3])
 			vlogs[3].push(logs[i][4])
 		end
-		$options.logtext += "\nAlignmentLength\tTotalBaitCoverage(×)\tFilteredBaitCoverage(×)\n"
+		write_file(".log.txt", "\nAlignmentLength\tTotalBaitCoverage(×)\tFilteredBaitCoverage(×)")
 		if $options.filter
-			$options.logtext += (vlogs[1].max-vlogs[0].min+1).to_s + "\t" + mean(vlogs[2]).to_s + "\t" + mean(vlogs[3]).to_s + "\n"
+			write_file(".log.txt", (vlogs[1].max-vlogs[0].min+1).to_s + "\t" + mean(vlogs[2]).to_s + "\t" + mean(vlogs[3]).to_s)
 		else
-			$options.logtext += (vlogs[1].max-vlogs[0].min+1).to_s + "\t" + mean(vlogs[2]).to_s + "\tNA\n"
+			write_file(".log.txt", (vlogs[1].max-vlogs[0].min+1).to_s + "\t" + mean(vlogs[2]).to_s + "\tNA")
 		end
 	end
-	write_baits(baitsout, outfilter, paramline, coordline, filtercoordline, $options.outdir + "/" + $options.outprefix, rbedline, rfilterline)
 end
