@@ -346,6 +346,9 @@ Versioning added to header of script
 RVM default bug fixed  
 
 ## pyrad2baits  
+### Version 1.1.0  
+Reworking to use new temp file methods  
+
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
 

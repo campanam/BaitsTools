@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # pyrad2baits
-PYRAD2BAITSVER = "1.0.4"
-# Michael G. Campana, 2017
+PYRAD2BAITSVER = "1.1.0"
+# Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ def pyrad2baits
 	@pyrad = false # file is in pyrad format
 	loc = Pyrad_Locus.new
 	locid = 0
-	$options.logtext += "Locus Coverage:\nLocus\tNumberIndividuals\tKept\n" if $options.log
+	write_file(".log.txt", "Locus Coverage:\nLocus\tNumberIndividuals\tKept") if $options.log
 	File.open($options.infile, 'r') do |pyr|
 		while line = pyr.gets
 			if line[0..1] != "//"
@@ -96,14 +96,14 @@ def pyrad2baits
 				end
 				@pyrad_loci.push(loc) unless loc.diplotypes.size < $options.minind # Keep locus unless too few individuals
 				if $options.log
-					loc.diplotypes.size < $options.minind ? kept = "false\n" : kept = "true\n"
-					$options.logtext += loc.locus_id.to_s + "\t" + loc.diplotypes.size.to_s + "\t" + kept
+					loc.diplotypes.size < $options.minind ? kept = "false" : kept = "true"
+					write_file(".log.txt", loc.locus_id.to_s + "\t" + loc.diplotypes.size.to_s + "\t" + kept)
 				end
 				loc = Pyrad_Locus.new
 			end
 		end
 	end
-	$options.logtext += "\n" if $options.log
+	write_file(".log.txt", "\n") if $options.log
 	if $options.strategy == "alignment"
 		# Treat like an alignment
 		aln = []
@@ -116,20 +116,15 @@ def pyrad2baits
 		# Treat like a vcf/stacks file.
 		print "** Generating reference sequences **\n"
 		refseq = []
-		refs = ""
 		for loc in @pyrad_loci
 			loc.make_reference
 			refseq.push(loc.refseq)
-			refs += ">" + loc.refseq.header + "\n" + loc.refseq.seq + "\n"
-		end
-		File.open($options.outdir + "/" + $options.outprefix + "-refseq.fa", 'w') do |write|
-			write.puts refs
+			write_file("-refseq.fa", ">" + loc.refseq.header + "\n" + loc.refseq.seq)
 		end
 		print "** Selecting variants **\n"
 		snp_hash = pyrad_to_selectsnps(@pyrad_loci)
 		@selectsnps = selectsnps(snp_hash)
 		print "** Generating and filtering baits **\n"
-		baits = snp_to_baits(@selectsnps, refseq)
-		write_baits(baits[0], baits[1], baits[2], baits[3], baits[4])
+		snp_to_baits(@selectsnps, refseq)
 	end
 end
