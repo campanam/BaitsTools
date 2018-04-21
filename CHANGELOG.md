@@ -92,6 +92,7 @@ File start called with setup_output
 setup_temp method sets up temporary files  
 concat_file concatenates temporary files  
 selectsnps compatible with temporary files  
+snp_to_baits compatible with temporary files  
 removal of write_baits  
 
 ### Version 1.0.4  
@@ -422,6 +423,9 @@ Output now controlled by baitslib write_probes function
 Preliminary script to divide genic/genomic sequences into tiled baits
 
 ## vcf2baits  
+### Version 1.1.0  
+Reworking to use new temp file methods  
+
 ### Version 0.10  
 Output directory and prefix can be named  
 Detailed log  

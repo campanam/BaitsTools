@@ -350,7 +350,6 @@ def setup_output
 		$options.default_files.push("-filtered-baits.bed") if $options.coords
 		$options.default_files.push("-filtered-baits-relative.bed") if $options.rbed
 	end
-	File.open($options.filestem + "-selected.vcf", 'w') if ($options.algorithm == "vcf2baits" and !$options.every)
 	if $options.algorithm == "stacks2baits"
 		File.open($options.filestem + "-betweenpops.tsv", 'w')
 		if $options.sort and $options.hwe
@@ -573,134 +572,126 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 end
 #-----------------------------------------------------------------------------------------------
 def snp_to_baits(selectedsnps, refseq)
-	baitsout = []
-	outfilter = []
-	paramline = ["Chromosome:Coordinates\tSNP\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept\n"]
-	coordline = []
-	filtercoordline = []
-	refseq.size.times do
-		baitsout.push([])
-		outfilter.push([])
-		paramline.push([])
-		coordline.push([])
-		filtercoordline.push([])
+	if $options.params
+		paramline = "Chromosome:Coordinates\tSNP\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept"
+		write_file("-filtered-params.txt", paramline)
 	end
 	filteredsnps = {}
 	threads = []
 	if $options.log
 		logs = []
 		refseq.size.times { logs.push([]) }
-		$options.logtext += "Chromosome\tVariant\tNumberBaits\tRetainedBaits\tExcludedBaits\n"
+		logtext = "Chromosome\tVariant\tNumberBaits\tRetainedBaits\tExcludedBaits"
+		write_file(".log.txt", logtext)
 	end
+	@splits = setup_temp(refseq.size)
 	$options.threads.times do |i|
 		threads[i] = Thread.new {
-			for Thread.current[:j] in 0...refseq.size
-				if Thread.current[:j] % $options.threads == i
-					if selectedsnps.keys.include?(refseq[Thread.current[:j]].header)
-						for Thread.current[:snp] in selectedsnps[refseq[Thread.current[:j]].header]
-							Thread.current[:totalbaits] = 0 if $options.log
-							Thread.current[:retainedbaits] = 0 if $options.log
-							Thread.current[:tiling] = $options.tiledepth
-							Thread.current[:rseq_vars] = [refseq[Thread.current[:j]]]
-							if $options.alt_alleles
-								for Thread.current[:altvar] in Thread.current[:snp].alt_alleles
-									Thread.current[:tmpseq] = refseq[Thread.current[:j]].seq.dup # Need to duplicate to prevent changes to original sequence
-									if Thread.current[:snp].ref.nil?
-										Thread.current[:tmpseq][Thread.current[:snp].snp-1]=Thread.current[:altvar]
-									else
-										Thread.current[:tmpseq][Thread.current[:snp].snp-1..Thread.current[:snp].snp+Thread.current[:snp].ref.length-2]=Thread.current[:altvar]
-									end
-									Thread.current[:tmpheader] = refseq[Thread.current[:j]].header.dup + "_" + Thread.current[:altvar] + "-variant"
-									Thread.current[:tmp] = Fa_Seq.new(Thread.current[:tmpheader], refseq[Thread.current[:j]].circular, refseq[Thread.current[:j]].fasta, Thread.current[:tmpseq], refseq[Thread.current[:j]].qual)
-									unless refseq[Thread.current[:j]].fasta
-										Thread.current[:qual_arr] = []
-										Thread.current[:tmpqual] = refseq[Thread.current[:j]].qual_array.dup
-										if $options.algorithm == "vcf2baits"
-											Thread.current[:qual] = Thread.current[:snp].qual
-											Thread.current[:qual] = 40 if Thread.current[:qual] > 40 # Adjust for quality scores beyond typical sequence capability
-										else
-											Thread.current[:qual] = refseq[Thread.current[:j]].numeric_quality[Thread.current[:snp].snp-1] # Assume quality is equal across the variants since no quality information
-										end
-										for Thread.current[:i] in 1..Thread.current[:altvar].length # Apply quality score to all bases in alternate allele
-											Thread.current[:qual_arr].push(Thread.current[:qual])
-										end
-										Thread.current[:tmpqual][Thread.current[:snp].snp-1]=Thread.current[:qual_arr]
-										Thread.current[:tmp].qual_array = Thread.current[:tmpqual].flatten
-									end
-									Thread.current[:rseq_vars].push(Thread.current[:tmp]) # Add alternate variants to the sequence
+			for Thread.current[:j] in @splits[i] ... @splits[i+1]
+				if selectedsnps.keys.include?(refseq[Thread.current[:j]].header)
+					for Thread.current[:snp] in selectedsnps[refseq[Thread.current[:j]].header]
+						Thread.current[:totalbaits] = 0 if $options.log
+						Thread.current[:retainedbaits] = 0 if $options.log
+						Thread.current[:tiling] = $options.tiledepth
+						Thread.current[:rseq_vars] = [refseq[Thread.current[:j]]]
+						if $options.alt_alleles
+							for Thread.current[:altvar] in Thread.current[:snp].alt_alleles
+								Thread.current[:tmpseq] = refseq[Thread.current[:j]].seq.dup # Need to duplicate to prevent changes to original sequence
+								if Thread.current[:snp].ref.nil?
+									Thread.current[:tmpseq][Thread.current[:snp].snp-1]=Thread.current[:altvar]
+								else
+									Thread.current[:tmpseq][Thread.current[:snp].snp-1..Thread.current[:snp].snp+Thread.current[:snp].ref.length-2]=Thread.current[:altvar]
 								end
+								Thread.current[:tmpheader] = refseq[Thread.current[:j]].header.dup + "_" + Thread.current[:altvar] + "-variant"
+								Thread.current[:tmp] = Fa_Seq.new(Thread.current[:tmpheader], refseq[Thread.current[:j]].circular, refseq[Thread.current[:j]].fasta, Thread.current[:tmpseq], refseq[Thread.current[:j]].qual)
+								unless refseq[Thread.current[:j]].fasta
+									Thread.current[:qual_arr] = []
+									Thread.current[:tmpqual] = refseq[Thread.current[:j]].qual_array.dup
+									if $options.algorithm == "vcf2baits"
+										Thread.current[:qual] = Thread.current[:snp].qual
+										Thread.current[:qual] = 40 if Thread.current[:qual] > 40 # Adjust for quality scores beyond typical sequence capability
+									else
+										Thread.current[:qual] = refseq[Thread.current[:j]].numeric_quality[Thread.current[:snp].snp-1] # Assume quality is equal across the variants since no quality information
+									end
+									for Thread.current[:i] in 1..Thread.current[:altvar].length # Apply quality score to all bases in alternate allele
+										Thread.current[:qual_arr].push(Thread.current[:qual])
+									end
+									Thread.current[:tmpqual][Thread.current[:snp].snp-1]=Thread.current[:qual_arr]
+									Thread.current[:tmp].qual_array = Thread.current[:tmpqual].flatten
+								end
+								Thread.current[:rseq_vars].push(Thread.current[:tmp]) # Add alternate variants to the sequence
 							end
-							for Thread.current[:rseq_var] in Thread.current[:rseq_vars]
-								for Thread.current[:tile] in 0...Thread.current[:tiling]
-									Thread.current[:be4] = Thread.current[:snp].snp - $options.lenbef + Thread.current[:tile] * $options.tileoffset
-									Thread.current[:after] = Thread.current[:snp].snp + $options.baitlength - 1 - $options.lenbef + Thread.current[:tile] * $options.tileoffset
-									Thread.current[:be4] = 1 if (Thread.current[:be4] < 1 and !Thread.current[:rseq_var].circular)
-									Thread.current[:qual] = [$options.fasta_score]
-									if Thread.current[:after] > Thread.current[:rseq_var].seq.length and !Thread.current[:rseq_var].circular
-										Thread.current[:after] = Thread.current[:rseq_var].seq.length
-										if $options.shuffle
-											Thread.current[:be4] = $options.baitlength - Thread.current[:after] - 1
-											Thread.current[:be4] = 1 if Thread.current[:be4] < 1
-										end
+						end
+						for Thread.current[:rseq_var] in Thread.current[:rseq_vars]
+							for Thread.current[:tile] in 0...Thread.current[:tiling]
+								Thread.current[:be4] = Thread.current[:snp].snp - $options.lenbef + Thread.current[:tile] * $options.tileoffset
+								Thread.current[:after] = Thread.current[:snp].snp + $options.baitlength - 1 - $options.lenbef + Thread.current[:tile] * $options.tileoffset
+								Thread.current[:be4] = 1 if (Thread.current[:be4] < 1 and !Thread.current[:rseq_var].circular)
+								Thread.current[:qual] = [$options.fasta_score]
+								if Thread.current[:after] > Thread.current[:rseq_var].seq.length and !Thread.current[:rseq_var].circular
+									Thread.current[:after] = Thread.current[:rseq_var].seq.length
+									if $options.shuffle
+										Thread.current[:be4] = $options.baitlength - Thread.current[:after] - 1
+										Thread.current[:be4] = 1 if Thread.current[:be4] < 1
+									end
+									Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:after]-1]  #Correct for 0-based counting
+									Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
+								elsif Thread.current[:after] > Thread.current[:rseq_var].seq.length and Thread.current[:rseq_var].circular
+									Thread.current[:after] -= Thread.current[:rseq_var].seq.length
+									if Thread.current[:be4] < 1
+										Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:rseq_var].seq.length-1]+Thread.current[:rseq_var].seq[0..Thread.current[:after]-1] #Correct for 0-based counting and end of sequence
+										Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:rseq_var].seq.length-1]+Thread.current[:rseq_var].numeric_quality[0..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
+									else
+										Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:rseq_var].seq.length-1]+Thread.current[:rseq_var].seq[0..Thread.current[:after]-1]  #Correct for 0-based counting and end of sequence
+										Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:rseq_var].seq.length-1]+rseq.numeric_quality[0..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
+									end
+								else
+									if Thread.current[:be4] < 1
+										Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].seq[0..Thread.current[:after]-1]
+										Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].numeric_quality[0..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
+									else
 										Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:after]-1]  #Correct for 0-based counting
 										Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
-									elsif Thread.current[:after] > Thread.current[:rseq_var].seq.length and Thread.current[:rseq_var].circular
-										Thread.current[:after] -= Thread.current[:rseq_var].seq.length
-										if Thread.current[:be4] < 1
-											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:rseq_var].seq.length-1]+Thread.current[:rseq_var].seq[0..Thread.current[:after]-1] #Correct for 0-based counting and end of sequence
-											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:rseq_var].seq.length-1]+Thread.current[:rseq_var].numeric_quality[0..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
-										else
-											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:rseq_var].seq.length-1]+Thread.current[:rseq_var].seq[0..Thread.current[:after]-1]  #Correct for 0-based counting and end of sequence
-											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:rseq_var].seq.length-1]+rseq.numeric_quality[0..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
-										end
-									else
-										if Thread.current[:be4] < 1
-											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].seq[0..Thread.current[:after]-1]
-											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..-1] + Thread.current[:rseq_var].numeric_quality[0..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
-										else
-											Thread.current[:prb] = Thread.current[:rseq_var].seq[Thread.current[:be4]-1..Thread.current[:after]-1]  #Correct for 0-based counting
-											Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
-										end
-									end
-									Thread.current[:prb] = reversecomp(Thread.current[:prb]) if $options.rc # Output reverse complemented baits if requested
-									Thread.current[:prb].gsub!("T","U") if $options.rna # RNA output handling
-									Thread.current[:prb].gsub!("t","u") if $options.rna # RNA output handling
-									Thread.current[:prb] = extend_baits(Thread.current[:prb], Thread.current[:rseq_var].seq, Thread.current[:be4]-1, Thread.current[:after]-1) if $options.gaps == "extend" # Basic gap extension
-									Thread.current[:seq] = ">" + Thread.current[:rseq_var].header + "_site" + Thread.current[:snp].snp.to_s + "\n" + Thread.current[:prb] + "\n"
-									Thread.current[:be4] = Thread.current[:rseq_var].seq.length + Thread.current[:be4] if Thread.current[:be4] < 1
-									Thread.current[:coord] = Thread.current[:rseq_var].header + "\t" + (Thread.current[:be4]-1).to_s + "\t" + Thread.current[:after].to_s + "\n"
-									baitsout[Thread.current[:j]].push(Thread.current[:seq])
-									Thread.current[:totalbaits] += 1 if $options.log
-									coordline[Thread.current[:j]].push(Thread.current[:coord])
-									if $options.filter
-										Thread.current[:parameters] = filter_baits(Thread.current[:prb], Thread.current[:qual]) # U should not affect filtration
-										if Thread.current[:parameters][0]
-											outfilter[Thread.current[:j]].push(Thread.current[:seq])
-											filtercoordline[Thread.current[:j]].push(Thread.current[:coord])
-											Thread.current[:retainedbaits] += 1 if $options.log
-											if filteredsnps[refseq[Thread.current[:j]].header].nil?
-												filteredsnps[refseq[Thread.current[:j]].header] = [Thread.current[:snp]]
-											else
-												filteredsnps[refseq[Thread.current[:j]].header].push(Thread.current[:snp])
-												filteredsnps[refseq[Thread.current[:j]].header].uniq!
-											end
-										end
-										if $options.params
-											Thread.current[:param] = Thread.current[:rseq_var].header + ":" + Thread.current[:be4].to_s + "-" + Thread.current[:after].to_s + "\t" + Thread.current[:snp].snp.to_s + "\t" + Thread.current[:parameters][1]
-											paramline[Thread.current[:j]+1].push(Thread.current[:param])
-										end
 									end
 								end
-							end
-							if $options.log
-								Thread.current[:vals] = [refseq[Thread.current[:j]].header, Thread.current[:snp].snp, Thread.current[:totalbaits]]
+								Thread.current[:prb] = reversecomp(Thread.current[:prb]) if $options.rc # Output reverse complemented baits if requested
+								Thread.current[:prb].gsub!("T","U") if $options.rna # RNA output handling
+								Thread.current[:prb].gsub!("t","u") if $options.rna # RNA output handling
+								Thread.current[:prb] = extend_baits(Thread.current[:prb], Thread.current[:rseq_var].seq, Thread.current[:be4]-1, Thread.current[:after]-1) if $options.gaps == "extend" # Basic gap extension
+								Thread.current[:seq] = ">" + Thread.current[:rseq_var].header + "_site" + Thread.current[:snp].snp.to_s + "\n" + Thread.current[:prb]
+								Thread.current[:be4] = Thread.current[:rseq_var].seq.length + Thread.current[:be4] if Thread.current[:be4] < 1
+								Thread.current[:coord] = Thread.current[:rseq_var].header + "\t" + (Thread.current[:be4]-1).to_s + "\t" + Thread.current[:after].to_s
+								write_file("-baits.fa", Thread.current[:seq], true, i)
+								Thread.current[:totalbaits] += 1 if $options.log
+								write_file("-baits.bed", Thread.current[:coord], true, i) if $options.coords
 								if $options.filter
-									Thread.current[:vals].push(Thread.current[:retainedbaits], Thread.current[:totalbaits] - Thread.current[:retainedbaits])
-								else
-									Thread.current[:vals].push(Thread.current[:totalbaits], "NA")
+									Thread.current[:parameters] = filter_baits(Thread.current[:prb], Thread.current[:qual]) # U should not affect filtration
+									if Thread.current[:parameters][0]
+										write_file("-filtered-baits.fa", Thread.current[:seq], true, i)
+										write_file("-filtered-baits.bed", Thread.current[:coord], true, i) if $options.coords
+										Thread.current[:retainedbaits] += 1 if $options.log
+										if filteredsnps[refseq[Thread.current[:j]].header].nil?
+											filteredsnps[refseq[Thread.current[:j]].header] = [Thread.current[:snp]]
+										else
+											filteredsnps[refseq[Thread.current[:j]].header].push(Thread.current[:snp])
+											filteredsnps[refseq[Thread.current[:j]].header].uniq!
+										end
+									end
+									if $options.params
+										Thread.current[:param] = Thread.current[:rseq_var].header + ":" + Thread.current[:be4].to_s + "-" + Thread.current[:after].to_s + "\t" + Thread.current[:snp].snp.to_s + "\t" + Thread.current[:parameters][1]
+										write_file("-filtered-params.txt", Thread.current[:param], true, i)
+									end
 								end
-								logs[Thread.current[:j]].push(Thread.current[:vals])
 							end
+						end
+						if $options.log
+							Thread.current[:vals] = [refseq[Thread.current[:j]].header, Thread.current[:snp].snp, Thread.current[:totalbaits]]
+							if $options.filter
+								Thread.current[:vals].push(Thread.current[:retainedbaits], Thread.current[:totalbaits] - Thread.current[:retainedbaits])
+							else
+								Thread.current[:vals].push(Thread.current[:totalbaits], "NA")
+							end
+							logs[Thread.current[:j]].push(Thread.current[:vals])
 						end
 					end
 				end
@@ -708,23 +699,24 @@ def snp_to_baits(selectedsnps, refseq)
 		}
 	end
 	threads.each { |thr| thr.join }
+	cat_files
 	if $options.log
 		vlogs = [[],[]]
 		for i in 0 ... logs.size
 			for l in 0 ... logs[i].size
-				$options.logtext += logs[i][l].join("\t") + "\n"
+				write_file(".log.txt", logs[i][l].join("\t") )
 				vlogs[0].push(logs[i][l][2])
 				vlogs[1].push(logs[i][l][3])
 			end
 		end
-		$options.logtext += "\nTotalBaitCoverage(×)\tFilteredBaitCoverage(×)\n"
+		write_file(".log.txt", "\nTotalBaitCoverage(×)\tFilteredBaitCoverage(×)")
 		if $options.filter
-			$options.logtext += mean(vlogs[0]).to_s + "\t" + mean(vlogs[1]).to_s + "\n"
+			write_file(".log.txt", mean(vlogs[0]).to_s + "\t" + mean(vlogs[1]).to_s)
 		else
-			$options.logtext += mean(vlogs[0]).to_s + "\tNA\n"
+			write_file(".log.txt", mean(vlogs[0]).to_s + "\tNA")
 		end
 	end
-	return [baitsout, outfilter, paramline, coordline, filtercoordline, filteredsnps]
+	return filteredsnps
 end
 #-----------------------------------------------------------------------------------------------
 def get_command_line # Get command line for summary output
