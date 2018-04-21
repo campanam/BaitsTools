@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # bed2baits
-BED2BAITSVER = "0.5"
-# Michael G. Campana, 2017
+BED2BAITSVER = "1.1.0"
+# Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -17,7 +17,7 @@ def bed2baits
 	#Read coordinates table
 	print "** Reading BED file **\n"
 	regions = [] #Array to hold generated fasta sequences
-	$options.logtext += "ExtractedRegions\nRegion\tStart\tEnd\tLength\n" if $options.log
+	write_files(".log.txt", "ExtractedRegions\nRegion\tStart\tEnd\tLength") if $options.log
 	totallength = 0
 	File.open($options.infile, 'r') do |coord|
 		while line = coord.gets
@@ -45,7 +45,7 @@ def bed2baits
 				seq.bedstart = seqst
 				regions.push(seq)
 				if $options.log
-					$options.logtext += seq.header + "\t" + (seqst+1).to_s + "\t" + seqend.to_s + "\t" + seq.seq.length.to_s + "\n"
+					write_files(".log.txt", seq.header + "\t" + (seqst+1).to_s + "\t" + seqend.to_s + "\t" + seq.seq.length.to_s)
 					totallength += seq.seq.length
 				end
 			else
@@ -54,14 +54,10 @@ def bed2baits
 		end
 	end
 	#Write fasta sequences from the files
-	outfasta = ""
 	for reg in regions
-		outfasta += ">" + reg.header + "\n" + reg.seq + "\n"
+		write_files("-regions.fa", ">" + reg.header + "\n" + reg.seq)
 	end
-	$options.logtext += "\nTotalRegions\tTotalRegionLength\n" + regions.size.to_s + "\t" + totallength.to_s + "\n\n" if $options.log
-	File.open($options.outdir+"/"+$options.outprefix+"-regions.fa", 'w') do |out|
-		out.puts outfasta
-	end
+	write_files(".log.txt", "\nTotalRegions\tTotalRegionLength\n" + regions.size.to_s + "\t" + totallength.to_s + "\n") if $options.log
 	#Generate probes using methods from tilebaits
 	tilebaits(regions)
 end

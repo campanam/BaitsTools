@@ -1,5 +1,5 @@
 # BaitsTools Change Log  
-Michael G. Campana, 2017  
+Michael G. Campana, 2017-2018  
 Smithsonian Conservation Biology Institute  
 Contact: campanam@si.edu  
 
@@ -85,7 +85,7 @@ get_command_line and read_fasta use << to improve performance
 File start called with setup_output  
 setup_temp method sets up temporary files  
 concat_file concatenates temporary files  
-select
+selectsnps compatible with temporary files  
 removal of write_baits  
 
 ### Version 1.0.4  
@@ -254,7 +254,6 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
-## baitslib  
 ### Version 1.1.0  
 start_baitstools uses << to improve performance  
 
@@ -281,6 +280,9 @@ pyrad2baits added
 Basic GUI compatible with baitstools 0.8  
 
 ## bed2baits  
+### Version 1.1.0  
+Reworking to use new temp file methods  
+
 ### Version 0.5  
 Absolute BED coordinates recorded  
 Padding parameter  
@@ -303,6 +305,9 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## checkbaits  
+### Version 1.1.0  
+Reworking to use new temp file methods  
+
 ### Version 1.0  
 Updated parameters table  
 Can reverse complement baits  
