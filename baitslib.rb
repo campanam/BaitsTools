@@ -549,27 +549,26 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	else
 		selectsnps = snp_hash
 	end
-	if $options.log
-		totalvar = 0
-		selectvar = 0
+	 if $options.log
+		 totalvar = 0
+		 selectvar = 0
 		for chromo in snp_hash.keys
 			totalvar += snp_hash[chromo].size
 		end
-		$options.logtext += "Chromosome\tSelectedVariants\n"
+		write_file(".log.txt", "Chromosome\tSelectedVariants")
 	end
 	for chromo in selectsnps.keys
 		selectsnps[chromo].sort_by! { |snp| snp.snp }
 		if $options.log
 			selectvar += selectsnps[chromo].size
-			$options.logtext += chromo + "\t"
+			logtext = chromo + "\t"
 			for snp in selectsnps[chromo]
-				$options.logtext += snp.snp.to_s + ","
+				logtext << snp.snp.to_s + ","
 			end
-			$options.logtext = $options.logtext[0...-1] # Remove final comma
+			write_file(".log.txt",  logtext[0...-1]) # Remove final comma
 		end
 	end
-	$options.logtext += "\n\nNumberTotalVariants\tNumberSelectedVariants\n" if $options.log
-	$options.logtext += totalvar.to_s + "\t" + selectvar.to_s + "\n\n" if $options.log
+	write_file(".log.txt", "\nNumberTotalVariants\tNumberSelectedVariants\n" + totalvar.to_s + "\t" + selectvar.to_s + "\n" ) if $options.log
 	return selectsnps
 end
 #-----------------------------------------------------------------------------------------------
