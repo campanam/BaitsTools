@@ -353,6 +353,9 @@ pyrad2baits can produce an uncollapsed reference sequence
 Preliminary script to generate baits from PyRAD/ipyrad loci files  
 
 ## stacks2baits  
+### Version 1.1.0  
+Reworking to use new temp file methods  
+
 ### Version 0.4  
 Output directory and prefix can be named  
 Detailed log  
