@@ -43,6 +43,7 @@ def checkbaits
 		}
 	end
 	threads.each { |thr| thr.join }
+	cat_files
 	if $options.log
 		kept = 0
 		for good in @kept
