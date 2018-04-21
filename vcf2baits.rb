@@ -48,7 +48,7 @@ def vcf2baits
 	@selectsnps = selectsnps(@snps) 	# Select SNPs
 	filteredsnps = @selectsnps.dup # Hash for filtering
 	# Write VCF & baits
-	vcfout = "##baitstools_vcf2baitsVersion=" + VCF2BAITSVER + "+BaitsTools-" + BAITSTOOLSVER + "\n##baitstools_vcf2baitsCommand="
+	vcfout << "##baitstools_vcf2baitsVersion=" + VCF2BAITSVER + "+BaitsTools-" + BAITSTOOLSVER + "\n##baitstools_vcf2baitsCommand="
 	cmdline = get_command_line
 	vcffilt = vcfout + cmdline[0] + cmdline[1] + "\n" + columns
 	if !$options.every
