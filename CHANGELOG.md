@@ -64,6 +64,9 @@ Corrected double-tabbed output in parameters output
 Preliminary script to generate weighted bait set from a fasta alignment  
 
 ## annot2baits  
+### Version 1.1.0  
+Reworking to use new temp file methods  
+
 ### Version 0.4  
 Absolute BED coordinates recorded  
 Padding parameter  
