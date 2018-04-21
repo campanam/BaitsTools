@@ -1,53 +1,53 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # checkbaits
-CHECKBAITSVER = "1.0"
-# Michael G. Campana, 2017
+CHECKBAITSVER = "1.1.0"
+# Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
 def checkbaits
 	# Process FASTA file
 	print "** Reading FASTA/FASTQ **\n"
-	outfilter = []
-	paramline = ["Bait\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept\n"]
-	seq_array = read_fasta($options.infile)
-	seq_array.size.times do
-		outfilter.push([])
-		paramline.push([])
+	if $options.params
+		paramline = "Bait\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept"
+		write_file("-filtered-params.txt", paramline)
 	end
+	seq_array = read_fasta($options.infile)
 	print "** Filtering baits **\n"
+	@splits = setup_temp(seq_array.size)
 	threads = []
+	@kept = []
 	$options.threads.times do |i|
+		@kept.push(0)
 		threads[i] = Thread.new {
-			for Thread.current[:j] in 0...seq_array.size
-				if Thread.current[:j] % $options.threads == i
-					if seq_array[Thread.current[:j]].fasta
-						Thread.current[:flt] = filter_baits(seq_array[Thread.current[:j]].seq, [$options.fasta_score])
-					else
-						Thread.current[:flt] = filter_baits(seq_array[Thread.current[:j]].seq, seq.numeric_quality)
-					end
-					if Thread.current[:flt][0]
-						seq_array[Thread.current[:j]].seq = reversecomp(seq_array[Thread.current[:j]].seq) if $options.rc # Output reverse complemented baits if requested
-						seq_array[Thread.current[:j]].seq.gsub!("T","U") if $options.rna # RNA output handling
-						seq_array[Thread.current[:j]].seq.gsub!("t","u") if $options.rna # RNA output handling
-						Thread.current[:bait] = ">" + seq_array[Thread.current[:j]].header + "\n" + seq_array[Thread.current[:j]].seq + "\n"
-						outfilter[Thread.current[:j]].push(Thread.current[:bait])
-					end
-					if $options.params
-						Thread.current[:param] = seq_array[Thread.current[:j]].header + "\t" + Thread.current[:flt][1]
-						paramline[Thread.current[:j]+1].push(Thread.current[:param])
-					end
+			for Thread.current[:j] in in @splits[i] ... @splits[i+1]
+				if seq_array[Thread.current[:j]].fasta
+					Thread.current[:flt] = filter_baits(seq_array[Thread.current[:j]].seq, [$options.fasta_score])
+				else
+					Thread.current[:flt] = filter_baits(seq_array[Thread.current[:j]].seq, seq.numeric_quality)
+				end
+				if Thread.current[:flt][0]
+					seq_array[Thread.current[:j]].seq = reversecomp(seq_array[Thread.current[:j]].seq) if $options.rc # Output reverse complemented baits if requested
+					seq_array[Thread.current[:j]].seq.gsub!("T","U") if $options.rna # RNA output handling
+					seq_array[Thread.current[:j]].seq.gsub!("t","u") if $options.rna # RNA output handling
+					Thread.current[:bait] = ">" + seq_array[Thread.current[:j]].header + "\n" + seq_array[Thread.current[:j]].seq
+					write_file("-filtered-baits.fa", Thread.current[:bait], true, i)
+					@kept[i] += 1
+				end
+				if $options.params
+					Thread.current[:param] = seq_array[Thread.current[:j]].header + "\t" + Thread.current[:flt][1]
+					write_file("-filtered-params.txt", Thread.current[:param], true, i)
 				end
 			end
 		}
 	end
 	threads.each { |thr| thr.join }
 	if $options.log
-		kept = outfilter.dup
-		kept.flatten!
-		kept.delete(nil)
-		$options.logtext += "TotalBaits\tFilteredBaits\tExcludedBaits\n" + seq_array.size.to_s + "\t" + kept.size.to_s + "\t" + (seq_array.size-kept.size).to_s + "\n\n"
+		kept = 0
+		for good in @kept
+			kept += good
+		end
+		write_file(".log.txt", "TotalBaits\tFilteredBaits\tExcludedBaits\n" + seq_array.size.to_s + "\t" + kept.to_s + "\t" + (seq_array.size-kept).to_s + "\n")
 	end
-	write_baits([""], outfilter, paramline)
 end

@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.0.4"
-# Michael G. Campana, 2017
+BAITSLIBVER = "1.1.0"
+# Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
-class Fa_Seq #container for fasta/fastq sequences
+class Fa_Seq #container for fasta/fastq sexquences
 	attr_accessor :header, :circular, :fasta, :seq, :qual, :qual_array, :bedstart, :locus
 	def initialize(header = "", circular = false, fasta = false, seq = "", qual = "", bedstart = 0, locus = "")
 		@header = header # Sequence header
@@ -333,48 +333,61 @@ def filter_baits(bait, qual = [0])
 		seqcomp = linguistic_complexity(bait)
 		keep = false if (seqcomp < $options.lc && $options.lc_filter)
 	end
-	return [keep, bait.length.to_s + "\t" + (gccont * 100.0).to_s + "\t" + melt.to_s + "\t" + maskcont.to_s + "\t" +  maxhomopoly.to_s + "\t" + seqcomp.to_s + "\t" + meanqual.to_s + "\t" + minqual.to_s + "\t" + bait.include?("N").to_s + "\t" + bait.include?("-").to_s + "\t" + keep.to_s + "\n"]
+	return [keep, bait.length.to_s + "\t" + (gccont * 100.0).to_s + "\t" + melt.to_s + "\t" + maskcont.to_s + "\t" +  maxhomopoly.to_s + "\t" + seqcomp.to_s + "\t" + meanqual.to_s + "\t" + minqual.to_s + "\t" + bait.include?("N").to_s + "\t" + bait.include?("-").to_s + "\t" + keep.to_s]
 end
 #-----------------------------------------------------------------------------------------------
-def write_baits(baitsout = [""], outfilter = [""], paramline = [""], coordline = [""], filtercoordline = [""], filestem = $options.outdir + "/" + $options.outprefix, rbedline = [""], rfilterline = [""])
-	[baitsout,outfilter,paramline,coordline,filtercoordline, rbedline, rfilterline].each do |output|
-		output.flatten!
-		output.delete(nil)
-		output.join("\n")
-	end
-	unless $options.algorithm == "checkbaits"
-		File.open(filestem + "-baits.fa", 'w') do |write|
-			write.puts baitsout
-		end
-	end
-	if $options.coords
-		File.open(filestem + "-baits.bed", 'w') do |write|
-			write.puts coordline
-		end
-	end
-	if $options.rbed
-		File.open(filestem + "-baits-relative.bed", 'w') do |write|
-			write.puts rbedline
-		end
+def setup_output
+	$options.filestem = $options.outdir + "/" + $options.outprefix
+	$options.default_files.push(".log.txt") if $options.log
+	unless $options.no_baits
+		$options.default_files.push("-baits.fa") unless $options.algorithm == "checkbaits"
+		$options.default_files.push("-baits.bed") if $options.coords
+		$options.default_files.push("-baits-relative.bed") if $options.rbed
 	end
 	if $options.filter
-		File.open(filestem + "-filtered-baits.fa", 'w') do |write|
-			write.puts outfilter
+		$options.default_files.push("-filtered-baits.fa")
+		$options.default_files.push("-filtered-params.txt") if $options.params
+		$options.default_files.push("-filtered-baits.bed") if $options.coords
+		$options.default_files.push("-filtered-baits-relative.bed") if $options.rbed
+	end
+	File.open($options.filestem + "-selected.vcf", 'w') if ($options.algorithm == "vcf2baits" and !$options.every)
+	if $options.algorithm == "stacks2baits"
+		File.open($options.filestem + "-betweenpops.tsv", 'w')
+		if $options.sort and $options.hwe
+			File.open($options.filestem + "-inhwe.tsv", 'w')
+			File.open($options.filestem + "-outhwe.tsv", 'w')	
+		elsif $options.sort
+			File.open($options.filestem + "-withinpops.tsv", 'w')
 		end
-		if $options.params
-			File.open(filestem + "-filtered-params.txt", 'w') do |write|
-				write.puts paramline
-			end
-		end
-		if $options.coords
-			File.open(filestem + "-filtered-baits.bed", 'w') do |write|
-				write.puts filtercoordline
-			end
-		end
-		if $options.rbed
-			File.open(filestem + "-filtered-baits-relative.bed", 'w') do |write|
-				write.puts rfilterline
-			end
+	end
+
+end
+#-----------------------------------------------------------------------------------------------
+def setup_temp(datasize, files = $options.default_files)
+	$options.threads > datasize ? $options.used_threads = datasize : $options.used_threads = $options.threads
+	splits = []
+	val = 0
+	crit = (datasize.to_f/$options.used_threads.to_f).ceil
+	while val < datasize
+		splits.push(val)
+		val += crit
+	end
+	splits.push(datasize)
+	return splits
+end
+#-----------------------------------------------------------------------------------------------
+def write_file(fileid, message, tmp = false, tmpfile = 0)
+	(tmp && tmpfile != 0) ? file = $options.filestem + ".tmp" + tmpfile.to_s + fileid : file = $options.filestem + fileid 
+	File.open(file, 'a') do |write|
+		write << message + "\n"
+	end
+end
+#-----------------------------------------------------------------------------------------------
+def cat_files(files = $options.default_files)
+	for file in files
+		for i in 1 ... $options.used_threads
+			system("cat #{$options.filestem + '.tmp' + i.to_s + file} >> #{$options.filestem + file}")
+			system("rm", $options.filestem + ".tmp" + i.to_s + file)
 		end
 	end
 end
@@ -412,7 +425,7 @@ def read_fasta(file) # Read fasta and fastq files
 					faseq.bedstart = bedstart
 					faseq.locus = locus[3..-1] unless locus.nil?
 				elsif qual and faseq.qual.length < faseq.seq.length # Test if quality line is complete
-					faseq.qual += line[0...-1] #Exclude final line break, allow multi-line fastq
+					faseq.qual << line[0...-1] #Exclude final line break, allow multi-line fastq
 			 	elsif line[0].chr == "@" # Start new sequence
 					qual = false
 					if !faseq.nil? # push previously completed sequence into array
@@ -442,7 +455,7 @@ def read_fasta(file) # Read fasta and fastq files
 				elsif line[0].chr == "+"
 					qual = true
 				else
-					faseq.seq += line[0...-1] #Exclude final line break, allow multi-line fasta/fastq
+					faseq.seq << line[0...-1] #Exclude final line break, allow multi-line fasta/fastq
 				end
 			end
 		end
@@ -461,7 +474,7 @@ def read_fasta(file) # Read fasta and fastq files
 	end
 	threads.each { |thr| thr.join }
 	if $options.log
-		$options.logtext += "SequencesRead\nType\tNumberCircular\tNumberLinear\tTotalNumber\tCircularBp\tLinearBp\tTotalBp\n"
+		logtext = "SequencesRead\nType\tNumberCircular\tNumberLinear\tTotalNumber\tCircularBp\tLinearBp\tTotalBp\n"
 		facirc = 0
 		falin = 0
 		facircbp = 0
@@ -485,9 +498,10 @@ def read_fasta(file) # Read fasta and fastq files
 				fqlinbp += seq.seq.length
 			end
 		end
-		$options.logtext += "FASTA\t" + facirc.to_s + "\t" + falin.to_s + "\t" + (facirc + falin).to_s + "\t" + facircbp.to_s + "\t" + falinbp.to_s + "\t" + (facircbp + falinbp).to_s + "\n"
-		$options.logtext += "FASTQ\t" + fqcirc.to_s + "\t" + fqlin.to_s + "\t" + (fqcirc + fqlin).to_s + "\t" + fqcircbp.to_s + "\t" + fqlinbp.to_s + "\t" + (fqcircbp + fqlinbp).to_s + "\n"
-		$options.logtext += "Total\t" + (facirc + fqcirc).to_s + "\t" + (falin + fqlin).to_s + "\t" + (facirc + falin + fqcirc + fqlin).to_s + "\t" + (facircbp + fqcircbp).to_s + "\t" + (falinbp + fqlinbp).to_s + "\t" + (facircbp + falinbp + fqcircbp + fqlinbp).to_s + "\n\n"
+		logtext << "FASTA\t" + facirc.to_s + "\t" + falin.to_s + "\t" + (facirc + falin).to_s + "\t" + facircbp.to_s + "\t" + falinbp.to_s + "\t" + (facircbp + falinbp).to_s + "\n"
+		logtext << "FASTQ\t" + fqcirc.to_s + "\t" + fqlin.to_s + "\t" + (fqcirc + fqlin).to_s + "\t" + fqcircbp.to_s + "\t" + fqlinbp.to_s + "\t" + (fqcircbp + fqlinbp).to_s + "\n"
+		logtext << "Total\t" + (facirc + fqcirc).to_s + "\t" + (falin + fqlin).to_s + "\t" + (facirc + falin + fqcirc + fqlin).to_s + "\t" + (facircbp + fqcircbp).to_s + "\t" + (falinbp + fqlinbp).to_s + "\t" + (facircbp + falinbp + fqcircbp + fqlinbp).to_s + "\n"
+		write_file(".log.txt", logtext)
 	end
 	return seq_array
 end
@@ -535,27 +549,26 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	else
 		selectsnps = snp_hash
 	end
-	if $options.log
-		totalvar = 0
-		selectvar = 0
+	 if $options.log
+		 totalvar = 0
+		 selectvar = 0
 		for chromo in snp_hash.keys
 			totalvar += snp_hash[chromo].size
 		end
-		$options.logtext += "Chromosome\tSelectedVariants\n"
+		write_file(".log.txt", "Chromosome\tSelectedVariants")
 	end
 	for chromo in selectsnps.keys
 		selectsnps[chromo].sort_by! { |snp| snp.snp }
 		if $options.log
 			selectvar += selectsnps[chromo].size
-			$options.logtext += chromo + "\t"
+			logtext = chromo + "\t"
 			for snp in selectsnps[chromo]
-				$options.logtext += snp.snp.to_s + ","
+				logtext << snp.snp.to_s + ","
 			end
-			$options.logtext = $options.logtext[0...-1] # Remove final comma
+			write_file(".log.txt",  logtext[0...-1]) # Remove final comma
 		end
 	end
-	$options.logtext += "\n\nNumberTotalVariants\tNumberSelectedVariants\n" if $options.log
-	$options.logtext += totalvar.to_s + "\t" + selectvar.to_s + "\n\n" if $options.log
+	write_file(".log.txt", "\nNumberTotalVariants\tNumberSelectedVariants\n" + totalvar.to_s + "\t" + selectvar.to_s + "\n" ) if $options.log
 	return selectsnps
 end
 #-----------------------------------------------------------------------------------------------
@@ -704,7 +717,7 @@ def snp_to_baits(selectedsnps, refseq)
 				vlogs[1].push(logs[i][l][3])
 			end
 		end
-		$options.logtext += "\nTotalBaitCoverage(√ó)\tFilteredBaitCoverage(√ó)\n"
+		$options.logtext += "\nTotalBaitCoverage(×)\tFilteredBaitCoverage(×)\n"
 		if $options.filter
 			$options.logtext += mean(vlogs[0]).to_s + "\t" + mean(vlogs[1]).to_s + "\n"
 		else
@@ -720,81 +733,81 @@ def get_command_line # Get command line for summary output
 	case $options.algorithm
 	when "vcf2baits", "stacks2baits"
 		if $options.every
-			cmdline += " -e"
-			cmdline += " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
+			cmdline << " -e"
+			cmdline << " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
 		else
-			cmdline += " -t" + $options.totalsnps.to_s + " -d" + $options.distance.to_s
+			cmdline << " -t" + $options.totalsnps.to_s + " -d" + $options.distance.to_s
 			if $options.scale
-				cmdline += " -j"
+				cmdline << " -j"
 			else
-				cmdline += " -m" + $options.maxsnps.to_s
+				cmdline << " -m" + $options.maxsnps.to_s
 			end
 			if $options.no_baits
-				cmdline += " -p"
+				cmdline << " -p"
 			else
-				cmdline += " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
+				cmdline << " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
 			end
 		end
-		cmdline += " -r " + $options.refseq unless $options.no_baits
-		cmdline += " -a" if $options.alt_alleles
-		cmdline += " -V" + $options.varqual.to_s if $options.varqual_filter
-		cmdline += " -S" if $options.sort
-		cmdline += " -H -A" + $options.alpha.to_s if $options.hwe
+		cmdline << " -r " + $options.refseq unless $options.no_baits
+		cmdline << " -a" if $options.alt_alleles
+		cmdline << " -V" + $options.varqual.to_s if $options.varqual_filter
+		cmdline << " -S" if $options.sort
+		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe
 	else
 		if $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits"
-			cmdline += " -r " + $options.refseq
-			cmdline += " -P" + $options.pad.to_s
+			cmdline << " -r " + $options.refseq
+			cmdline << " -P" + $options.pad.to_s
 		end
-		cmdline += " -L" + $options.baitlength.to_s
-		cmdline += " -O" + $options.tileoffset.to_s unless $options.algorithm == "checkbaits"
+		cmdline << " -L" + $options.baitlength.to_s
+		cmdline << " -O" + $options.tileoffset.to_s unless $options.algorithm == "checkbaits"
 		if $options.algorithm == "pyrad2baits"
-			cmdline += " -I" + $options.minind.to_s
-			cmdline += " -W " + $options.strategy
+			cmdline << " -I" + $options.minind.to_s
+			cmdline << " -W " + $options.strategy
 		end
 		if $options.algorithm == "aln2baits" or ($options.algorithm == "pyrad2baits" && $options.strategy == "alignment")
-			cmdline += " -H " + $options.haplodef
+			cmdline << " -H " + $options.haplodef
 		elsif $options.algorithm == "annot2baits"
-			cmdline += " -U "
+			cmdline << " -U "
 			for feature in $options.features
-				cmdline += feature + ","
+				cmdline << feature + ","
 			end
 			cmdline = cmdline[0...-1] # Remove final , from feature list
 		end
 		if $options.algorithm == "pyrad2baits" && $options.strategy != "alignment"
-			cmdline += " --uncollapsedref" if $options.uncollapsed_ref
-			cmdline += " -t" + $options.totalsnps.to_s + " -m" + $options.maxsnps.to_s + " -d" + $options.distance.to_s + " -k" + $options.tiledepth.to_s
-			cmdline += " -a" if $options.alt_alleles
+			cmdline << " --uncollapsedref" if $options.uncollapsed_ref
+			cmdline << " -t" + $options.totalsnps.to_s + " -m" + $options.maxsnps.to_s + " -d" + $options.distance.to_s + " -k" + $options.tiledepth.to_s
+			cmdline << " -a" if $options.alt_alleles
 		end
 	end
-	cmdline += " -o " + $options.outprefix
-	cmdline += " -Z " + $options.outdir
-	cmdline += " -l" if $options.log
-	cmdline += " -B" if $options.coords
-	cmdline += " -E" if $options.rbed
-	cmdline += " --shuffle" if $options.shuffle
-	cmdline += " -D" if $options.ncbi
-	cmdline += " -Y" if $options.rna
-	cmdline += " -R" if $options.rc
-	cmdline += " -G " + $options.gaps
-	cmdline += " -X" + $options.threads.to_s
+	cmdline << " -o " + $options.outprefix
+	cmdline << " -Z " + $options.outdir
+	cmdline << " -l" if $options.log
+	cmdline << " -B" if $options.coords
+	cmdline << " -E" if $options.rbed
+	cmdline << " --shuffle" if $options.shuffle
+	cmdline << " -D" if $options.ncbi
+	cmdline << " -Y" if $options.rna
+	cmdline << " -R" if $options.rc
+	cmdline << " -G " + $options.gaps
+	cmdline << " -X" + $options.threads.to_s
 	# Generate filtration options
 	fltline = ""
-	fltline += " -w" if $options.params
-	fltline += " -c" if $options.completebait
-	fltline += " -N" if $options.no_Ns
-	fltline += " -C" if $options.collapse_ambiguities
-	fltline += " -n" + $options.mingc.to_s if $options.mingc_filter
-	fltline += " -x" + $options.maxgc.to_s if $options.maxgc_filter
-	fltline += " -q" + $options.mint.to_s if $options.mint_filter
-	fltline += " -z" + $options.maxt.to_s if $options.maxt_filter
+	fltline << " -w" if $options.params
+	fltline << " -c" if $options.completebait
+	fltline << " -N" if $options.no_Ns
+	fltline << " -C" if $options.collapse_ambiguities
+	fltline << " -n" + $options.mingc.to_s if $options.mingc_filter
+	fltline << " -x" + $options.maxgc.to_s if $options.maxgc_filter
+	fltline << " -q" + $options.mint.to_s if $options.mint_filter
+	fltline << " -z" + $options.maxt.to_s if $options.maxt_filter
 	if $options.mint_filter or $options.maxt_filter
-		fltline += " -T " + $options.bait_type + " -s" + $options.na.to_s + " -f" + $options.formamide.to_s
+		fltline << " -T " + $options.bait_type + " -s" + $options.na.to_s + " -f" + $options.formamide.to_s
 	end
-	fltline += " -K" + $options.maxmask.to_s if $options.maxmask_filter
-	fltline += " -J" + $options.maxhomopoly.to_s if $options.maxhomopoly_filter
-	fltline += " -y" + $options.lc.to_s if $options.lc_filter
-	fltline += " -Q" + $options.meanqual.to_s if $options.meanqual_filter
-	fltline += " -M" + $options.minqual.to_s if $options.minqual_filter
-	fltline += " -F" + $options.fasta_score.to_s if ($options.meanqual_filter or $options.minqual_filter)
+	fltline << " -K" + $options.maxmask.to_s if $options.maxmask_filter
+	fltline << " -J" + $options.maxhomopoly.to_s if $options.maxhomopoly_filter
+	fltline << " -y" + $options.lc.to_s if $options.lc_filter
+	fltline << " -Q" + $options.meanqual.to_s if $options.meanqual_filter
+	fltline << " -M" + $options.minqual.to_s if $options.minqual_filter
+	fltline << " -F" + $options.fasta_score.to_s if ($options.meanqual_filter or $options.minqual_filter)
 	return [cmdline,fltline]
 end

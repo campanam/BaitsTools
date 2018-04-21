@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.0.4"
-# Michael G. Campana, 2017
+BAITSTOOLSGUI = "1.1.0"
+# Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -18,76 +18,76 @@ def start_baitstools
 	case $options.algorithm
 	when "vcf2baits", "stacks2baits"
 		if $options.every == 1
-			cmdline += " -e"
-			cmdline += " -L" + $options.baitlength + " -O" + $options.tileoffset + " -b" + $options.lenbef + " -k" + $options.tiledepth
+			cmdline << " -e"
+			cmdline << " -L" + $options.baitlength + " -O" + $options.tileoffset + " -b" + $options.lenbef + " -k" + $options.tiledepth
 		else
-			cmdline += " -t" + $options.totalsnps + " -d" + $options.distance
+			cmdline << " -t" + $options.totalsnps + " -d" + $options.distance
 			if $options.scale == 1
-				cmdline += " -j"
+				cmdline << " -j"
 			else
-				cmdline += " -m" + $options.maxsnps
+				cmdline << " -m" + $options.maxsnps
 			end
 			if $options.no_baits == 1
-				cmdline += " -p"
+				cmdline << " -p"
 			else
-				cmdline += " -L" + $options.baitlength + " -O" + $options.tileoffset + " -b" + $options.lenbef + " -k" + $options.tiledepth
+				cmdline << " -L" + $options.baitlength + " -O" + $options.tileoffset + " -b" + $options.lenbef + " -k" + $options.tiledepth
 			end
 		end
-		cmdline += " -r " + $options.refseq unless $options.no_baits == 1
-		cmdline += " -a" if $options.alt_alleles == 1
-		cmdline += " -V " + $options.varqual if $options.varqual_filter == 1
-		cmdline += " -S" if $options.sort == 1
-		cmdline += " -H -A" + $options.alpha.to_s if $options.hwe == 1
+		cmdline << " -r " + $options.refseq unless $options.no_baits == 1
+		cmdline << " -a" if $options.alt_alleles == 1
+		cmdline << " -V " + $options.varqual if $options.varqual_filter == 1
+		cmdline << " -S" if $options.sort == 1
+		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe == 1
 	else
 		if $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits"
-			cmdline += " -r " + $options.refseq
-			cmdline += " -P" + $options.pad
+			cmdline << " -r " + $options.refseq
+			cmdline << " -P" + $options.pad
 		end
-		cmdline += " -L" + $options.baitlength
-		cmdline += " -O" + $options.tileoffset unless $options.algorithm == "checkbaits"
+		cmdline << " -L" + $options.baitlength
+		cmdline << " -O" + $options.tileoffset unless $options.algorithm == "checkbaits"
 		if $options.algorithm == "pyrad2baits"
-			cmdline += " -I" + $options.minind
-			cmdline += " -W " + $options.strategy
+			cmdline << " -I" + $options.minind
+			cmdline << " -W " + $options.strategy
 		end
 		if $options.algorithm == "aln2baits" or ($options.algorithm == "pyrad2baits" && $options.strategy == "alignment")
-			cmdline += " -H " + $options.haplodef
+			cmdline << " -H " + $options.haplodef
 		elsif $options.algorithm == "annot2baits"
-			cmdline += " -U " + $options.features.value.upcase
+			cmdline << " -U " + $options.features.value.upcase
 		end
 		if $options.algorithm == "pyrad2baits" && $options.strategy != "alignment"
-			cmdline += " --uncollapsedref" if $options.uncollapsed_ref == 1
-			cmdline += " -t" + $options.totalsnps + " -m" + $options.maxsnps + " -d" + $options.distance + " -k" + $options.tiledepth
-			cmdline += " -a" if $options.alt_alleles
+			cmdline << " --uncollapsedref" if $options.uncollapsed_ref == 1
+			cmdline << " -t" + $options.totalsnps + " -m" + $options.maxsnps + " -d" + $options.distance + " -k" + $options.tiledepth
+			cmdline << " -a" if $options.alt_alleles
 		end
 	end
-	cmdline += " -o " + $options.outprefix
-	cmdline += " -Z " + $options.outdir
-	cmdline += " -l" if $options.log == 1
-	cmdline += " -B" if $options.coords == 1
-	cmdline += " -E" if $options.rbed == 1
-	cmdline += " --shuffle" if $options.shuffle == 1
-	cmdline += " -D" if $options.ncbi == 1
-	cmdline += " -Y" if $options.rna == 1
-	cmdline += " -G " + $options.gaps
-	cmdline += " -X" + $options.threads
+	cmdline << " -o " + $options.outprefix
+	cmdline << " -Z " + $options.outdir
+	cmdline << " -l" if $options.log == 1
+	cmdline << " -B" if $options.coords == 1
+	cmdline << " -E" if $options.rbed == 1
+	cmdline << " --shuffle" if $options.shuffle == 1
+	cmdline << " -D" if $options.ncbi == 1
+	cmdline << " -Y" if $options.rna == 1
+	cmdline << " -G " + $options.gaps
+	cmdline << " -X" + $options.threads
 	# Generate filtration options
-	cmdline += " -w" if $options.params == 1
-	cmdline += " -c" if $options.completebait == 1
-	cmdline += " -N" if $options.no_Ns == 1
-	cmdline += " -C" if $options.collapse_ambiguities == 1
-	cmdline += " -n" + $options.mingc if $options.mingc_filter == 1
-	cmdline += " -x" + $options.maxgc if $options.maxgc_filter == 1
-	cmdline += " -q" + $options.mint if $options.mint_filter == 1
-	cmdline += " -z" + $options.maxt if $options.maxt_filter == 1
+	cmdline << " -w" if $options.params == 1
+	cmdline << " -c" if $options.completebait == 1
+	cmdline << " -N" if $options.no_Ns == 1
+	cmdline << " -C" if $options.collapse_ambiguities == 1
+	cmdline << " -n" + $options.mingc if $options.mingc_filter == 1
+	cmdline << " -x" + $options.maxgc if $options.maxgc_filter == 1
+	cmdline << " -q" + $options.mint if $options.mint_filter == 1
+	cmdline << " -z" + $options.maxt if $options.maxt_filter == 1
 	if $options.mint_filter == 1 or $options.maxt_filter == 1
-		cmdline += " -T " + $options.bait_type + " -s" + $options.na + " -f" + $options.formamide
+		cmdline << " -T " + $options.bait_type + " -s" + $options.na + " -f" + $options.formamide
 	end
-	cmdline += " -K" + $options.maxmask if $options.maxmask_filter == 1
-	cmdline += " -J" + $options.maxhomopoly if $options.maxhomopoly_filter == 1
-	cmdline += " -y" + $options.lc if $options.lc_filter == 1
-	cmdline += " -Q" + $options.meanqual if $options.meanqual_filter == 1
-	cmdline += " -M" + $options.minqual if $options.minqual_filter == 1
-	cmdline += " -F" + $options.fasta_score if ($options.meanqual_filter == 1 or $options.minqual_filter == 1)
+	cmdline << " -K" + $options.maxmask if $options.maxmask_filter == 1
+	cmdline << " -J" + $options.maxhomopoly if $options.maxhomopoly_filter == 1
+	cmdline << " -y" + $options.lc if $options.lc_filter == 1
+	cmdline << " -Q" + $options.meanqual if $options.meanqual_filter == 1
+	cmdline << " -M" + $options.minqual if $options.minqual_filter == 1
+	cmdline << " -F" + $options.fasta_score if ($options.meanqual_filter == 1 or $options.minqual_filter == 1)
 	Tk::messageBox :message => 'Starting BaitsTools with the command: ' + cmdline
 	system(cmdline)
 	exit
