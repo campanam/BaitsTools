@@ -385,7 +385,7 @@ def cat_files(files = $options.default_files)
 	for file in files
 		for i in 1 ... $options.used_threads
 			tmpfile = $options.filestem + '.tmp' + i.to_s + file
-			if File.exist(tmpfile)
+			if File.exist?(tmpfile)
 				system("cat #{tmpfile} >> #{$options.filestem + file}")
 				system("rm", tmpfile)
 			end
