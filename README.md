@@ -44,7 +44,7 @@ In a terminal window, execute the following commands:
 
 Optionally, the Ruby files (.rb files) can be placed within the users $PATH so that they can be executed from any location. Depending on your operating system, you may need to change the shebang lines in the scripts (first lines starting with #!) to specify the path of your Ruby executable.  
 
-You can test your BaitsTools installation by running the tutorials included in the example data. The archive "tutorial.tgz" include the expected output of each tutorial. Note that vcf2baits and stacks2baits output will vary slightly due to the random number generator.  
+You can test your BaitsTools installation by running the tutorials included in the example data. The archive "tutorial.tgz" includes the expected output of each tutorial. Note that vcf2baits and stacks2baits output will vary slightly due to the random number generator.  
 
 ### GUI Installation  
 The GUI requires the Ruby gem 'tk' (typically installed using `gem install tk` on most UNIX-like operating systems with the appropriate RubyGems package installed). macOS requires the [Ruby Version Manager](https://get.rvm.io) to manually install Ruby gems. The GUI requires BaitsTools Ruby files to be in your $PATH. Please note that the GUI has only been tested on macOS and may not work well on other operating systems. Due to its requirement of external dependencies, the GUI can be difficult to install. I have included instructions for automatic and manual installation on macOS. Please report any encountered bugs to <campanam@si.edu>.  
