@@ -21,7 +21,7 @@ def checkbaits
 	$options.threads.times do |i|
 		@kept.push(0)
 		threads[i] = Thread.new {
-			for Thread.current[:j] in in @splits[i] ... @splits[i+1]
+			for Thread.current[:j] in @splits[i] ... @splits[i+1]
 				if seq_array[Thread.current[:j]].fasta
 					Thread.current[:flt] = filter_baits(seq_array[Thread.current[:j]].seq, [$options.fasta_score])
 				else
