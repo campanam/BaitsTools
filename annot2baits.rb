@@ -17,7 +17,7 @@ def annot2baits
 	# Read annotation file
 	print "** Reading annotation file **\n"
 	regions = [] #Array to hold generated fasta sequences
-	write_files(".log.txt", "ExtractedRegions\nRegion\tStart\tEnd\tLength") if $options.log
+	write_file(".log.txt", "ExtractedRegions\nRegion\tStart\tEnd\tLength") if $options.log
 	totallength = 0
 	File.open($options.infile, 'r') do |annot|
 		while line = annot.gets
@@ -42,7 +42,7 @@ def annot2baits
 						seq.bedstart = seqst 
 						regions.push(seq)
 						if $options.log
-							write_files(".log.txt", seq.header + "\t" + (seqst+1).to_s + "\t" + (seqend+1).to_s + "\t" + seq.seq.length.to_s)
+							write_file(".log.txt", seq.header + "\t" + (seqst+1).to_s + "\t" + (seqend+1).to_s + "\t" + seq.seq.length.to_s)
 							totallength += seq.seq.length
 						end
 					end
@@ -52,9 +52,9 @@ def annot2baits
 	end
 	#Write fasta sequences from the files
 	for reg in regions
-		write_files("-regions.fa", ">" + reg.header + "\n" + reg.seq)
+		write_file("-regions.fa", ">" + reg.header + "\n" + reg.seq)
 	end
-	write_files(".log.txt", "\nTotalRegions\tTotalRegionLength\n" + regions.size.to_s + "\t" + totallength.to_s + "\n") if $options.log
+	write_file(".log.txt", "\nTotalRegions\tTotalRegionLength\n" + regions.size.to_s + "\t" + totallength.to_s + "\n") if $options.log
 	#Generate probes using methods from tilebaits
 	tilebaits(regions)
 end
