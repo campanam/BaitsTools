@@ -351,18 +351,17 @@ def setup_output
 		$options.default_files.push("-filtered-baits-relative.bed") if $options.rbed
 	end
 	if $options.algorithm == "stacks2baits"
-		File.open($options.filestem + "-betweenpops.tsv", 'w')
+		$options.default_files.push("-betweenpops.tsv")
 		if $options.sort and $options.hwe
-			File.open($options.filestem + "-inhwe.tsv", 'w')
-			File.open($options.filestem + "-outhwe.tsv", 'w')	
+			$options.default_files.push("-inhwe.tsv")
+			$options.default_files.push("-outhwe.tsv")	
 		elsif $options.sort
-			File.open($options.filestem + "-withinpops.tsv", 'w')
+			$options.default_files.push("-withinpops.tsv")
 		end
 	end
-
 end
 #-----------------------------------------------------------------------------------------------
-def setup_temp(datasize, files = $options.default_files)
+def setup_temp(datasize)
 	$options.threads > datasize ? $options.used_threads = datasize : $options.used_threads = $options.threads
 	splits = []
 	val = 0
@@ -385,8 +384,11 @@ end
 def cat_files(files = $options.default_files)
 	for file in files
 		for i in 1 ... $options.used_threads
-			system("cat #{$options.filestem + '.tmp' + i.to_s + file} >> #{$options.filestem + file}")
-			system("rm", $options.filestem + ".tmp" + i.to_s + file)
+			tmpfile = $options.filestem + '.tmp' + i.to_s + file
+			if File.exist(tmpfile)
+				system("cat #{tmpfile} >> #{$options.filestem + file}")
+				system("rm", tmpfile)
+			end
 		end
 	end
 end
@@ -571,7 +573,7 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	return selectsnps
 end
 #-----------------------------------------------------------------------------------------------
-def snp_to_baits(selectedsnps, refseq)
+def snp_to_baits(selectedsnps, refseq, filext = "")
 	if $options.params
 		paramline = "Chromosome:Coordinates\tSNP\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept"
 		write_file("-filtered-params.txt", paramline)
@@ -661,14 +663,14 @@ def snp_to_baits(selectedsnps, refseq)
 								Thread.current[:seq] = ">" + Thread.current[:rseq_var].header + "_site" + Thread.current[:snp].snp.to_s + "\n" + Thread.current[:prb]
 								Thread.current[:be4] = Thread.current[:rseq_var].seq.length + Thread.current[:be4] if Thread.current[:be4] < 1
 								Thread.current[:coord] = Thread.current[:rseq_var].header + "\t" + (Thread.current[:be4]-1).to_s + "\t" + Thread.current[:after].to_s
-								write_file("-baits.fa", Thread.current[:seq], true, i)
+								write_file(filext + "-baits.fa", Thread.current[:seq], true, i)
 								Thread.current[:totalbaits] += 1 if $options.log
-								write_file("-baits.bed", Thread.current[:coord], true, i) if $options.coords
+								write_file(filext + "-baits.bed", Thread.current[:coord], true, i) if $options.coords
 								if $options.filter
 									Thread.current[:parameters] = filter_baits(Thread.current[:prb], Thread.current[:qual]) # U should not affect filtration
 									if Thread.current[:parameters][0]
-										write_file("-filtered-baits.fa", Thread.current[:seq], true, i)
-										write_file("-filtered-baits.bed", Thread.current[:coord], true, i) if $options.coords
+										write_file(filext + "-filtered-baits.fa", Thread.current[:seq], true, i)
+										write_file(filext + "-filtered-baits.bed", Thread.current[:coord], true, i) if $options.coords
 										Thread.current[:retainedbaits] += 1 if $options.log
 										if filteredsnps[refseq[Thread.current[:j]].header].nil?
 											filteredsnps[refseq[Thread.current[:j]].header] = [Thread.current[:snp]]
@@ -679,7 +681,7 @@ def snp_to_baits(selectedsnps, refseq)
 									end
 									if $options.params
 										Thread.current[:param] = Thread.current[:rseq_var].header + ":" + Thread.current[:be4].to_s + "-" + Thread.current[:after].to_s + "\t" + Thread.current[:snp].snp.to_s + "\t" + Thread.current[:parameters][1]
-										write_file("-filtered-params.txt", Thread.current[:param], true, i)
+										write_file(filext + "-filtered-params.txt", Thread.current[:param], true, i)
 									end
 								end
 							end
@@ -709,7 +711,7 @@ def snp_to_baits(selectedsnps, refseq)
 				vlogs[1].push(logs[i][l][3])
 			end
 		end
-		write_file(".log.txt", "\nTotalBaitCoverage(×)\tFilteredBaitCoverage(×)")
+		write_file(".log.txt", "\nTotalBaitCoverage(x)\tFilteredBaitCoverage(x)")
 		if $options.filter
 			write_file(".log.txt", mean(vlogs[0]).to_s + "\t" + mean(vlogs[1]).to_s)
 		else

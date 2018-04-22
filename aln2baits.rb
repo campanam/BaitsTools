@@ -193,7 +193,7 @@ def aln2baits(aln)
 			vlogs[2].push(logs[i][3])
 			vlogs[3].push(logs[i][4])
 		end
-		write_file(".log.txt", "\nAlignmentLength\tTotalBaitCoverage(×)\tFilteredBaitCoverage(×)")
+		write_file(".log.txt", "\nAlignmentLength\tTotalBaitCoverage(x)\tFilteredBaitCoverage(x)")
 		if $options.filter
 			write_file(".log.txt", (vlogs[1].max-vlogs[0].min+1).to_s + "\t" + mean(vlogs[2]).to_s + "\t" + mean(vlogs[3]).to_s)
 		else

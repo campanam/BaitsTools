@@ -17,7 +17,7 @@ def tilebaits(seq_array)
 		seq_array = read_fasta(seq_array)
 	end
 	if $options.log
-		logtext = "BaitCoverage\nSequence\tLength\tNumberBaits\tRetainedBaits\tExcludedBaits\tTotalBaitCoverage(×)\tFilteredBaitCoverage(×)"
+		logtext = "BaitCoverage\nSequence\tLength\tNumberBaits\tRetainedBaits\tExcludedBaits\tTotalBaitCoverage(x)\tFilteredBaitCoverage(x)"
 		write_file(".log.txt", logtext)
 	end
 	@splits = setup_temp(seq_array.size)
