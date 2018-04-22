@@ -45,7 +45,7 @@ def bed2baits
 				seq.bedstart = seqst
 				regions.push(seq)
 				if $options.log
-					write_files(".log.txt", seq.header + "\t" + (seqst+1).to_s + "\t" + seqend.to_s + "\t" + seq.seq.length.to_s)
+					write_file(".log.txt", seq.header + "\t" + (seqst+1).to_s + "\t" + seqend.to_s + "\t" + seq.seq.length.to_s)
 					totallength += seq.seq.length
 				end
 			else
