@@ -142,6 +142,7 @@ def aln2baits(aln)
 	$options.threads.times do |i|
 		threads[i] = Thread.new {
 			for Thread.current[:j] in @splits[i] ... @splits[i+1]
+				Thread.current[:filtnum] = 0
 				for Thread.current[:hapno] in 1..@windows[Thread.current[:j]].haplotypes.size
 					Thread.current[:rng] = (@windows[Thread.current[:j]].seqstart+1).to_s+"-"+(@windows[Thread.current[:j]].seqend+1).to_s # Adjust for 1-based indexing
 					@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1] = reversecomp(@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]) if $options.rc  # Output reverse complemented baits if requested
@@ -159,6 +160,7 @@ def aln2baits(aln)
 					if $options.filter
 						Thread.current[:flt] = filter_baits(@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]) # U won't affect filtration
 						if Thread.current[:flt][0]
+							Thread.current[:filtnum] += 1
 							write_file("-filtered-baits.fa", Thread.current[:bait], true, i)
 							write_file("-filtered-baits.bed", Thread.current[:coord], true, i) if $options.coords
 							write_file("-filtered-baits-relative.bed", Thread.current[:rbed], true, i) if $options.rbed
@@ -172,7 +174,7 @@ def aln2baits(aln)
 				if $options.log
 					logs[Thread.current[:j]] = [@windows[Thread.current[:j]].locus,@windows[Thread.current[:j]].seqstart+1, @windows[Thread.current[:j]].seqend+1, @windows[Thread.current[:j]].haplotypes.size]
 					if $options.filter
-						logs[Thread.current[:j]].push(outfilter[Thread.current[:j]].size, @windows[Thread.current[:j]].haplotypes.size - outfilter[Thread.current[:j]].size)
+						logs[Thread.current[:j]].push(Thread.current[:filtnum], @windows[Thread.current[:j]].haplotypes.size - Thread.current[:filtnum])
 					else
 						logs[Thread.current[:j]].push(@windows[Thread.current[:j]].haplotypes.size, "NA")
 					end
