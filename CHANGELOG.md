@@ -63,7 +63,7 @@ Option 'no_indels' moved to general filtration option (now -I rather than -N)
 FASTA headers of generated baits now match the original source sequence  
 Corrected double-tabbed output in parameters output  
 
-## Version 0.1  
+### Version 0.1  
 Preliminary script to generate weighted bait set from a fasta alignment  
 
 ## annot2baits  
@@ -499,7 +499,7 @@ Outputs probes based on reference sequence
 Now bed2baits  
 
 ## filter_probes  
-Became baitslib, now incorporated into baitstools  
+Incorporated into baitslib  
 
 ## select_snps  
 Now vcf2baits  
@@ -508,4 +508,4 @@ Now vcf2baits
 Now vcf2baits  
 
 ## tile_probes
-Now tilebaits
+Now tilebaits  
