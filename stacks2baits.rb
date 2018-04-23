@@ -17,37 +17,25 @@ class Popvar # Population-specific SNP data object
 		@line = line # Original SNP descriptor line
 	end
 	def monomorphic? # Determine if SNP is monomorphic within population
-		if (@pfreq == 1 or @pfreq == 0)
-			return true
-		else
-			return false
-		end
+		(@pfreq == 1.0 or @pfreq == 0.0) ? return true: return false
 	end
 	def in_hwe? # Return whether variant is in HWE for a population
-		qfreq = 1 - @pfreq # Calculate minor allele frequency
-		p2exp = @pfreq ** 2 * @no_ind  # Calculate expected major allele homozygotes
-		q2exp = qfreq ** 2 * @no_ind # Calculate expected minor allele homozygotes
-		pqexp = (2 * @pfreq * qfreq) * @no_ind # Calculate expected heterozygotes
-		pqobs = (@hetobs * @no_ind).to_i
-		p2obs = ((@pfreq - @hetobs/2) * @no_ind).to_i # Calculate observed major alleles in homozygotes
-		q2obs = ((qfreq - @hetobs/2) * @no_ind).to_i # Calculate observed minor alleles in homozygotes
-		hwe = ((p2obs - p2exp) ** 2)/p2exp + ((pqobs - pqexp) ** 2)/pqexp + ((q2obs - q2exp) ** 2)/q2exp # Calculate chi-square statistic
-		case $options.alpha
-		when 0.1
-			alpha = 2.706
-		when 0.05
-			alpha = 3.841
-		when 0.025
-			alpha = 5.024
-		when 0.01
-			alpha = 6.635
-		end
-		if hwe < alpha # Compare to alpha 0.05
-			return true
-		else
-			return false
-		end
+		qfreq = 1.0 - @pfreq # Calculate minor allele frequency
+		p2exp = @pfreq ** 2.0 * @no_ind  # Calculate expected major allele homozygotes
+		q2exp = qfreq ** 2.0 * @no_ind # Calculate expected minor allele homozygotes
+		pqexp = (2.0 * @pfreq * qfreq) * @no_ind # Calculate expected heterozygotes
+		pqobs = @hetobs * @no_ind
+		p2obs = (@pfreq - @hetobs/2.0) * @no_ind # Calculate observed major alleles in homozygotes
+		q2obs = (qfreq - @hetobs/2.0) * @no_ind # Calculate observed minor alleles in homozygotes
+		hwe = ((p2obs - p2exp) ** 2.0)/p2exp + ((pqobs - pqexp) ** 2.0)/pqexp + ((q2obs - q2exp) ** 2.0)/q2exp # Calculate chi-square statistic
+		(1.0 - chi_cum_prob(hwe) < $options.alpha) ? return true : return false # Compare to alpha 0.05
 	end
+end
+#-----------------------------------------------------------------------------------------------
+def chi_cum_prob(test) # This calculates under chi distribution cumulative probability distribution special case of df = 1
+	num = Math.sqrt(Math::PI) * Math.erf(Math.sqrt(test/2.0))
+	denom = Math.sqrt(Math::PI)
+	return num/denom
 end
 #-----------------------------------------------------------------------------------------------
 def write_stacks(header, snps, tag) # Method to write stacks output since repeating over and over
@@ -75,7 +63,7 @@ def stacks2baits
 				pop = split_line[5] # Population
 				alleles = [split_line[6], split_line[7]] # Get major, minor alleles
 				alleles.delete("-") # Remove non-alleles, separate command to avoid assigning alleles as "-"
-				no_ind = split_line[8].to_i # No. of individuals
+				no_ind = split_line[8].to_f # No. of individuals
 				pfreq = split_line[9].to_f # Major allele frequency
 				hetobs = split_line[10].to_f # Observed heterozygosity
 				if stacksvars.include?(locus)

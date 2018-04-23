@@ -432,7 +432,7 @@ def sort_windows
 		variable $options.hwe
 		text "Sort by HWE"
 		place('x' => 240, 'y' => 450)
-		command '$alpha.state == "disabled" ? $alpha.state = $alphaselect.state = "normal" : $alpha.state = $alphaselect.state = "disabled"'
+		command '$alpha.state == "disabled" ? $alpha.state = $alphaentry.state = "normal" : $alpha.state = $alphaentry.state = "disabled"'
 	end
 	$alpha = TkLabel.new($root) do
 		text 'Alpha'
@@ -440,25 +440,24 @@ def sort_windows
 		place('x' => 440, 'y' => 450)
 		pady 10
 	end
-	$alphaselect = Tk::Tile::Combobox.new($root) do
+	$alphaentry = TkEntry.new($root) do
 		textvariable $options.alpha
-		values ["0.10", "0.05", "0.025", "0.01"]
-		state "readonly"
-		width 10
-		height 3
+		borderwidth 5
+		font TkFont.new('times 12')
 		place('x' => 500, 'y' => 460)
+		width 10
 	end
-	$widgets.push(sort, $hwe, $alpha, $alphaselect)
+	$widgets.push(sort, $hwe, $alpha, $alphaentry)
 	configure_buttons([sort, $hwe])
 	$hwe.state = "disabled" if $options.sort == 0
-	$alpha.state = $alphaselect.state = "disabled" if $options.hwe == 0
+	$alpha.state = $alphaentry.state = "disabled" if $options.hwe == 0
 end
 #-----------------------------------------------------------------------------------------------
 def update_sort
 	if $hwe.state == "disabled"
 		$hwe.state = "normal"
 	else 
-		$hwe.state = $alpha.state = $alphaselect.state = "disabled"
+		$hwe.state = $alpha.state = $alphaentry.state = "disabled"
 		$options.hwe.value = 0
 	end
 end
@@ -1078,6 +1077,8 @@ def go_forward
 			Tk::messageBox :message => 'Tiling depth cannot be greater than bait length/tiling offset ratio.'
 		elsif $options.tiledepth.to_i < 1
 			Tk::messageBox :message => 'Tiling depth cannot be less than 1.'
+		elsif ($options.alpha.to_f < 0.0 or $options.alpha.to_f > 1.0) && $options.hwe == 1
+			Tk::messageBox :message => 'Alpha must be between 0.0 and 1.0.'
 		else
 			qc_window
 		end

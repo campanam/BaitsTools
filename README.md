@@ -211,7 +211,7 @@ stacks2baits selects variants and generates baits from a Stacks population summa
 `-i, --input [FILE]`: Input Stacks summary TSV file name. Include the path to the file if not in the current directory.  
 `-S, --sort`: Sort variants according to variation between or within populations
 `-H, --hwe`: Sort variants within populations according to whether they conform to the expectations of Hardy-Weinberg Equilibrium (HWE). This option implies `-S`.  
-`-A, --alpha [VALUE]`: Alpha value for the the HWE chi-square test (one of `0.10`,`0.05`, `0.025`, or `0.01`). Default is 0.05.  
+`-A, --alpha [VALUE]`: Alpha value for the the HWE chi-square test. Default is 0.05.  
 `-t, --totalvars [VALUE]`: Total requested variants within each sorted category. For example, without sorting, choosing `-t 20000` will choose a maximum of 20,000 total variants. By choosing to sort variants by within/between populations, it would return a maximum of 20,000 between-population variants and 20,000 within-population variants. Default is 30,000.  
 `-j, --scale`: Scale the maximum number of variants per contig by that contig's length. Overrides the `-m` argument.  
 `-m, --maxsnps [VALUE]`: Maximum number of variants per contig. Default is 2.  

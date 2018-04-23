@@ -152,6 +152,7 @@ filter_probes definition removed into separate script for access by other script
 ### Version 1.1.0  
 File start called with setup_output  
 Reworking to use new temp file methods  
+HWE alpha no longer hard-coded  
 
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
@@ -263,6 +264,7 @@ Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_
 ## baitstoolsgui  
 ### Version 1.1.0  
 start_baitstools uses << to improve performance  
+HWE alpha no longer hard-coded  
 
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
@@ -358,6 +360,8 @@ Preliminary script to generate baits from PyRAD/ipyrad loci files
 ## stacks2baits  
 ### Version 1.1.0  
 Reworking to use new temp file methods  
+HWE test uses floats rather than integers for precision  
+HWE alpha no longer hard-coded (CDF calculated on fly using chi_cum_prob)  
 
 ### Version 0.4  
 Output directory and prefix can be named  

@@ -126,7 +126,7 @@ class Parser
 						args.sort = true
 						args.hwe = true
 					end
-					opts.on("-A", "--alpha [VALUE]", Float, "Set alpha value for HWE test (Either 0.10, 0.05, 0.025, 0.01) (Default = 0.05)") do |alph|
+					opts.on("-A", "--alpha [VALUE]", Float, "Alpha value for HWE test (Default = 0.05)") do |alph|
 						args.alpha = alph if alph != nil
 					end
 					opts.on("-t", "--totalvars [VALUE]", Integer, "Total requested variants per category (Default = 30,000)") do |tsnps|
@@ -453,16 +453,15 @@ begin
 					t = gets.chomp.upcase
 					if t == "Y" or t == "YES"
 						$options.hwe = true
-						print "Alpha value for HWE (alpha = 0.10, 0.05, 0.025, 0.01)?\n"
+						print "Alpha value for HWE?\n"
 						$options.alpha = gets.chomp.to_f
 					end
 				end
 			end
 		end
 		if $options.algorithm == "stacks2baits"
-			alphas = [0.10, 0.05, 0.025, 0.01]
-			while !alphas.include?($options.alpha)
-				print "Alpha value must be 0.10, 0.05, 0.025, 0.01. Re-enter.\n"
+			while $options.alpha < 0.0 or $options.alpha > 1.0
+				print "Alpha value must be between 0.0 and 1.0. Re-enter.\n"
 				$options.alpha = gets.chomp.to_f
 			end
 		end
