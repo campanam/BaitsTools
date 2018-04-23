@@ -318,7 +318,7 @@ def filter_baits(bait, qual = [0])
 		maxhomopoly = max_homopolymer(bait)
 		keep = false if (maxhomopoly > $options.maxhomopoly && $options.maxhomopoly_filter)
 	end
-	if $options.lc_filter or $options.params
+	if $options.lc_filter #or $options.params
 		seqcomp = linguistic_complexity(bait)
 		keep = false if (seqcomp < $options.lc && $options.lc_filter)
 	end
@@ -690,7 +690,7 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 		}
 	end
 	threads.each { |thr| thr.join }
-	cat_files
+	cat_files([filext + "-baits.fa", filext + "-baits.bed", filext + "-filtered-baits.fa", filext + "-filtered-baits.bed", filext + "-filtered-params.txt"])
 	if $options.log
 		vlogs = [[],[]]
 		for i in 0 ... logs.size
