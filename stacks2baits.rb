@@ -17,7 +17,7 @@ class Popvar # Population-specific SNP data object
 		@line = line # Original SNP descriptor line
 	end
 	def monomorphic? # Determine if SNP is monomorphic within population
-		(@pfreq == 1.0 or @pfreq == 0.0) ? return true: return false
+		(@pfreq == 1.0 or @pfreq == 0.0) ? return true : return false
 	end
 	def in_hwe? # Return whether variant is in HWE for a population
 		qfreq = 1.0 - @pfreq # Calculate minor allele frequency
