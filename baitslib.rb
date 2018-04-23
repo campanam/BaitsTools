@@ -57,7 +57,7 @@ class Chromo_SNP # Container for SNPs
 		if @line.nil? # Combine data from stacks2baits Popvars if line not previously defined
 			@line = ""
 			for pop in @popvar_data
-				@line += pop.line
+				@line << pop.line
 			end
 		end
 		return @line
