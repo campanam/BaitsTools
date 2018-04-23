@@ -35,6 +35,7 @@ while @exit == ""
 	test = gets.chomp.to_f
 	print "Enter degrees of freedom\n"
 	df = gets.chomp.to_f
+	print chi_prob(test, df).to_s + "\n"
 	print "Exit? Return for no. Any string for yes.\n"
 	@exit = gets.chomp
 	break if @exit != ""
