@@ -283,22 +283,11 @@ def filter_baits(bait, qual = [0])
 	keep = false if (bait.include?("N") and $options.no_Ns)
 	keep = false if (bait.include?("-") and $options.gaps == "exclude")
 	gc = 0.0
-	maskbases = ["a","t","g","c","u","r","y","m","k","s","w","h","b","v","d","n"] # Array of masked base possibilities
-	mask = 0.0
-	for i in 0 ... bait.length
-		base = bait[i].chr.upcase
-		case base
-		when "G","C","S"
-			gc += 1.0
-		when "R","Y","K","M","N"
-			gc += 0.5
-		when "B","V"
-			gc += 0.67
-		when "D", "H"
-			gc += 0.33
-		end
-		mask += 1.0 if maskbases.include?(bait[i].chr)
-	end
+	gc += bait.count("GCSgcs").to_f
+	gc += 0.5 * bait.count("RYKMNrykmn").to_f
+	gc += 0.667 * bait.count("BVbv").to_f
+	gc += 0.333 * bait.count("DHdh").to_f
+	mask = bait.count("atgcurymkswhbvdn").to_f
 	gccont = gc/bait.length.to_f
 	maskcont = mask/bait.length.to_f
 	keep = false if (gccont * 100.0 < $options.mingc && $options.mingc_filter)
