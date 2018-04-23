@@ -297,11 +297,11 @@ def filter_baits(bait, qual = [0])
 	if $options.mint_filter or $options.maxt_filter or $options.params
 		case $options.bait_type
 		when "RNA-RNA"
-			melt = 79.8 + (58.4 * gccont) + (11.8 * (gccont**2.0)) - 820.0/bait.length.to_f + 18.5 * Math::log($options.na) - 0.35 * $options.formamide
+			melt = 79.8 + (58.4 * gccont) + (11.8 * (gccont**2.0)) - 820.0/bait.length.to_f + 18.5 * Math.log($options.na) - 0.35 * $options.formamide
 		when "RNA-DNA"
-			melt = 79.8 + (58.4 * gccont) + (11.8 * (gccont**2.0)) - 820.0/bait.length.to_f + 18.5 * Math::log($options.na) - 0.50 * $options.formamide
+			melt = 79.8 + (58.4 * gccont) + (11.8 * (gccont**2.0)) - 820.0/bait.length.to_f + 18.5 * Math.log($options.na) - 0.50 * $options.formamide
 		when "DNA-DNA"
-			melt = 81.5 + (41.0 * gccont) - 500.0/bait.length.to_f + 16.6 * Math::log($options.na) - 0.62 * $options.formamide
+			melt = 81.5 + (41.0 * gccont) - 500.0/bait.length.to_f + 16.6 * Math.log($options.na) - 0.62 * $options.formamide
 		end
 		keep = false if (melt < $options.mint && $options.mint_filter)
 		keep = false if (melt > $options.maxt && $options.maxt_filter)
