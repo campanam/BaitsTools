@@ -17,7 +17,11 @@ class Popvar # Population-specific SNP data object
 		@line = line # Original SNP descriptor line
 	end
 	def monomorphic? # Determine if SNP is monomorphic within population
-		(@pfreq == 1.0 or @pfreq == 0.0) ? return true : return false
+		if (@pfreq == 1.0 or @pfreq == 0.0)
+			return true
+		else
+			return false
+		end
 	end
 	def in_hwe? # Return whether variant is in HWE for a population
 		qfreq = 1.0 - @pfreq # Calculate minor allele frequency
@@ -28,7 +32,11 @@ class Popvar # Population-specific SNP data object
 		p2obs = (@pfreq - @hetobs/2.0) * @no_ind # Calculate observed major alleles in homozygotes
 		q2obs = (qfreq - @hetobs/2.0) * @no_ind # Calculate observed minor alleles in homozygotes
 		hwe = ((p2obs - p2exp) ** 2.0)/p2exp + ((pqobs - pqexp) ** 2.0)/pqexp + ((q2obs - q2exp) ** 2.0)/q2exp # Calculate chi-square statistic
-		(1.0 - chi_cum_prob(hwe) < $options.alpha) ? return true : return false # Compare to alpha 0.05
+		if 1.0 - chi_cum_prob(hwe) < $options.alpha # Compare to alpha 0.05
+			return true
+		else
+			return false
+		end
 	end
 end
 #-----------------------------------------------------------------------------------------------
