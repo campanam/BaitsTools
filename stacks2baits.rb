@@ -41,9 +41,7 @@ class Popvar # Population-specific SNP data object
 end
 #-----------------------------------------------------------------------------------------------
 def chi_cum_prob(test) # This calculates under chi distribution cumulative probability distribution special case of df = 1
-	num = Math.sqrt(Math::PI) * Math.erf(Math.sqrt(test/2.0))
-	denom = Math.sqrt(Math::PI)
-	return num/denom
+	return Math.erf(Math.sqrt(test/2.0))
 end
 #-----------------------------------------------------------------------------------------------
 def write_stacks(header, snps, tag) # Method to write stacks output since repeating over and over
