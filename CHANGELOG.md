@@ -94,6 +94,7 @@ concat_file concatenates temporary files
 selectsnps compatible with temporary files  
 snp_to_baits compatible with temporary files  
 removal of write_baits  
+filter_baits speed improvement using count rather than loops  
 
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
