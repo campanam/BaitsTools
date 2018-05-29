@@ -17,7 +17,7 @@ def annot2baits
 	# Read annotation file
 	print "** Reading annotation file **\n"
 	regions = [] #Array to hold generated fasta sequences
-	write_file(".log.txt", "ExtractedRegions\nRegion\tStart\tEnd\tLength") if $options.log
+	write_file(".log.txt", "ExtractedRegions\nRegion\tChromosome\tStart\tEnd\tLength") if $options.log
 	totallength = 0
 	File.open($options.infile, 'r') do |annot|
 		while line = annot.gets
@@ -42,7 +42,7 @@ def annot2baits
 						seq.bedstart = seqst 
 						regions.push(seq)
 						if $options.log
-							write_file(".log.txt", seq.header + "\t" + (seqst+1).to_s + "\t" + (seqend+1).to_s + "\t" + seq.seq.length.to_s)
+							write_file(".log.txt", seq.header + "\t" + chromo + "\t" + (seqst+1).to_s + "\t" + (seqend+1).to_s + "\t" + seq.seq.length.to_s)
 							totallength += seq.seq.length
 						end
 					end
