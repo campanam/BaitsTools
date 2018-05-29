@@ -16,13 +16,14 @@ require_relative 'aln2baits'
 require_relative 'stacks2baits'
 require_relative 'checkbaits'
 require_relative 'pyrad2baits'
+require_relative 'blast2baits'
 require_relative 'baitslib'
 #-----------------------------------------------------------------------------------------------
 class Parser
 	def self.parse(options)
 		# Set defaults
 		args = OpenStruct.new
-		algorithms = ["aln2baits", "annot2baits", "bed2baits", "checkbaits", "pyrad2baits", "stacks2baits", "tilebaits", "vcf2baits"]
+		algorithms = ["aln2baits", "annot2baits", "bed2baits", "blast2baits", "checkbaits", "pyrad2baits", "stacks2baits", "tilebaits", "vcf2baits"]
 		args.algorithm = ARGV[0] # Define subcommands
 		if algorithms.include?(args.algorithm) #Set interactive mode or whether to kill
 			args.interact = true if ARGV.size == 1
@@ -64,6 +65,10 @@ class Parser
 		args.params = false # Flag to output filtration parameters
 		args.coords = false # Flag to output BED file of baits (absolute coordinates)
 		args.rbed = false # Flag to output BED file of baits (relative coordinates)
+		args.percid = 0.0 # Minimum percent identity to include blast hit
+		args.blastlen = 1 # Minimum sequence length in nucleotides to include blast hit
+		args.evalue_filter = false # Filter by maximum evalue
+		args.evalue = 0.1 # Maximum evalue to include blast hit
 		args.gaps = "include" # Gapped bait handling
 		args.no_Ns = false # Flag to omit bait sequences with Ns
 		args.collapse_ambiguities = false # Flag to collapse ambiguities to a single nucleotide
@@ -83,6 +88,7 @@ class Parser
 		args.maxhomopoly = 4 # Maximum homopolymer length
 		args.lc_filter = false # Flag to filter by minimum sequence complexity
 		args.lc = 0.9 # Minimum sequence complexity
+		args.no_lc = false # Disable linguistic complexity calculation in parameters-only calculation
 		args.features = [] # Array holding desired features
 		args.pad = 0 # BP to pad ends of extracted regions
 		args.shuffle = false # Flag whether baits are shuffled to account for end of contigs
@@ -173,6 +179,8 @@ class Parser
 					case args.algorithm
 					when "bed2baits"
 						inputstr = "Input BED file"
+					when "blast2baits"
+						inputstr = "Input BLAST hit table"
 					when "annot2baits"
 						inputstr = "Input GFF/GTF table"
 					else
@@ -181,7 +189,7 @@ class Parser
 					opts.on("-i","--input [FILE]", String, inputstr) do |fa|
 						args.infile = fa
 					end
-					if args.algorithm == "bed2baits" or args.algorithm == "annot2baits"
+					if args.algorithm == "bed2baits" or args.algorithm == "annot2baits" or args.algorithm == "blast2baits"
 						opts.on("-r","--refseq [FILE]", String, "Reference FASTA/FASTQ sequence file") do |ref|
 							args.refseq = ref
 						end
@@ -204,6 +212,18 @@ class Parser
 					elsif args.algorithm == "aln2baits"
 						opts.on("-H","--haplo [VALUE]", String, "Window haplotype definition (haplotype or variant) (Default = haplotype)") do |fa|
 							args.haplodef = fa if fa != nil
+						end
+					end
+					if args.algorithm == "blast2baits"
+						opts.on("--percid [VALUE]", Float, "Minimum percent identity to include BLAST hit (Default = 0.0)") do |percid|
+							args.percid = percid if percid != nil
+						end
+						opts.on("--blastlen [VALUE]", Integer, "Minimum length of BLAST hit in nucleotides (Default = 1)") do |blastlen|
+							args.blastlen = blastlen if blastlen != nil
+						end
+						opts.on("--evalue [VALUE]", Float, "Maximum E-value to include BLAST hit (Default = 0.1)") do |evalue|
+							args.evalue = evalue if evalue != nil
+							args.evalue_filter = true
 						end
 					end
 				end
@@ -247,6 +267,9 @@ class Parser
 				opts.separator ""
 				opts.on("-w", "--params", "Output bait statistics table") do
 					args.params = true
+				end
+				opts.on("--disable-lc", "Disable slow linguistic complexity calculations for parameters table") do
+					args.no_lc = true
 				end
 				opts.on("-c","--complete", "Require baits be full length") do
 					args.completebait = true
@@ -323,7 +346,7 @@ class Parser
 					opts.on("-B", "--bed", "Output BED file for the baits") do
 						args.coords = true
 					end
-					if args.algorithm == "aln2baits" or args.algorithm == "annot2baits" or args.algorithm == "bed2baits" or args.algorithm == "tilebaits"
+					if args.algorithm == "aln2baits" or args.algorithm == "annot2baits" or args.algorithm == "bed2baits" or args.algorithm == "tilebaits" or args.algorithm == "blast2baits"
 						opts.on("-E", "--rbed", "Output BED file for the baits relative to extracted sequences") do
 							args.rbed = true
 						end
@@ -373,6 +396,8 @@ class Parser
 						print "checkbaits " + CHECKBAITSVER + "\n"
 					when "pyrad2baits"
 						print "pyrad2baits " + PYRAD2BAITSVER + "\n"
+					when "blast2baits"
+						print "blast2baits " + BLAST2BAITSVER + "\n"
 					end
 					exit
 				end
@@ -383,6 +408,7 @@ class Parser
 				print "    aln2baits\t\t\t\tGenerate weighted baits from a FASTA/FASTQ alignment\n"
 				print "    annot2baits\t\t\t\tGenerate tiled baits from a GFF/GTF file and a reference sequence\n"
 				print "    bed2baits\t\t\t\tGenerate tiled baits from BED file and a reference sequence\n"
+				print "    blast2baits\t\t\t\tGenerate tiled baits from a BLAST hit table and a reference sequence\n"
 				print "    checkbaits\t\t\t\tFilter a FASTA/FASTQ of candidate baits by quality\n"
 				print "    pyrad2baits\t\t\t\tSelect variants and generate baits from a PyRAD/ipyrad LOCI file\n"
 				print "    stacks2baits\t\t\tSelect variants and generate baits from a Stacks summary TSV file\n"
@@ -555,7 +581,7 @@ begin
 			end
 		end
 	else
-		if $options.algorithm == "bed2baits" or $options.algorithm == "annot2baits"
+		if $options.algorithm == "bed2baits" or $options.algorithm == "annot2baits" or $options.algorithm == "blast2baits"
 			if $options.interact
 				print "Enter reference sequence.\n"
 				$options.refseq = gets.chomp
@@ -671,6 +697,38 @@ begin
 				$options.haplodef = gets.chomp
 			end
 		end
+		if $options.algorithm == "blast2baits"
+			if $options.interact
+				print "Enter minimum percent identity to include BLAST hit.\n"
+				$options.percid = gets.chomp.to_f
+			end
+			while $options.percid < 0.0 or $options.percid > 100.0
+				print "Percent identity must be between 0.0 and 100.0. Re-enter.\n"
+				$options.percid = gets.chomp.to_f
+			end
+			if $options.interact
+				print "Enter minimum length of BLAST hit in nucleotides.\n"
+				$options.blastlen = gets.chomp.to_i
+			end
+			while $options.blastlen < 0
+				print "Minimum length must be greater than 0. Re-enter.\n"
+			end
+			if $options.interact
+				print "Filter BLAST hits by E-value?\n"
+				t = gets.chomp.upcase
+				if t == "Y" or t == "YES"
+					$options.evalue_filter = true
+				end
+				if $options.evalue_filter
+					print "Enter maximum E-value to include BLAST hit.\n"
+					$options.evalue = gets.chomp.to_f
+				end
+			end
+			while $options.evalue_filter && $options.evalue < 0
+				print "Maximum E-value must be at least 0.0 Re-enter.\n"
+				$options.evalue = gets.chomp.to_f
+			end
+		end
 	end
 	if $options.interact and !$options.no_baits
 		if $options.algorithm != "pyrad2baits"
@@ -686,7 +744,7 @@ begin
 			if t == "Y" or t == "YES"
 				$options.coords = true
 			end
-			if $options.algorithm == "aln2baits" or $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "tilebaits"
+			if $options.algorithm == "aln2baits" or $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "tilebaits" or $options.algorithm == "blast2baits"
 				print "Output BED file(s) for the baits relative to extracted sequences? (y/n)\n"
 				t = gets.chomp.upcase
 				if t == "Y" or t == "YES"
@@ -703,6 +761,13 @@ begin
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
 			$options.params = true
+		end
+		if $options.params
+			print "Disable linguistic complexity calculations to improve program speed? (y/n)\n"
+			t = gets.chomp.upcase
+			if t == "Y" or t == "YES"
+				$options.no_lc = true
+			end
 		end
 		print "Require complete length bait? (y/n)\n"
 		t = gets.chomp.upcase
@@ -892,6 +957,8 @@ begin
 		annot2baits
 	when "bed2baits"
 		bed2baits
+	when "blast2baits"
+		blast2baits
 	when "checkbaits"
 		checkbaits
 	when "pyrad2baits"

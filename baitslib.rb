@@ -7,7 +7,7 @@ BAITSLIBVER = "1.1.0"
 #-----------------------------------------------------------------------------------------------
 
 class Fa_Seq #container for fasta/fastq sexquences
-	attr_accessor :header, :circular, :fasta, :seq, :qual, :qual_array, :bedstart, :locus
+	attr_accessor :header, :circular, :fasta, :seq, :qual, :qual_array, :bedstart, :locus, :bedheader
 	def initialize(header = "", circular = false, fasta = false, seq = "", qual = "", bedstart = 0, locus = "")
 		@header = header # Sequence header
 		@circular = circular # Circular sequence flag
@@ -17,6 +17,7 @@ class Fa_Seq #container for fasta/fastq sexquences
 		@fasta = fasta # FASTA format flag
 		@bedstart = bedstart # Sequence start in absolute BED coordinates
 		@locus = locus # locus id for alignment
+		@bedheader = header.dup # Default is header, change for region extraction
 	end
 	def make_dna # Replace uracils with thymines for internal consistency
 		@seq.gsub!("u", "t")
@@ -318,9 +319,13 @@ def filter_baits(bait, qual = [0])
 		maxhomopoly = max_homopolymer(bait)
 		keep = false if (maxhomopoly > $options.maxhomopoly && $options.maxhomopoly_filter)
 	end
-	if $options.lc_filter #or $options.params
-		seqcomp = linguistic_complexity(bait)
-		keep = false if (seqcomp < $options.lc && $options.lc_filter)
+	if $options.lc_filter or $options.params
+		if $options.no_lc
+			seqcomp = "NA"
+		else
+			seqcomp = linguistic_complexity(bait)
+			keep = false if (seqcomp < $options.lc && $options.lc_filter)
+		end
 	end
 	return [keep, bait.length.to_s + "\t" + (gccont * 100.0).to_s + "\t" + melt.to_s + "\t" + maskcont.to_s + "\t" +  maxhomopoly.to_s + "\t" + seqcomp.to_s + "\t" + meanqual.to_s + "\t" + minqual.to_s + "\t" + bait.include?("N").to_s + "\t" + bait.include?("-").to_s + "\t" + keep.to_s]
 end
@@ -737,7 +742,7 @@ def get_command_line # Get command line for summary output
 		cmdline << " -S" if $options.sort
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe
 	else
-		if $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits"
+		if $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "blast2baits"
 			cmdline << " -r " + $options.refseq
 			cmdline << " -P" + $options.pad.to_s
 		end
@@ -755,6 +760,9 @@ def get_command_line # Get command line for summary output
 				cmdline << feature + ","
 			end
 			cmdline = cmdline[0...-1] # Remove final , from feature list
+		elsif $options.algorithm == "blast2baits"
+			cmdline << " --percid " + $options.percid.to_s + " --blastlen " + $options.blastlen.to_s
+			cmdline << " --evalue " + $options.evalue.to_s if $options.evalue_filter
 		end
 		if $options.algorithm == "pyrad2baits" && $options.strategy != "alignment"
 			cmdline << " --uncollapsedref" if $options.uncollapsed_ref
@@ -776,6 +784,7 @@ def get_command_line # Get command line for summary output
 	# Generate filtration options
 	fltline = ""
 	fltline << " -w" if $options.params
+	fltline << " --disable-lc" if $options.no_lc
 	fltline << " -c" if $options.completebait
 	fltline << " -N" if $options.no_Ns
 	fltline << " -C" if $options.collapse_ambiguities

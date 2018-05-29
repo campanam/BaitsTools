@@ -42,6 +42,7 @@ def bed2baits
 					seq.calc_quality
 				end
 				seq.seq = refhash[chromosome].seq[seqst..seqend-1] #Correct for 0-based counting
+				seq.bedheader = chromo
 				seq.bedstart = seqst
 				regions.push(seq)
 				if $options.log

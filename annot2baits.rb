@@ -39,6 +39,7 @@ def annot2baits
 							seq.calc_quality
 						end
 						seq.seq = refhash[chromo].seq[seqst..seqend]
+						seq.bedheader = chromo
 						seq.bedstart = seqst 
 						regions.push(seq)
 						if $options.log
