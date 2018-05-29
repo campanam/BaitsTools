@@ -69,6 +69,7 @@ Preliminary script to generate weighted bait set from a fasta alignment
 ## annot2baits  
 ### Version 1.1.0  
 Reworking to use new temp file methods  
+Log gives extracted region chromosome names  
 
 ### Version 0.4  
 Absolute BED coordinates recorded  
@@ -292,6 +293,7 @@ Basic GUI compatible with baitstools 0.8
 ## bed2baits  
 ### Version 1.1.0  
 Reworking to use new temp file methods  
+Log gives extracted region chromosome names  
 
 ### Version 0.5  
 Absolute BED coordinates recorded  
