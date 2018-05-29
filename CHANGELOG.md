@@ -70,6 +70,7 @@ Preliminary script to generate weighted bait set from a fasta alignment
 ### Version 1.1.0  
 Reworking to use new temp file methods  
 Log gives extracted region chromosome names  
+Absolute bed now gives correct chromosome name  
 
 ### Version 0.4  
 Absolute BED coordinates recorded  
@@ -96,6 +97,9 @@ selectsnps compatible with temporary files
 snp_to_baits compatible with temporary files  
 removal of write_baits  
 filter_baits speed improvement using count rather than loops  
+Fa_Seq has bedheader for region extraction chromosome names  
+filter_baits can now exclude linguistic complexity calculations  
+get_command_line updated for blast2baits  
 
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
@@ -155,6 +159,8 @@ filter_probes definition removed into separate script for access by other script
 File start called with setup_output  
 Reworking to use new temp file methods  
 HWE alpha no longer hard-coded  
+Updated for blast2baits  
+Linguistic complexity calculations can be disabled for fast parameters  
 
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
@@ -294,6 +300,7 @@ Basic GUI compatible with baitstools 0.8
 ### Version 1.1.0  
 Reworking to use new temp file methods  
 Log gives extracted region chromosome names  
+Absolute bed now gives correct chromosome name  
 
 ### Version 0.5  
 Absolute BED coordinates recorded  
@@ -315,6 +322,10 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 
 ### Version 0.1  
 Preliminary script to turn a coordinates table and a reference sequence into baits  
+
+## blast2baits  
+### Version 1.1.0  
+Preliminary script to generate baits from BLAST hit tables and a reference sequence  
 
 ## checkbaits  
 ### Version 1.1.0  
