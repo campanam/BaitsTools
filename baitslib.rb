@@ -503,26 +503,28 @@ end
 #-----------------------------------------------------------------------------------------------
 def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	# Sort chromosomal SNPs in case unsorted
+	totalvar = 0
+	selectvar = 0
 	for chromo in snp_hash.keys
+		totalvar += snp_hash[chromo].size
 		snp_hash[chromo].sort_by! { |snp| snp.snp }
 	end
-	temp_snps = snp_hash.dup #Avoid messing with the original hash.
 	selectsnps = {}
 	if !$options.every
 		for i in 1..$options.totalsnps
-			selected_contig = temp_snps.keys[rand(temp_snps.size)] # Get name of contig
-			snpindex = rand(temp_snps[selected_contig].size)
-			selected_snp = temp_snps[selected_contig][snpindex]
+			selected_contig = snp_hash.keys[rand(snp_hash.size)] # Get name of contig
+			snpindex = rand(snp_hash[selected_contig].size)
+			selected_snp = snp_hash[selected_contig][snpindex]
 			# Delete SNPs that are too close
-			if snpindex + 1 < temp_snps[selected_contig].size
-				while (temp_snps[selected_contig][snpindex + 1].snp - selected_snp.snp).abs < $options.distance
-					temp_snps[selected_contig].delete(temp_snps[selected_contig][snpindex + 1])
-					break if snpindex + 1 >= temp_snps[selected_contig].size
+			if snpindex + 1 < snp_hash[selected_contig].size
+				while (snp_hash[selected_contig][snpindex + 1].snp - selected_snp.snp).abs < $options.distance
+					snp_hash[selected_contig].delete(snp_hash[selected_contig][snpindex + 1])
+					break if snpindex + 1 >= snp_hash[selected_contig].size
 				end
 			end
 			if snpindex > 0
-				while (temp_snps[selected_contig][snpindex - 1].snp - selected_snp.snp).abs < $options.distance
-					temp_snps[selected_contig].delete(temp_snps[selected_contig][snpindex - 1])
+				while (snp_hash[selected_contig][snpindex - 1].snp - selected_snp.snp).abs < $options.distance
+					snp_hash[selected_contig].delete(snp_hash[selected_contig][snpindex - 1])
 					snpindex -= 1
 					break if snpindex < 1
 				end
@@ -530,28 +532,21 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 			# Add SNP to selected pool and delete contigs if maximum number of SNPs reached or no remaining SNPs on contig
 			selectsnps[selected_contig] = [] if selectsnps[selected_contig].nil?
 			selectsnps[selected_contig].push(selected_snp)
-			temp_snps[selected_contig].delete(selected_snp) # So it cannot be reselected
+			snp_hash[selected_contig].delete(selected_snp) # So it cannot be reselected
 			if $options.scale
 				maxsize = $options.scalehash[selected_contig]
 			else
 				maxsize = $options.maxsnps
 			end
-			if selectsnps[selected_contig].size == maxsize or temp_snps[selected_contig].size == 0
-				temp_snps.delete_if {|key, value | key == selected_contig}
+			if selectsnps[selected_contig].size == maxsize or snp_hash[selected_contig].size == 0
+				snp_hash.delete_if {|key, value | key == selected_contig}
 			end
-			break if temp_snps.size == 0 # Stop selecting SNPs when all contigs deleted from consideration
+			break if snp_hash.size == 0 # Stop selecting SNPs when all contigs deleted from consideration
 		end
 	else
 		selectsnps = snp_hash
 	end
-	 if $options.log
-		 totalvar = 0
-		 selectvar = 0
-		for chromo in snp_hash.keys
-			totalvar += snp_hash[chromo].size
-		end
-		write_file(".log.txt", "Chromosome\tSelectedVariants")
-	end
+	write_file(".log.txt", "Chromosome\tSelectedVariants") if $options.log
 	for chromo in selectsnps.keys
 		selectsnps[chromo].sort_by! { |snp| snp.snp }
 		if $options.log
