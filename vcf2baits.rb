@@ -67,8 +67,8 @@ def vcf2baits
 		write_file(".log.txt", "VariantBaits") if $options.log
 		baits = snp_to_baits(@selectsnps, refseq)
 		if $options.filter
+			write_file( "-filtered.vcf", vcffilt)
 			for i in 0 ... baits.size # Filtered snps
-				write_file( "-filtered.vcf", vcffilt)
 				for snp in baits[baits.keys[i]]
 					write_file( "-filtered.vcf", snp.line)
 				end
