@@ -272,7 +272,9 @@ Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_
 ## baitstoolsgui  
 ### Version 1.1.0  
 start_baitstools uses << to improve performance  
+blast2baits handling added  
 HWE alpha no longer hard-coded  
+disable-lc option added  
 
 ### Version 1.0.4  
 pyrad2baits can produce an uncollapsed reference sequence  
