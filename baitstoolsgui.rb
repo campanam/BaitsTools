@@ -53,6 +53,9 @@ def start_baitstools
 			cmdline << " -H " + $options.haplodef
 		elsif $options.algorithm == "annot2baits"
 			cmdline << " -U " + $options.features.value.upcase
+		elsif $options.algorithm == "blast2baits"
+			cmdline << " --percid " + $options.percid + " --blastlen " + $options.blastlen
+			cmdline << " --evalue " + $options.evalue if $options.evalue_filter == 1
 		end
 		if $options.algorithm == "pyrad2baits" && $options.strategy != "alignment"
 			cmdline << " --uncollapsedref" if $options.uncollapsed_ref == 1
@@ -72,6 +75,7 @@ def start_baitstools
 	cmdline << " -X" + $options.threads
 	# Generate filtration options
 	cmdline << " -w" if $options.params == 1
+	cmdline << " --disable-lc" if $options.no_lc == 1
 	cmdline << " -c" if $options.completebait == 1
 	cmdline << " -N" if $options.no_Ns == 1
 	cmdline << " -C" if $options.collapse_ambiguities == 1
@@ -421,6 +425,53 @@ def feature_window
 	$widgets.push(feat, featentry)
 end
 #-----------------------------------------------------------------------------------------------
+def blast_window
+	percid = TkLabel.new($root) do
+		text 'Min. % identity'
+		font TkFont.new('times 20')
+		place('x' => 50, 'y' => 350)
+		pady 10
+	end
+	percidentry = TkEntry.new($root) do
+		textvariable $options.percid
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 180, 'y' => 360)
+		width 10
+	end
+	blastlen = TkLabel.new($root) do
+		text 'Min. Hit Length'
+		font TkFont.new('times 20')
+		place('x' => 330, 'y' => 350)
+		pady 10
+	end
+	blastlenentry = TkEntry.new($root) do
+		textvariable $options.blastlen
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 480, 'y' => 360)
+		width 10
+	end
+	evalue = TkCheckButton.new ($root) do
+		variable $options.evalue_filter
+		text 'Max. E-Value'
+		font TkFont.new('times 20')
+		place('x' => 50, 'y' => 400)
+		command '$evalueentry.state == "disabled" ? $evalueentry.state = "normal" : $evalueentry.state = "disabled"'
+	end
+	$evalueentry = TkEntry.new($root) do
+		textvariable $options.evalue
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 220, 'y' => 410)
+		width 10
+	end
+	$widgets.push(percid, percidentry, blastlen, blastlenentry, $evalueentry)
+	configure_buttons([evalue])
+	evalue.width = 15
+	$evalueentry.state = "disabled" if $options.evalue_filter == 0
+end
+#-----------------------------------------------------------------------------------------------
 def sort_windows
 	sort = TkCheckButton.new($root) do
 		variable $options.sort
@@ -658,6 +709,13 @@ def subcommand_window(subcommand)
 		length_window(250)
 		offset_window(300)
 		inputlabel = "Input BED"
+	when "blast2baits"
+		reference_window
+		pad_window
+		length_window(250)
+		offset_window(300)
+		inputlabel = "Input BLAST table"
+		blast_window
 	when "checkbaits"
 		length_window
 		inputlabel = "Input FASTA/FASTQ"
@@ -717,38 +775,43 @@ def create_root_menu
 		command 'subcommand_window("bed2baits")'
 		place('x' => 500, 'y' => 100)
 	end
+	blast2baits_btn = TkButton.new($root) do
+		text "blast2baits"
+		command 'subcommand_window("blast2baits")'
+		place('x' => 100, 'y' => 150)
+	end
 	checkbaits_btn = TkButton.new($root) do
 		text "checkbaits"
 		command 'subcommand_window("checkbaits")'
-		place('x' => 100, 'y' => 150)
+		place('x' => 300, 'y' => 150)
 	end
 	pyrad2baits_btn = TkButton.new($root) do
   		text "pyrad2baits"
   		command 'subcommand_window("pyrad2baits")'
-		place('x' => 300, 'y' => 150)
+		place('x' => 500, 'y' => 150)
 	end
 	stacks2baits_btn = TkButton.new($root) do
   		text "stacks2baits"
   		command 'subcommand_window("stacks2baits")'
-		place('x' => 500, 'y' => 150)
+		place('x' => 100, 'y' => 200)
 	end
 	tilebaits_btn = TkButton.new($root) do
 		text "tilebaits"
 		command 'subcommand_window("tilebaits")'
-		place('x' => 100, 'y' => 200)
+		place('x' => 300, 'y' => 200)
 	end
 	vcf2baits_btn = TkButton.new($root) do
 		text "vcf2baits"
 		command 'subcommand_window("vcf2baits")'
-   		place('x' => 300, 'y' => 200)
+   		place('x' => 500, 'y' => 200)
 	end
-	$widgets = [aln2baits_btn, annot2baits_btn, bed2baits_btn, checkbaits_btn, pyrad2baits_btn, stacks2baits_btn, tilebaits_btn, vcf2baits_btn]
+	$widgets = [aln2baits_btn, annot2baits_btn, bed2baits_btn, blast2baits_btn, checkbaits_btn, pyrad2baits_btn, stacks2baits_btn, tilebaits_btn, vcf2baits_btn]
 	configure_buttons($widgets)
-	#poonheli = TkLabel.new($root) do
-	#	image TkPhotoImage.new(:file => "~/baitstools/poonheli.gif")
-	#	place('height' => 118, 'width' => 118, 'x' => 341, 'y' => 400)
-	#end
-	#$widgets.push(poonheli)
+#	poonheli = TkLabel.new($root) do
+#		image TkPhotoImage.new(:file => "~/baitstools/poonheli.gif")
+#		place('height' => 118, 'width' => 118, 'x' => 341, 'y' => 400)
+#	end
+#	$widgets.push(poonheli)
 	$labelVar.value = "Choose Subcommand"
 end
 #-----------------------------------------------------------------------------------------------
@@ -759,59 +822,68 @@ def qc_window
 		variable $options.params
 		text "Output parameters file"
 		place('x' => 50, 'y' => 100)
+		command 'update_params'
+	end
+	$no_lc = TkCheckButton.new($root) do
+		variable $options.no_lc
+		text "No linguistic complexity for parameters file"
+		font TkFont.new('times 20')
+		place('x' => 315, 'y' => 100)
+		width 40
+		pady 10
 	end
 	complete = TkCheckButton.new ($root) do
 		variable $options.completebait
 		text "Require complete length"
-		place('x' => 315, 'y' => 100)
+		place('x' => 50, 'y' => 150)
 	end
 	noNs = TkCheckButton.new($root) do
 		variable $options.no_Ns
 		text "No Ns"
-		place('x' =>580, 'y' => 100)
+		place('x' =>390, 'y' => 150)
 	end
 	collapse = TkCheckButton.new($root) do
 		variable $options.collapse_ambiguities
 		text "Collapse ambiguities"
-		place('x' => 50, 'y' => 150)
+		place('x' => 50, 'y' => 200)
 	end
 	maxmask = TkCheckButton.new($root) do
 		variable $options.maxmask_filter
 		text "Max mask%"
-		place('x' => 390, 'y' => 150)
+		place('x' => 390, 'y' => 200)
 		command '$maxmaskentry.state == "disabled" ? $maxmaskentry.state = "normal" : $maxmaskentry.state = "disabled"'
 	end
 	$maxmaskentry = TkEntry.new($root) do
 		textvariable $options.maxmask
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 580, 'y' => 160)
+		place('x' => 580, 'y' => 210)
 		width 10
 	end
 	mingc = TkCheckButton.new($root) do
 		variable $options.mingc_filter
 		text "Min GC%"
-		place('x' => 50, 'y' => 200)
+		place('x' => 50, 'y' => 250)
 		command '$mingcentry.state == "disabled" ? $mingcentry.state = "normal" : $mingcentry.state = "disabled"'
 	end
 	$mingcentry = TkEntry.new($root) do
 		textvariable $options.mingc
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 240, 'y' => 210)
+		place('x' => 240, 'y' => 260)
 		width 10
 	end
 	maxgc = TkCheckButton.new($root) do
 		variable $options.maxgc_filter
 		text "Max GC%"
-		place('x' => 390, 'y' => 200)
+		place('x' => 390, 'y' => 250)
 		command '$maxgcentry.state == "disabled" ? $maxgcentry.state = "normal" : $maxgcentry.state = "disabled"'
 	end
 	$maxgcentry = TkEntry.new($root) do
 		textvariable $options.maxgc
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 580, 'y' => 210)
+		place('x' => 580, 'y' => 260)
 		width 10
 	end
 	$mingcentry.state = "disabled" if $options.mingc_filter == 0
@@ -819,61 +891,60 @@ def qc_window
 	homopoly = TkCheckButton.new($root) do
 		variable $options.maxhomopoly_filter
 		text "Max homopolymer"
-		place('x' => 50, 'y' => 250)
+		place('x' => 50, 'y' => 300)
 		command '$homopolyentry.state == "disabled" ? $homopolyentry.state = "normal" : $homopolyentry.state = "disabled"'
 	end
 	$homopolyentry = TkEntry.new($root) do
 		textvariable $options.maxhomopoly
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 240, 'y' => 260)
+		place('x' => 240, 'y' => 310)
 		width 10
-	end
-	minlc = TkCheckButton.new($root) do
-		variable $options.lc_filter
-		text "Min complexity"
-		place('x' => 390, 'y' => 250)
-		command '$lcentry.state == "disabled" ? $lcentry.state = "normal" : $lcentry.state = "disabled"'
 	end
 	$lcentry = TkEntry.new($root) do
 		textvariable $options.lc
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 580, 'y' => 260)
+		place('x' => 580, 'y' => 310)
 		width 10
 	end
+	minlc = TkCheckButton.new($root) do
+		variable $options.lc_filter
+		text "Min complexity"
+		place('x' => 390, 'y' => 300)
+		command 'update_minlc'
+	end
 	$homopolyentry.state = "disabled" if $options.maxhomopoly_filter == 0
-	$lcentry.state = "disabled" if $options.lc_filter == 0
 	mint = TkCheckButton.new($root) do
 		variable $options.mint_filter
 		text "Min Tm (°C)"
-		place('x' => 50, 'y' => 300)
+		place('x' => 50, 'y' => 350)
 		command 'update_mint'
 	end
 	$mintentry = TkEntry.new($root) do
 		textvariable $options.mint
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 240, 'y' => 310)
+		place('x' => 240, 'y' => 360)
 		width 10
 	end
 	maxt = TkCheckButton.new($root) do
 		variable $options.maxt_filter
 		text "Max Tm (°C)"
-		place('x' => 390, 'y' => 300)
+		place('x' => 390, 'y' => 350)
 		command 'update_maxt'
 	end
 	$maxtentry = TkEntry.new($root) do
 		textvariable $options.maxt
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 580, 'y' => 310)
+		place('x' => 580, 'y' => 360)
 		width 10
 	end
 	$typelab = TkLabel.new($root) do
 		text 'Hybridization'
 		font TkFont.new('times 20')
-		place('x' => 50, 'y' => 350)
+		place('x' => 50, 'y' => 400)
 		pady 10
 	end
 	$typeselect = Tk::Tile::Combobox.new($root) do
@@ -882,32 +953,32 @@ def qc_window
 		state "readonly"
 		width 10
 		height 3
-		place('x' => 180, 'y' => 360)
+		place('x' => 180, 'y' => 410)
 	end
 	$sodium = TkLabel.new($root) do
 		text 'Sodium (M)'
 		font TkFont.new('times 20')
-		place('x' => 320, 'y' => 350)
+		place('x' => 320, 'y' => 400)
 		pady 10
 	end
 	$sodiumentry = TkEntry.new($root) do
 		textvariable $options.na
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 450, 'y' => 360)
+		place('x' => 450, 'y' => 410)
 		width 10
 	end
 	$formamide = TkLabel.new($root) do
 		text 'Formamide (M)'
 		font TkFont.new('times 20')
-		place('x' => 540, 'y' => 350)
+		place('x' => 540, 'y' => 400)
 		pady 10
 	end
 	$formamideentry = TkEntry.new($root) do
 		textvariable $options.formamide
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 690, 'y' => 360)
+		place('x' => 690, 'y' => 410)
 		width 10
 	end
 	$maxmaskentry.state = "disabled" if $options.maxmask_filter == 0
@@ -921,49 +992,70 @@ def qc_window
 	meanqual = TkCheckButton.new($root) do
 		variable $options.meanqual_filter
 		text "Min mean base Q"
-		place('x' => 50, 'y' => 400)
+		place('x' => 50, 'y' => 450)
 		command '$meanqualentry.state == "disabled" ? $meanqualentry.state = "normal" : $meanqualentry.state = "disabled"'
 	end
 	$meanqualentry = TkEntry.new($root) do
 		textvariable $options.meanqual
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 230, 'y' => 410)
+		place('x' => 230, 'y' => 460)
 		width 10
 	end
 	minqual = TkCheckButton.new($root) do
 		variable $options.minqual_filter
 		text "Min base Q"
-		place('x' => 320, 'y' => 400)
+		place('x' => 320, 'y' => 450)
 		command '$minqualentry.state == "disabled" ? $minqualentry.state = "normal" : $minqualentry.state = "disabled"'
 	end
 	$minqualentry = TkEntry.new($root) do
 		textvariable $options.minqual
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 450, 'y' => 410)
+		place('x' => 450, 'y' => 460)
 		width 10
 	end
 	fastascore = TkLabel.new($root) do
 		text 'Assumed base Q'
 		font TkFont.new('times 20')
-		place('x' => 540, 'y' => 400)
+		place('x' => 540, 'y' => 450)
 		pady 10
 	end
 	$fastascoreentry = TkEntry.new($root) do
 		textvariable $options.fasta_score
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 690, 'y' => 410)
+		place('x' => 690, 'y' => 460)
 		width 10
 	end
 	$meanqualentry.state = "disabled" if $options.meanqual_filter == 0
 	$minqualentry.state = "disabled" if $options.minqual_filter == 0
+	$lcentry.state = "disabled" if $options.lc_filter == 0
+	$no_lc.state = "disabled" if $options.params == 0 or $options.lc_filter == 1
 	$widgets.push(params, complete, noNs, collapse, maxmask, mingc, maxgc, homopoly, minlc, mint, maxt, meanqual, minqual)
 	configure_buttons($widgets)
-	$widgets.push($maxmaskentry, $mingcentry, $maxgcentry, $homopolyentry, $lcentry, $mintentry, $maxtentry, $typelab, $typeselect, $sodium, $sodiumentry, $formamide, $formamideentry, $meanqualentry, $minqualentry, $fastascoreentry, fastascore)
-	params.width = complete.width = collapse.width = 20 
+	$widgets.push($maxmaskentry, $mingcentry, $maxgcentry, $homopolyentry, $no_lc, $lcentry, $mintentry, $maxtentry, $typelab, $typeselect, $sodium, $sodiumentry, $formamide, $formamideentry, $meanqualentry, $minqualentry, $fastascoreentry, fastascore)
+	params.width = complete.width = collapse.width = 20
 	meanqual.width = homopoly.width = minlc.width = 15
+end
+#-----------------------------------------------------------------------------------------------
+def update_params
+	if $options.params == 1 && $options.lc_filter == 0
+		$no_lc.state = "normal"
+	elsif $options.params == 0
+		$no_lc.state = "disabled"
+		$options.no_lc.value = 0
+	end
+end
+#-----------------------------------------------------------------------------------------------
+def update_minlc
+	$lcentry.state == "disabled" ? $lcentry.state = "normal" : $lcentry.state = "disabled"
+	if $options.params == 1 && $options.lc_filter == 1
+		$no_lc.state = "disabled"
+		$options.no_lc.value = 0
+	elsif $options.params == 1
+		$no_lc.state = "normal"
+	end	
 end
 #-----------------------------------------------------------------------------------------------
 def update_maxt
@@ -1008,17 +1100,23 @@ end
 #-----------------------------------------------------------------------------------------------
 def go_forward
 	case $labelVar.value
-	when "aln2baits Options", "annot2baits Options", "bed2baits Options", "checkbaits Options", "tilebaits Options"
+	when "aln2baits Options", "annot2baits Options", "bed2baits Options", "blast2baits Options", "checkbaits Options", "tilebaits Options"
 		if $options.infile == ""
 			Tk::messageBox :message => 'Please specify an input file.'
-		elsif ($options.algorithm == "annot2baits" or $options.algorithm == "bed2baits") && $options.refseq == ""
+		elsif ($options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "blast2baits") && $options.refseq == ""
 			Tk::messageBox :message => 'Please specify a reference sequence.'
-		elsif ($options.algorithm == "annot2baits" or $options.algorithm == "bed2baits") && $options.pad < 0
+		elsif ($options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "blast2baits") && $options.pad < 0
 			Tk::messageBox :message => 'Pad length cannot be less than 0.'
 		elsif $options.baitlength < 1
 			Tk::messageBox :message => 'Bait length must be greater than 0.'
 		elsif $options.tileoffset < 1 && $options.algorithm != "checkbaits"
 			Tk::messageBox :message => 'Tiling offset must be greater than 0.'
+		elsif $options.percid < 0.0 or $options.percid > 100.0
+			Tk::messageBox :message => 'Percent identity must be between 0.0 and 100.0.'
+		elsif $options.blastlen < 1
+			Tk::messageBox :message => 'Minimum BLAST hit length must be greater than 0.'
+		elsif $options.evalue < 0 && $options.evalue_filter == 1
+			Tk::messageBox :message => 'Maximum E-value must be at least 0.'
 		else
 			qc_window
 		end
@@ -1216,9 +1314,14 @@ def set_defaults
 	$options.tiledepth = TkVariable.new(1) # Tiling depth	
 	$options.sort = TkVariable.new(0) # Flag to sort stack2baits SNPs by between/within population variation
 	$options.hwe = TkVariable.new(0) # Flag to sort stacks2baits SNPs by Hardy-Weinberg Equilibrium
-	$options.alpha = TkVariable.new("0.05") # HWE test alpha value
+	$options.alpha = TkVariable.new(0.05) # HWE test alpha value
+	$options.percid = TkVariable.new(0.0) # Percent identity for BLAST hit
+	$options.blastlen = TkVariable.new(1) # Minimum length for BLAST hit
+	$options.evalue = TkVariable.new(0.1) # Maximum E-value to include BLAST hit
+	$options.evalue_filter = TkVariable.new(0) # Flag to filter BLAST hits by E-value
 	# Filtration Parameters
-	$options.params = TkVariable.new(0) # Flag to output filtration parameters	
+	$options.params = TkVariable.new(0) # Flag to output filtration parameters
+	$options.no_lc = TkVariable.new(0) # Flag to disable linguistic complexity calculation for filtration
 	$options.completebait = TkVariable.new(0) # Flag to filter by complete bait length	
 	$options.no_Ns = TkVariable.new(0) # Flag to omit bait sequences with Ns
 	$options.collapse_ambiguities = TkVariable.new(0) # Flag to collapse ambiguities to a single nucleotide
@@ -1275,17 +1378,17 @@ create_root_menu
 exit_btn = TkButton.new($root) do
 	text "Quit"
 	command 'exit'
-	place('x' => 660, 'y' => 560)
+	place('x' => 10, 'y' => 560)
 end
 $back_btn = TkButton.new($root) do
 	text "Back"
 	command 'go_back'
-	place('x' => 660, 'y' => 520)
+	place('x' => 660, 'y' => 560)
 end
 $next_btn = TkButton.new($root) do 
 	text 'Next'
 	command 'go_forward'
-	place('x' => 660, 'y' => 480)
+	place('x' => 660, 'y' => 520)
 end
 credit = TkLabel.new($root) do
 	text "Michael G. Campana, 2017-2018\nSmithsonian Conservation Biology Institute"
