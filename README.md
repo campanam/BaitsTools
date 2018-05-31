@@ -25,11 +25,12 @@ The software is made available under the Smithsonian Institution [terms of use](
 7a. [aln2baits](#aln2baits)  
 7b. [annot2baits](#annot2baits)  
 7c. [bed2baits](#bed2baits)  
-7d. [checkbaits](#checkbaits)  
-7e. [pyrad2baits](#pyrad2baits)  
-7f. [stacks2baits](#stacks2baits)  
-7g. [tilebaits](#tilebaits)  
-7h. [vcf2baits](#vcf2baits)  
+7d. [blast2baits](#blast2baits)  
+7e. [checkbaits](#checkbaits)  
+7f. [pyrad2baits](#pyrad2baits)  
+7g. [stacks2baits](#stacks2baits)  
+7h. [tilebaits](#tilebaits)  
+7i. [vcf2baits](#vcf2baits)  
 8. [Tips and Tricks](#tips-and-tricks)  
 9. [Bug Reports](#bug-reports)
 10. [Citation](#citation)  
@@ -180,6 +181,18 @@ bed2baits generates baits from a track file in headerless BED and a a correspond
 `-P, --pad [VALUE]`: Length to pad beginning and ending of extracted regions. Padding the BED coordinates helps ensure that baits cover the entire region evenly. Default is 0 bp.  
 `-L, --length [VALUE]`: Requested bait length. Default is 120 bp.  
 `-O, --offset [VALUE]`: Offset (in bp) between tiled baits. Default is 60 bp.  
+
+### blast2baits  
+blast2baits generates baits from a BLAST hit tabular file and a corresponding DNA sequence in FASTA or FASTQ format.  
+
+`-i, --input [FILE]`: Input BLAST hit table. Include the path to the file if not in the current directory.  
+`-r, --refseq [FILE]`: Input reference sequence file name. Include the path to the file if not in the current directory.  
+ `-P, --pad [VALUE]`: Length to pad beginning and ending of extracted regions. Padding the BED coordinates helps ensure that baits cover the entire region evenly. Default is 0 bp.  
+`-L, --length [VALUE]`: Requested bait length. Default is 120 bp.  
+`-O, --offset [VALUE]`: Offset (in bp) between tiled baits. Default is 60 bp.  
+`--percid [VALUE]`: Minimum percent identity to include BLAST hit. Default is 0.0%.  
+`--blastlen [VALUE]`: Minimum length of BLAST hit in nucleotides. Default is 1 bp.  
+`--evalue [VALUE]`: Maximum E-value to include BLAST hit. Default is 0.1.  
 
 ### checkbaits  
 checkbaits quality-controls and filters previously generated baits in FASTA or FASTQ format.
