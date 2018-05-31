@@ -38,5 +38,4 @@ while @exit == ""
 	print chi_prob(test, df).to_s + "\n"
 	print "Exit? Return for no. Any string for yes.\n"
 	@exit = gets.chomp
-	break if @exit != ""
 end
