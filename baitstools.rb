@@ -712,6 +712,7 @@ begin
 			end
 			while $options.blastlen < 0
 				print "Minimum length must be greater than 0. Re-enter.\n"
+				$options.blastlen = gets.chomp.to_i
 			end
 			if $options.interact
 				print "Filter BLAST hits by E-value?\n"
