@@ -320,7 +320,7 @@ def filter_baits(bait, qual = [0])
 		keep = false if (maxhomopoly > $options.maxhomopoly && $options.maxhomopoly_filter)
 	end
 	if $options.lc_filter or $options.params
-		if $options.no_lc
+		if $options.no_lc && !$options.lc_filter
 			seqcomp = "NA"
 		else
 			seqcomp = linguistic_complexity(bait)
