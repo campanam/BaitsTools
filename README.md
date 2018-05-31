@@ -102,7 +102,7 @@ A tutorial and example data are available in the example_data subdirectory of th
 ## Common Options  
 `-o, --outprefix [VALUE]`: Output file prefix. Default is `out`.  
 `-Z, --outdir [VALUE]`: Output directory name. Default is current directory.  
-`-l, --log`: Output detailed log including subcommand-specific summary information such as retained loci, total selected SNPs, SNP coverage after filtration, etc.  
+`-l, --log`: Output detailed log including subcommand-specific summary information such as retained loci, total selected SNPs, SNP coverage after filtration, etc. *Highly recommended*  
 `-B, --bed`: Output BED file listing the absolute coordinates of baits in comparison to the reference sequences. Unless otherwise specified using the #bed annotation (see [Sequence Annotations](#sequence-annotations)), the default starting position of input FASTA/FASTQ sequences is assumed to be postion 1 (BED coordinate 0). *Recommended*.   
 `-E, --rbed`: Output BED file listing the coordinates of baits relative to input sequences. For example, if a gene is at neighboring positions 570-900 of a reference genome, a bait at positions 570-689 will have BED coordinates 0-120 rather than 569-689.  
 `--shuffle`: Shuffle the last bait forward to compensate for reaching the end of a contig  
@@ -116,6 +116,7 @@ A tutorial and example data are available in the example_data subdirectory of th
 
 ## Quality Control and Bait Filtration Options  
 `-w, --params`: Output table listing bait statistics (GC%, melting temperature, length, etc.). *Highly recommended*.  
+`--disable-lc`: Disable slow linguistic complexity calculations for parameters table  
 `-c, --complete`: Remove candidate baits that are shorter than the requested bait length.  
 `-N, --noNs`: Exclude candidate baits that include unknown bases (Ns).  
 `-C, --collapse`: Collapse ambiguity codes to a single nucleotide. One nucleotide will be chosen randomly from the possible nucleotides (e.g. either A or G will be selected for a R site). If `-N` is specified, N sites will be treated as missing data and filtered out as specified. Otherwise, N sites will be treated as matching any nucleotide (A, G, C, T(U)).  
