@@ -440,7 +440,7 @@ def blast_window
 		width 10
 	end
 	blastlen = TkLabel.new($root) do
-		text 'Min. Hit Length'
+		text 'Min. hit length'
 		font TkFont.new('times 20')
 		place('x' => 330, 'y' => 350)
 		pady 10
@@ -454,7 +454,7 @@ def blast_window
 	end
 	evalue = TkCheckButton.new ($root) do
 		variable $options.evalue_filter
-		text 'Max. E-Value'
+		text 'Max. E-value'
 		font TkFont.new('times 20')
 		place('x' => 50, 'y' => 400)
 		command '$evalueentry.state == "disabled" ? $evalueentry.state = "normal" : $evalueentry.state = "disabled"'
