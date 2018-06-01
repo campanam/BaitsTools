@@ -39,7 +39,7 @@ def start_baitstools
 		cmdline << " -S" if $options.sort == 1
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe == 1
 	else
-		if $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits"
+		if $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "blast2baits"
 			cmdline << " -r " + $options.refseq
 			cmdline << " -P" + $options.pad
 		end
@@ -469,6 +469,7 @@ def blast_window
 	$widgets.push(percid, percidentry, blastlen, blastlenentry, $evalueentry)
 	configure_buttons([evalue])
 	evalue.width = 15
+	$widgets.push(evalue)
 	$evalueentry.state = "disabled" if $options.evalue_filter == 0
 end
 #-----------------------------------------------------------------------------------------------
