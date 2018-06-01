@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.1.0"
+BAITSTOOLSGUI = "1.1.1"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
