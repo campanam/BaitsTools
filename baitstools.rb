@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.1.0"
+BAITSTOOLSVER = "1.2.0"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -98,6 +98,9 @@ class Parser
 		args.rc = false # Flag to generate reverse-complement bait
 		args.varqual_filter = false # Flag to determine whether to filter vcf variants by QUAL scores
 		args.varqual = 30 # Minimum vcf variant QUAL score
+		args.taxafile = nil # File holding taxa IDs
+		args.taxa = {} # Taxa hash
+		args.taxacount = [] # Array of values for taxa balancing
 		args.outdir = File.expand_path("./") # Output directory
 		args.outprefix = "out" # Output prefix
 		args.log = false # Flag to output detailed log
@@ -113,6 +116,12 @@ class Parser
 				when "vcf2baits" # vcf2baits options
 					opts.on("-i","--input [FILE]", String, "Input VCF file") do |vcf|
 						args.infile = vcf
+					end
+					opts.on("--taxafile [FILE]", String, "Balance variants by taxa specified in TSV file") do |taxafile|
+						args.taxafile = taxafile
+					end
+					opts.on("--taxacount [VALUES]", String, "Comma-separated list of values for taxa balancing (Order: AllPopulations,BetweenPopulations,WithinPopulations)") do |taxacount|
+						args.taxacount = taxacount.split(",").each { |value| value.to_i } if taxacount != nil
 					end
 					opts.on("-V", "--varqual [VALUE]", Integer, "Minimum variant QUAL score (Default = 30)") do |varf|
 						args.varqual = varf if varf != nil
