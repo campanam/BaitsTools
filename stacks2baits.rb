@@ -40,7 +40,7 @@ class Popvar # Population-specific SNP data object
 	end
 end
 #-----------------------------------------------------------------------------------------------
-def chi_cum_prob(test) # This calculates under chi distribution cumulative probability distribution special case of df = 1
+def chi_cum_prob(test) # This calculates chi distribution cumulative probability distribution under special case of df = 1
 	return Math.erf(Math.sqrt(test/2.0))
 end
 #-----------------------------------------------------------------------------------------------
