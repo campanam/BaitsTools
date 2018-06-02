@@ -61,10 +61,11 @@ def vcf2baits
 		$options.taxa = tmptax
 		write_file(".log.txt", "Variant Categories\nChromosome\tVariant\tCategory") if $options.log
 		@snps.keys.each { |chromo| @snps[chromo].each { |snp| snp.categorize } }
+		write_file(".log.txt", "") if $options.log # Add break line to make log easier to read
 	end
 	print "** Selecting variants **\n" unless $options.every
 	write_file(".log.txt", "Variants") if $options.log
-	@selectsnps = selectsnps(@snps) 	# Select SNPs
+	@selectsnps = selectsnps(@snps) # Select SNPs
 	# Write VCF & baits
 	vcfout << "##baitstools_vcf2baitsVersion=" + VCF2BAITSVER + "+BaitsTools-" + BAITSTOOLSVER + "\n##baitstools_vcf2baitsCommand="
 	cmdline = get_command_line

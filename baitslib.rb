@@ -556,9 +556,9 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 		snp_hash[chromo].sort_by! { |snp| snp.snp }
 		if $options.taxafile != nil
 			snp_hash[chromo].delete_if { |snp| snp.category == "MissingData" || snp.category == "Invariant" }
-			snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" && $options.taxacount[0] == 0 }
-			snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" && $options.taxacount[1] == 0 }
-			snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations" && $options.taxacount[2] == 0 }
+			snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" } if $options.taxacount[0] == 0
+			snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" } if $options.taxacount[1] == 0
+			snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations"} if $options.taxacount[2] == 0
 			snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
 		end
 	end
@@ -585,29 +585,48 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 					break if snpindex < 1
 				end
 			end
+			# Add SNP to selected pool and delete contigs if maximum number of SNPs reached or no remaining SNPs on contig
+			selectsnps[selected_contig] = [] if selectsnps[selected_contig].nil?
+			selectsnps[selected_contig].push(selected_snp)
+			snp_hash[selected_contig].delete(selected_snp) # So it cannot be reselected
 			# Delete remaining SNPs of category if maximum amount reached
 			if $options.taxafile != nil
 				case selected_snp.category
 				when "AllPopulations"
 					all_populations += 1
-					#if all_populations == $options.taxacount 
+					if all_populations == $options.taxacount[0]
+						for chromo in snp_hash.keys
+							snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" }
+							snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+						end
+					end
 				when "BetweenPopulations"
 					between_populations += 1
+					if between_populations == $options.taxacount[1]
+						for chromo in snp_hash.keys
+							snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" }
+							snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+						end
+					end
 				when "WithinPopulations"
 					within_populations += 1
+					if within_populations == $options.taxacount[2]
+						for chromo in snp_hash.keys
+							snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations" }
+							snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+						end
+					end
 				end
 			end
-			# Add SNP to selected pool and delete contigs if maximum number of SNPs reached or no remaining SNPs on contig
-			selectsnps[selected_contig] = [] if selectsnps[selected_contig].nil?
-			selectsnps[selected_contig].push(selected_snp)
-			snp_hash[selected_contig].delete(selected_snp) # So it cannot be reselected
 			if $options.scale
 				maxsize = $options.scalehash[selected_contig]
 			else
 				maxsize = $options.maxsnps
 			end
-			if selectsnps[selected_contig].size == maxsize or snp_hash[selected_contig].size == 0
-				snp_hash.delete_if {|key, value | key == selected_contig}
+			unless snp_hash[selected_contig].nil?
+				if selectsnps[selected_contig].size == maxsize or snp_hash[selected_contig].size == 0
+					snp_hash.delete_if {|key, value | key == selected_contig}
+				end
 			end
 			break if snp_hash.size == 0 # Stop selecting SNPs when all contigs deleted from consideration
 		end
@@ -792,7 +811,8 @@ def get_command_line # Get command line for summary output
 			cmdline << " -e"
 			cmdline << " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
 		else
-			cmdline << " -t" + $options.totalsnps.to_s + " -d" + $options.distance.to_s
+			cmdline << " -t" + $options.totalsnps.to_s if $options.taxafile.nil?
+			cmdline << " -d" + $options.distance.to_s
 			if $options.scale
 				cmdline << " -j"
 			else

@@ -100,7 +100,7 @@ class Parser
 		args.varqual = 30 # Minimum vcf variant QUAL score
 		args.taxafile = nil # File holding taxa IDs
 		args.taxa = {} # Taxa hash
-		args.taxacount = [] # Array of values for taxa balancing
+		args.taxacount = [0,0,0] # Array of values for taxa balancing
 		args.outdir = File.expand_path("./") # Output directory
 		args.outprefix = "out" # Output prefix
 		args.log = false # Flag to output detailed log
@@ -121,8 +121,8 @@ class Parser
 						args.taxafile = taxafile
 					end
 					opts.on("--taxacount [VALUES]", String, "Comma-separated list of values for taxa balancing (Order: AllPopulations,BetweenPopulations,WithinPopulations)") do |taxacount|
-						args.taxacount = taxacount.split(",").each { |value| value.to_i } if taxacount != nil
-					end
+						args.taxacount = taxacount.split(",").map! { |value| value.to_i } if taxacount != nil
+					end	
 					opts.on("-V", "--varqual [VALUE]", Integer, "Minimum variant QUAL score (Default = 30)") do |varf|
 						args.varqual = varf if varf != nil
 						args.varqual_filter = true
@@ -500,10 +500,58 @@ begin
 				$options.alpha = gets.chomp.to_f
 			end
 		end
-		if $options.interact and !$options.every
+		if $options.algorithm == "vcf2baits" and !$options.every
+			if $options.interact 
+				print "Sort variants by variation within, between and among taxa?\n"
+				t = gets.chomp.upcase
+				if t == "Y" or t == "YES"
+					print "Enter taxa file name.\n"
+					$options.taxafile = gets.chomp
+				end
+			end
+			unless $options.taxafile.nil?
+				while !FileTest.exist?($options.taxafile)
+					print "Taxa file not found. Please re-enter.\n"
+					$options.taxafile = gets.chomp
+				end
+				$options.totalsnps = $options.taxacount[0] + $options.taxacount[1] + $options.taxacount[2] # Ruby 2.0 does not have Array#sum method
+				while $options.totalsnps < 1
+					if $options.interact
+						print "Enter requested number of variants variable across populations.\n"
+						$options.taxacount[0] = gets.chomp.to_i
+					end
+					while $options.taxacount[0] < 0
+						print "The number of variants variable across populations must be at least 0. Re-enter.\n"
+						$options.taxacount[0] = gets.chomp.to_i
+					end
+					if $options.interact
+						print "Enter requested number of variants between populations.\n"
+						$options.taxacount[1] = gets.chomp.to_i
+					end
+					while $options.taxacount[1] < 0
+						print "The number of variants variable between populations must be at least 0. Re-enter.\n"
+						$options.taxacount[1] = gets.chomp.to_i
+					end
+					if $options.interact
+						print "Enter requested number of variants variable within populations.\n"
+						$options.taxacount[2] = gets.chomp.to_i
+					end
+					while $options.taxacount[2] < 0
+						print "The number of variants variable within populations must be at least 0. Re-enter.\n"
+						$options.taxacount[2] = gets.chomp.to_i
+					end
+					$options.totalsnps = $options.taxacount[0] + $options.taxacount[1] + $options.taxacount[2] # Ruby 2.0 does not have Array#sum method
+					if $options.totalsnps < 1
+						print "The total number of variants must be greater than 0. Please re-enter.\n"
+						$options.taxacount = [-1,-1,-1] # Force taxacount redo
+					end
+				end
+			end
+		end
+		if $options.interact and !$options.every and $options.taxafile.nil?
 			if $options.algorithm == "vcf2baits"
 				print "Enter total number of requested variants.\n"
-			else
+			else $options.algorithm == "stacks2baits"
 				print "Enter total number of requested variants per category.\n"
 			end
 			$options.totalsnps = gets.chomp.to_i
