@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.1.0"
+BAITSLIBVER = "1.2.0"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ class Fa_Seq #container for fasta/fastq sexquences
 end
 #-----------------------------------------------------------------------------------------------
 class Chromo_SNP # Container for SNPs
-	attr_accessor :chromo, :snp, :popvar_data, :ref, :alt, :qual
+	attr_accessor :chromo, :snp, :popvar_data, :ref, :alt, :qual, :category
 	def initialize(chromo, snp, popvar_data =[], ref = nil, alt = nil, qual = nil, line = nil)
 		@chromo = chromo # Chromosome
 		@snp = snp # SNP index in 1-based indexing
@@ -43,8 +43,54 @@ class Chromo_SNP # Container for SNPs
 		@alt = alt # Alternate alleles (vcf)
 		@qual = qual # Allele quality for vcf
 		@line = line # Original datalines for recall
+		@category = nil # Sorting category for vcf variants
 	end
-	def within_pops? # Determine whether SNP variable within populations
+	def categorize # Categorize VCF variants
+		alleles = line[0..-2].split("\t")[9..-1]
+		taxa = $options.taxa.uniq
+		taxa_hash = {}
+		for taxon in taxa
+			taxa_hash[taxon] = []
+		end
+		for i in 0 ... alleles.size
+			taxa_hash[$options.taxa[i]].push(alleles[i][0]) unless alleles[i][0] == "."
+			taxa_hash[$options.taxa[i]].push(alleles[i][2]) unless alleles[i][2] == "."
+			taxa_hash[$options.taxa[i]].uniq!
+			taxa_hash[$options.taxa[i]].sort! unless taxa_hash[$options.taxa[i]].nil?
+		end
+		observed_combinations = {}
+		for taxon in taxa_hash
+			if observed_combinations[taxon[1]].nil?
+				observed_combinations[taxon[1]] = 1
+			else
+				observed_combinations[taxon[1]] += 1
+			end
+		end
+		observed_combinations = observed_combinations.keys
+		if observed_combinations.include?([])
+			@category = "MissingData"
+		elsif observed_combinations.size == 1
+			if observed_combinations[0].size == 1
+				@category = "Invariant"
+			else
+				@category = "AllPopulations"
+			end
+		else
+			homozygous = true
+			for i in 0 ... observed_combinations.size
+				if observed_combinations[i].size > 1
+					homozygous = false
+				end
+			end
+			if homozygous
+				@category = "BetweenPopulations"
+			else
+				@category = "WithinPopulations"
+			end
+		end
+		write_file(".log.txt", @chromo + "\t" + @snp.to_s + "\t" + @category) if $options.log
+	end
+	def within_pops? # Determine whether stacks SNP variable within populations
 		within_pops = false
 		for pop in @popvar_data
 			if !pop.monomorphic?
@@ -508,8 +554,18 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	for chromo in snp_hash.keys
 		totalvar += snp_hash[chromo].size
 		snp_hash[chromo].sort_by! { |snp| snp.snp }
+		if $options.taxafile != nil
+			snp_hash[chromo].delete_if { |snp| snp.category == "MissingData" || snp.category == "Invariant" }
+			snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" } if $options.taxacount[0] == 0
+			snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" } if $options.taxacount[1] == 0
+			snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations"} if $options.taxacount[2] == 0
+			snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+		end
 	end
 	selectsnps = {}
+	all_populations = 0
+	between_populations = 0
+	within_populations = 0
 	if !$options.every
 		for i in 1..$options.totalsnps
 			selected_contig = snp_hash.keys[rand(snp_hash.size)] # Get name of contig
@@ -533,13 +589,44 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 			selectsnps[selected_contig] = [] if selectsnps[selected_contig].nil?
 			selectsnps[selected_contig].push(selected_snp)
 			snp_hash[selected_contig].delete(selected_snp) # So it cannot be reselected
+			# Delete remaining SNPs of category if maximum amount reached
+			if $options.taxafile != nil
+				case selected_snp.category
+				when "AllPopulations"
+					all_populations += 1
+					if all_populations == $options.taxacount[0]
+						for chromo in snp_hash.keys
+							snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" }
+							snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+						end
+					end
+				when "BetweenPopulations"
+					between_populations += 1
+					if between_populations == $options.taxacount[1]
+						for chromo in snp_hash.keys
+							snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" }
+							snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+						end
+					end
+				when "WithinPopulations"
+					within_populations += 1
+					if within_populations == $options.taxacount[2]
+						for chromo in snp_hash.keys
+							snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations" }
+							snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+						end
+					end
+				end
+			end
 			if $options.scale
 				maxsize = $options.scalehash[selected_contig]
 			else
 				maxsize = $options.maxsnps
 			end
-			if selectsnps[selected_contig].size == maxsize or snp_hash[selected_contig].size == 0
-				snp_hash.delete_if {|key, value | key == selected_contig}
+			unless snp_hash[selected_contig].nil?
+				if selectsnps[selected_contig].size == maxsize or snp_hash[selected_contig].size == 0
+					snp_hash.delete_if {|key, value | key == selected_contig}
+				end
 			end
 			break if snp_hash.size == 0 # Stop selecting SNPs when all contigs deleted from consideration
 		end
@@ -558,7 +645,12 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 			write_file(".log.txt",  logtext[0...-1]) # Remove final comma
 		end
 	end
-	write_file(".log.txt", "\nNumberTotalVariants\tNumberSelectedVariants\n" + totalvar.to_s + "\t" + selectvar.to_s + "\n" ) if $options.log
+	if $options.log
+		write_file(".log.txt", "\nNumberTotalVariants\tNumberSelectedVariants\n" + totalvar.to_s + "\t" + selectvar.to_s + "\n")
+		if $options.taxafile != nil
+			write_file(".log.txt", "NumberAllPopulations\tNumberWithinPopulations\tNumberBetweenPopulations\n" + all_populations.to_s + "\t" + between_populations.to_s + "\t" + within_populations.to_s + "\n")
+		end
+	end
 	return selectsnps
 end
 #-----------------------------------------------------------------------------------------------
@@ -719,7 +811,8 @@ def get_command_line # Get command line for summary output
 			cmdline << " -e"
 			cmdline << " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
 		else
-			cmdline << " -t" + $options.totalsnps.to_s + " -d" + $options.distance.to_s
+			cmdline << " -t" + $options.totalsnps.to_s if $options.taxafile.nil?
+			cmdline << " -d" + $options.distance.to_s
 			if $options.scale
 				cmdline << " -j"
 			else
@@ -734,6 +827,10 @@ def get_command_line # Get command line for summary output
 		cmdline << " -r " + $options.refseq unless $options.no_baits
 		cmdline << " -a" if $options.alt_alleles
 		cmdline << " -V" + $options.varqual.to_s if $options.varqual_filter
+		if $options.taxafile != nil
+			cmdline << " --taxafile " + $options.taxafile 
+			cmdline << " --taxacount " + $options.taxacount.join(",")
+		end
 		cmdline << " -S" if $options.sort
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe
 	else

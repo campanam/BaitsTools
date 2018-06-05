@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # vcf2baits
-VCF2BAITSVER = "1.1.0"
+VCF2BAITSVER = "1.2.0"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -17,7 +17,10 @@ def vcf2baits
 	File.open($options.infile, 'r') do |snpreg|
 		while line = snpreg.gets
 			vcfout << line if line[0..1] == "##" # Add info lines to header
-			columns = line if line[0..1] == "#C" # Get column header separately so I can insert new information
+			if line[0..1] == "#C" # Get column header separately so I can insert new information
+				columns = line 
+				@samples = line[0..-2].split("\t")[9..-1] # Get sample names
+			end
 			if $options.scale and line[0..12] == "##contig=<ID="
 				line_arr = line.split(",")
 				reg = line_arr[0][13..-1] # Get region ID, but remove tag
@@ -43,9 +46,26 @@ def vcf2baits
 	@snps[chromosome]=temp_snps 		#To add last state from last line since otherwise will not loop
 	@snps.delete_if {|key, value| key == ""} # Delete dummy original value
 	@snps.delete_if {|key, value| value == []} # Delete empty contigs due to QUAL filter
+	unless $options.taxafile.nil?
+		print "** Reading taxa file and sorting variants **\n"
+		File.open($options.taxafile, 'r') do |taxafile| # Get taxa assignments
+			while line = taxafile.gets
+				taxon = line[0..-2].split("\t")
+				$options.taxa[taxon[0]] = taxon[1]
+			end
+		end
+		tmptax = [] # Sort taxa by sample order
+		for samp in @samples
+			tmptax.push($options.taxa[samp])
+		end
+		$options.taxa = tmptax
+		write_file(".log.txt", "Variant Categories\nChromosome\tVariant\tCategory") if $options.log
+		@snps.keys.each { |chromo| @snps[chromo].each { |snp| snp.categorize } }
+		write_file(".log.txt", "") if $options.log # Add break line to make log easier to read
+	end
 	print "** Selecting variants **\n" unless $options.every
 	write_file(".log.txt", "Variants") if $options.log
-	@selectsnps = selectsnps(@snps) 	# Select SNPs
+	@selectsnps = selectsnps(@snps) # Select SNPs
 	# Write VCF & baits
 	vcfout << "##baitstools_vcf2baitsVersion=" + VCF2BAITSVER + "+BaitsTools-" + BAITSTOOLSVER + "\n##baitstools_vcf2baitsCommand="
 	cmdline = get_command_line
