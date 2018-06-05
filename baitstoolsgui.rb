@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.1.1"
+BAITSTOOLSGUI = "1.2.0"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -643,7 +643,7 @@ def general_window
 		place('x' => 550, 'y' => 250)
 	end
 	rc = TkCheckButton.new($root) do
-		variable $options.log
+		variable $options.rc
 		text "Reverse complement"
 		place('x' => 50, 'y' => 300)
 	end
