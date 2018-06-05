@@ -270,6 +270,9 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.2.0  
+Fixed RC option bug  
+
 ### Version 1.1.1  
 Fixed evalue window bug  
 Fixed start_baitstools reference sequence/padding parameter for blast2baits bug  
