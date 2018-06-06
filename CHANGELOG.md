@@ -88,6 +88,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.2.0  
+fixed bugs in snp.line causing extra line breaks with write_file  
+
 ### Version 1.1.0  
 get_command_line and read_fasta use << to improve performance  
 File start called with setup_output  
@@ -456,6 +459,9 @@ Output now controlled by baitslib write_probes function
 Preliminary script to divide genic/genomic sequences into tiled baits
 
 ## vcf2baits  
+### Version 1.2.0  
+fixed bug in snp.line causing extra line breaks with write_file  
+
 ### Version 1.1.0  
 Reworking to use new temp file methods  
 
