@@ -461,6 +461,7 @@ Preliminary script to divide genic/genomic sequences into tiled baits
 ## vcf2baits  
 ### Version 1.2.0  
 fixed bug in snp.line causing extra line breaks with write_file  
+Taxon-based SNP sorting  
 
 ### Version 1.1.0  
 Reworking to use new temp file methods  
