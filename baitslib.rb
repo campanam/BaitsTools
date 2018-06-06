@@ -46,7 +46,7 @@ class Chromo_SNP # Container for SNPs
 		@category = nil # Sorting category for vcf variants
 	end
 	def categorize # Categorize VCF variants
-		alleles = line[0..-2].split("\t")[9..-1]
+		alleles = line.split("\t")[9..-1]
 		taxa = $options.taxa.uniq
 		taxa_hash = {}
 		for taxon in taxa
@@ -107,7 +107,7 @@ class Chromo_SNP # Container for SNPs
 				@line << pop.line
 			end
 		end
-		return @line
+		return @line[0..-2] # Remove final line break
 	end
 	def alt_alleles
 		if @alt.nil? # Get alternate alleles for stacks2baits (once)

@@ -38,7 +38,7 @@ def vcf2baits
 				temp_snps = [] if chromosome != reg # Empty set if no longer on same chromosome
 				chromosome = reg # Reset chromosome
 				if !$options.varqual_filter or qual > $options.varqual
-					temp_snps.push(Chromo_SNP.new(reg, snp, [], ref, alt, qual, line)) #Now using Chromo_SNPs to be consistent
+					temp_snps.push(Chromo_SNP.new(reg, snp, [], ref, alt, qual, line[0..-2])) #Now using Chromo_SNPs to be consistent
 				end
 			end
 		end
