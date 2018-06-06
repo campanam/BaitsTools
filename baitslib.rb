@@ -648,7 +648,7 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	if $options.log
 		write_file(".log.txt", "\nNumberTotalVariants\tNumberSelectedVariants\n" + totalvar.to_s + "\t" + selectvar.to_s + "\n")
 		if $options.taxafile != nil
-			write_file(".log.txt", "NumberAllPopulations\tNumberWithinPopulations\tNumberBetweenPopulations\n" + all_populations.to_s + "\t" + between_populations.to_s + "\t" + within_populations.to_s + "\n")
+			write_file(".log.txt", "NumberAllPopulations\tNumberBetweenPopulations\tNumberWithinPopulations\n" + all_populations.to_s + "\t" + between_populations.to_s + "\t" + within_populations.to_s + "\n")
 		end
 	end
 	return selectsnps
