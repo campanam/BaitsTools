@@ -860,7 +860,13 @@ def get_command_line # Get command line for summary output
 		if $options.taxafile != nil
 			cmdline << " --taxafile " + $options.taxafile 
 			cmdline << " --taxacount " + $options.taxacount.join(",")
-			cmdline << " --popcategories " + $options.popcategories.join(",") if $options.popcategories != nil # Not converted to hash until later in vcf2baits
+			if $options.popcategories != nil
+				if $options.popcategories.is_a?(Hash) # Not converted to hash until later in vcf2baits
+					cmdline << " --popcategories " + $options.popcategories.values.join(",")
+				else
+					cmdline << " --popcategories " + $options.popcategories.join(",")
+				end
+			end
 		end
 		cmdline << " -S" if $options.sort
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe
