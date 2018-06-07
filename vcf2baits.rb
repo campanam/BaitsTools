@@ -59,6 +59,13 @@ def vcf2baits
 			tmptax.push($options.taxa[samp])
 		end
 		$options.taxa = tmptax
+		unless $options.popcategories.nil? # Build popcategories hash for snp selection
+			tmpcat = $options.popcategories
+			$options.popcategories = {}
+			for taxon in 0 ... tmptax.uniq.size
+				$options.popcategories[tmptax[taxon]] = tmpcat[taxon]
+			end
+		end
 		write_file(".log.txt", "Variant Categories\nChromosome\tVariant\tCategory") if $options.log
 		@snps.keys.each { |chromo| @snps[chromo].each { |snp| snp.categorize } }
 		write_file(".log.txt", "") if $options.log # Add break line to make log easier to read

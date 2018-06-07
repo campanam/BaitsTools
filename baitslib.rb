@@ -34,7 +34,7 @@ class Fa_Seq #container for fasta/fastq sexquences
 end
 #-----------------------------------------------------------------------------------------------
 class Chromo_SNP # Container for SNPs
-	attr_accessor :chromo, :snp, :popvar_data, :ref, :alt, :qual, :category
+	attr_accessor :chromo, :snp, :popvar_data, :ref, :alt, :qual, :category, :popcategory
 	def initialize(chromo, snp, popvar_data =[], ref = nil, alt = nil, qual = nil, line = nil)
 		@chromo = chromo # Chromosome
 		@snp = snp # SNP index in 1-based indexing
@@ -44,6 +44,7 @@ class Chromo_SNP # Container for SNPs
 		@qual = qual # Allele quality for vcf
 		@line = line # Original datalines for recall
 		@category = nil # Sorting category for vcf variants
+		@popcategory = {} # Sorting category for vcf variants within populations
 	end
 	def categorize # Categorize VCF variants
 		alleles = line.split("\t")[9..-1]
@@ -55,6 +56,9 @@ class Chromo_SNP # Container for SNPs
 		for i in 0 ... alleles.size
 			taxa_hash[$options.taxa[i]].push(alleles[i][0]) unless alleles[i][0] == "."
 			taxa_hash[$options.taxa[i]].push(alleles[i][2]) unless alleles[i][2] == "."
+			unless alleles[i][0] == "." or alleles[i][2] == "." # Get population-level variation
+				@popcategory[$options.taxa[i]] = true if alleles[i][0] != alleles[i][2]
+			end
 			taxa_hash[$options.taxa[i]].uniq!
 			taxa_hash[$options.taxa[i]].sort! unless taxa_hash[$options.taxa[i]].nil?
 		end
@@ -559,6 +563,11 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 			snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" } if $options.taxacount[0] == 0
 			snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" } if $options.taxacount[1] == 0
 			snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations"} if $options.taxacount[2] == 0
+			unless $options.popcategories.nil? # Remove unwanted population-specific SNPs
+				for popcat in $options.popcategories.keys
+					snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) } if $options.popcategories[popcat] == 0
+				end
+			end
 			snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
 		end
 	end
@@ -566,6 +575,7 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	all_populations = 0
 	between_populations = 0
 	within_populations = 0
+	popcategories = $options.popcategories.map { |key, value| value = 0} unless $options.popcategories.nil?
 	if !$options.every
 		for i in 1..$options.totalsnps
 			selected_contig = snp_hash.keys[rand(snp_hash.size)] # Get name of contig
@@ -610,6 +620,15 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 					end
 				when "WithinPopulations"
 					within_populations += 1
+					unless $options.popcategories.nil? # Remove unwanted population-specific SNPs
+						for popcat in $options.popcategories.keys
+							popcategories[popcat] += 1
+							if popcategories[popcat] == $options.popcategories[popcat]
+								snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) }
+								snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+							end
+						end
+					end
 					if within_populations == $options.taxacount[2]
 						for chromo in snp_hash.keys
 							snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations" }

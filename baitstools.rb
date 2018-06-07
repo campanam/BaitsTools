@@ -101,6 +101,7 @@ class Parser
 		args.taxafile = nil # File holding taxa IDs
 		args.taxa = {} # Taxa hash
 		args.taxacount = [0,0,0] # Array of values for taxa balancing
+		args.popcategories = nil # Maximum numbers of population-specific variants
 		args.outdir = File.expand_path("./") # Output directory
 		args.outprefix = "out" # Output prefix
 		args.log = false # Flag to output detailed log
@@ -122,7 +123,10 @@ class Parser
 					end
 					opts.on("--taxacount [VALUES]", String, "Comma-separated list of values for taxa balancing (Order: AllPopulations,BetweenPopulations,WithinPopulations)") do |taxacount|
 						args.taxacount = taxacount.split(",").map! { |value| value.to_i } if taxacount != nil
-					end	
+					end
+					opts.on("--popcategories [VALUES]", String, "Comma-separated list of maximum number of population-specific variants in order of appearnce in taxa TSV file)") do |popcat|
+						args.popcategories = popcat.split(",").map! { |value| value.to_i } if popcat != nil
+					end
 					opts.on("-V", "--varqual [VALUE]", Integer, "Minimum variant QUAL score (Default = 30)") do |varf|
 						args.varqual = varf if varf != nil
 						args.varqual_filter = true
