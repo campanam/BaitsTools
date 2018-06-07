@@ -62,7 +62,8 @@ def vcf2baits
 		unless $options.popcategories.nil? # Build popcategories hash for snp selection
 			tmpcat = $options.popcategories
 			$options.popcategories = {}
-			for taxon in 0 ... tmptax.uniq!.size
+			tmptax = tmptax.uniq # Using uniq! on a uniqued array returns nil
+			for taxon in 0 ... tmptax.size
 				$options.popcategories[tmptax[taxon]] = tmpcat[taxon]
 			end
 		end
