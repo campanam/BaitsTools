@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # aln2baits
-ALN2BAITSVER = "1.1.0"
+ALN2BAITSVER = "1.2.0"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Hap_Window # Object defining a haplotype window
 						for Thread.current[:seq] in @haplotypes
 							Thread.current[:vars].push(get_ambiguity(Thread.current[:seq][Thread.current[:i]]))
 						end
-						Thread.current[:vars].flatten!.uniq! # Remove duplicate variants
+						Thread.current[:vars] = Thread.current[:vars].flatten!.uniq # Remove duplicate variants
 						variants[Thread.current[:i]] = Thread.current[:vars] # Minimize lock time
 					end
 				end

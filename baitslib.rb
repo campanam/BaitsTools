@@ -59,7 +59,7 @@ class Chromo_SNP # Container for SNPs
 			unless alleles[i][0] == "." or alleles[i][2] == "." # Get population-level variation
 				@popcategory[$options.taxa[i]] = true if alleles[i][0] != alleles[i][2]
 			end
-			taxa_hash[$options.taxa[i]].uniq!
+			taxa_hash[$options.taxa[i]] = taxa_hash[$options.taxa[i]].uniq 
 			taxa_hash[$options.taxa[i]].sort! unless taxa_hash[$options.taxa[i]].nil?
 		end
 		observed_combinations = {}
@@ -119,7 +119,7 @@ class Chromo_SNP # Container for SNPs
 			for pop in @popvar_data
 				@alt += pop.alleles
 			end
-			@alt.uniq!
+			@alt = @alt.uniq
 		end
 		return @alt
 	end
@@ -798,7 +798,7 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 											filteredsnps[refseq[Thread.current[:j]].header] = [Thread.current[:snp]]
 										else
 											filteredsnps[refseq[Thread.current[:j]].header].push(Thread.current[:snp])
-											filteredsnps[refseq[Thread.current[:j]].header].uniq!
+											filteredsnps[refseq[Thread.current[:j]].header] = filteredsnps[refseq[Thread.current[:j]].header].uniq
 										end
 									end
 									if $options.params
