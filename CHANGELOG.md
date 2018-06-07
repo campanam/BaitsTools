@@ -159,6 +159,10 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.2.0  
+Taxon-based SNP-sorting  
+Fixed bugs requesting filters when no baits are going to be output  
+
 ### Version 1.1.0  
 File start called with setup_output  
 Reworking to use new temp file methods  
