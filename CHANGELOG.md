@@ -18,6 +18,9 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.2.0  
+Fixed possible issues due to uniq!  
+
 ### Version 1.1.0  
 Reworking to use new temp file methods  
 
@@ -91,6 +94,7 @@ Preliminary script to generate baits from an annotation file and a reference seq
 ### Version 1.2.0  
 fixed bugs in snp.line causing extra line breaks with write_file  
 Taxon-based SNP sorting  
+Fixed possible issues due to uniq!  
 
 ### Version 1.1.0  
 get_command_line and read_fasta use << to improve performance  
