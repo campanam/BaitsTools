@@ -124,7 +124,7 @@ class Parser
 					opts.on("--taxacount [VALUES]", String, "Comma-separated list of values for taxa balancing (Order: AllPopulations,BetweenPopulations,WithinPopulations)") do |taxacount|
 						args.taxacount = taxacount.split(",").map! { |value| value.to_i } if taxacount != nil
 					end
-					opts.on("--popcategories [VALUES]", String, "Comma-separated list of maximum number of population-specific variants in order of appearnce in taxa TSV file") do |popcat|
+					opts.on("--popcategories [VALUES]", String, "Comma-separated list of maximum number of population-specific variants in order of appearance in taxa TSV file") do |popcat|
 						args.popcategories = popcat.split(",").map! { |value| value.to_i } if popcat != nil
 					end
 					opts.on("-V", "--varqual [VALUE]", Integer, "Minimum variant QUAL score (Default = 30)") do |varf|
