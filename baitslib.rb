@@ -638,7 +638,7 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 					within_populations += 1
 					unless $options.popcategories.nil? # Remove unwanted population-specific SNPs
 						for popcat in $options.popcategories.keys
-							popcategories[popcat] += 1
+							popcategories[popcat] += 1 if selected_snp.popcategory.include?(popcat)
 							if popcategories[popcat] == $options.popcategories[popcat]
 								for chromo in snp_hash.keys
 									snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) }
