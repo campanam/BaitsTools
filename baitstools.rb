@@ -551,6 +551,20 @@ begin
 					end
 				end
 			end
+			if $options.interact
+				print "Control population-specific variants by quantity?\n"
+				t = gets.chomp.upcase
+				if t == "Y" or t == "YES"
+					print "Enter comma-separated list of population-specific variants in order of appearance in taxa TSV file\n"
+					$options.popcategories = gets.chomp.split(",").map! { |val| val.to_i }
+				end
+			end
+			unless $options.popcategories.nil? # Check that population values are ok
+				while checkpop
+					print "Population-specific variant numbers must be between 0 and the total number of within-population variants. Re-enter.\n"
+					$options.popcategories = gets.chomp.split(",").map! { |val| val.to_i }
+				end
+			end
 		end
 		if $options.interact and !$options.every and $options.taxafile.nil?
 			if $options.algorithm == "vcf2baits"
@@ -929,7 +943,7 @@ begin
 			$options.bait_type = gets.chomp
 		end
 	end
-	if $options.interact
+	if $options.interact and !$options.no_baits
 		print "Filter by maximum percent masked sequence? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
@@ -942,7 +956,7 @@ begin
 		print "Percent masked sequence must be between 0.0 and 100.0. Re-enter.\n"
 		$options.maxmask = gets.chomp.to_f
 	end
-	if $options.interact
+	if $options.interact and !$options.no_baits
 		print "Filter by maximum homopolymer length? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
@@ -955,7 +969,7 @@ begin
 		print "Maximum homopolymer length must be greater than 0. Re-enter.\n"
 		$options.maxhomopoly = gets.chomp.to_i
 	end
-	if $options.interact
+	if $options.interact and !$options.no_baits
 		print "Filter by minimum sequence linguistic complexity? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"

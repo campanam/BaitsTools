@@ -125,6 +125,17 @@ class Chromo_SNP # Container for SNPs
 	end
 end
 #-----------------------------------------------------------------------------------------------
+def checkpop # Method to determine whether popcategories input is reasonable
+	popbad = false
+	for pop in $options.popcategories
+		if pop < 0 or pop > $options.taxacount[1]
+			popbad = true
+			break
+		end
+	end
+	return popbad
+end
+#-----------------------------------------------------------------------------------------------
 def mean(val = [])
 	mean = 0.0
 	for i in 0.. val.size-1
