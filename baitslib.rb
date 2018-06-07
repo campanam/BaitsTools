@@ -128,7 +128,7 @@ end
 def checkpop # Method to determine whether popcategories input is reasonable
 	popbad = false
 	for pop in $options.popcategories
-		if pop < 0 or pop > $options.taxacount[1]
+		if pop < 0 or pop > $options.taxacount[2]
 			popbad = true
 			break
 		end

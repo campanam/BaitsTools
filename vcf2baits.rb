@@ -58,11 +58,11 @@ def vcf2baits
 		for samp in @samples
 			tmptax.push($options.taxa[samp])
 		end
-		$options.taxa = tmptax
+		$options.taxa = tmptax.dup
 		unless $options.popcategories.nil? # Build popcategories hash for snp selection
 			tmpcat = $options.popcategories
 			$options.popcategories = {}
-			for taxon in 0 ... tmptax.uniq.size
+			for taxon in 0 ... tmptax.uniq!.size
 				$options.popcategories[tmptax[taxon]] = tmpcat[taxon]
 			end
 		end
