@@ -575,7 +575,12 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	all_populations = 0
 	between_populations = 0
 	within_populations = 0
-	popcategories = $options.popcategories.map { |key, value| value = 0} unless $options.popcategories.nil?
+	popcategories = $options.popcategories.dup
+	unless $options.popcategories.nil? # Set count of selected popcategories to 0
+		for key in popcategories.keys
+			popcategories[key] = 0
+		end
+	end
 	if !$options.every
 		for i in 1..$options.totalsnps
 			selected_contig = snp_hash.keys[rand(snp_hash.size)] # Get name of contig
@@ -624,8 +629,10 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 						for popcat in $options.popcategories.keys
 							popcategories[popcat] += 1
 							if popcategories[popcat] == $options.popcategories[popcat]
-								snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) }
-								snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+								for chromo in snp_hash.keys
+									snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) }
+									snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+								end
 							end
 						end
 					end
@@ -668,6 +675,10 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 		write_file(".log.txt", "\nNumberTotalVariants\tNumberSelectedVariants\n" + totalvar.to_s + "\t" + selectvar.to_s + "\n")
 		if $options.taxafile != nil
 			write_file(".log.txt", "NumberAllPopulations\tNumberBetweenPopulations\tNumberWithinPopulations\n" + all_populations.to_s + "\t" + between_populations.to_s + "\t" + within_populations.to_s + "\n")
+			if $options.popcategories != nil
+				popcatline = "Population-Specific Variants\n" + $options.taxa.uniq.join("\t") + "\n" + popcategories.values.join("\t") + "\n"
+				write_file(".log.txt",popcatline)
+			end
 		end
 	end
 	return selectsnps
@@ -849,6 +860,7 @@ def get_command_line # Get command line for summary output
 		if $options.taxafile != nil
 			cmdline << " --taxafile " + $options.taxafile 
 			cmdline << " --taxacount " + $options.taxacount.join(",")
+			cmdline << " --popcategories " + $options.popcategories.join(",") if $options.popcategories != nil # Not converted to hash until later in vcf2baits
 		end
 		cmdline << " -S" if $options.sort
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe
