@@ -166,6 +166,7 @@ filter_probes definition removed into separate script for access by other script
 ### Version 1.2.0  
 Taxon-based SNP-sorting  
 Fixed bugs requesting filters when no baits are going to be output  
+Phred64 quality encoding  
 
 ### Version 1.1.0  
 File start called with setup_output  
