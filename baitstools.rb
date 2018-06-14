@@ -96,11 +96,13 @@ class Parser
 		args.rna = false # Flag whether baits are output as RNA
 		args.alt_alleles = false # Flag to apply alternate alleles
 		args.rc = false # Flag to generate reverse-complement bait
+		args.phred64 = false # Flag to use phred64 quality encoding
 		args.varqual_filter = false # Flag to determine whether to filter vcf variants by QUAL scores
 		args.varqual = 30 # Minimum vcf variant QUAL score
 		args.taxafile = nil # File holding taxa IDs
 		args.taxa = {} # Taxa hash
 		args.taxacount = [0,0,0] # Array of values for taxa balancing
+		args.popcategories = nil # Maximum numbers of population-specific variants
 		args.outdir = File.expand_path("./") # Output directory
 		args.outprefix = "out" # Output prefix
 		args.log = false # Flag to output detailed log
@@ -122,7 +124,10 @@ class Parser
 					end
 					opts.on("--taxacount [VALUES]", String, "Comma-separated list of values for taxa balancing (Order: AllPopulations,BetweenPopulations,WithinPopulations)") do |taxacount|
 						args.taxacount = taxacount.split(",").map! { |value| value.to_i } if taxacount != nil
-					end	
+					end
+					opts.on("--popcategories [VALUES]", String, "Comma-separated list of maximum number of population-specific variants in order of appearance in taxa TSV file") do |popcat|
+						args.popcategories = popcat.split(",").map! { |value| value.to_i } if popcat != nil
+					end
 					opts.on("-V", "--varqual [VALUE]", Integer, "Minimum variant QUAL score (Default = 30)") do |varf|
 						args.varqual = varf if varf != nil
 						args.varqual_filter = true
@@ -375,6 +380,9 @@ class Parser
 				opts.on("-R", "--rc", "Output reverse-complemented baits") do
 					args.rc = true
 				end
+				opts.on("--phred64", "Quality scores are in Phred64") do
+					args.phred64 = true
+				end
 				opts.on("-G", "--gaps [VALUE]", String, "Strategy to handle sequence gaps (-) (include, exclude, or extend) (Default = include)") do |gap|
 					args.gaps = gap if gap != nil
 				end
@@ -432,18 +440,9 @@ class Parser
 end
 #-----------------------------------------------------------------------------------------------
 begin
-	# Build FASTQ quality translation hash
-	fq_val = ["!","\"","#","$","%","&","\'","(",")","*","+",",","-",".","/","0","1","2","3","4","5","6","7","8","9",
-		":",";","<","=",">","?","@","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T",
-		"U","V","W","X","Y","Z","[","\\","]","^","_","`","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o",
-		"p","q","r","s","t","u","v","w","x","y","z","{","|","}","~"]
-	$fq_hash = {}
-	for i in 0..93
-		$fq_hash[fq_val[i]] = i
-	end
-	# Interactive mode block
 	$options = Parser.parse(ARGV)
 	exit if $options.kill
+	# Interactive mode block
 	if $options.interact
 		print "Enter input file.\n"
 		$options.infile = gets.chomp
@@ -545,6 +544,20 @@ begin
 						print "The total number of variants must be greater than 0. Please re-enter.\n"
 						$options.taxacount = [-1,-1,-1] # Force taxacount redo
 					end
+				end
+			end
+			if $options.interact
+				print "Control population-specific variants by quantity?\n"
+				t = gets.chomp.upcase
+				if t == "Y" or t == "YES"
+					print "Enter comma-separated list of population-specific variants in order of appearance in taxa TSV file\n"
+					$options.popcategories = gets.chomp.split(",").map! { |val| val.to_i }
+				end
+			end
+			unless $options.popcategories.nil? # Check that population values are ok
+				while checkpop
+					print "Population-specific variant numbers must be between 0 and the total number of within-population variants. Re-enter.\n"
+					$options.popcategories = gets.chomp.split(",").map! { |val| val.to_i }
 				end
 			end
 		end
@@ -925,7 +938,7 @@ begin
 			$options.bait_type = gets.chomp
 		end
 	end
-	if $options.interact
+	if $options.interact and !$options.no_baits
 		print "Filter by maximum percent masked sequence? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
@@ -938,7 +951,7 @@ begin
 		print "Percent masked sequence must be between 0.0 and 100.0. Re-enter.\n"
 		$options.maxmask = gets.chomp.to_f
 	end
-	if $options.interact
+	if $options.interact and !$options.no_baits
 		print "Filter by maximum homopolymer length? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
@@ -951,7 +964,7 @@ begin
 		print "Maximum homopolymer length must be greater than 0. Re-enter.\n"
 		$options.maxhomopoly = gets.chomp.to_i
 	end
-	if $options.interact
+	if $options.interact and !$options.no_baits
 		print "Filter by minimum sequence linguistic complexity? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
@@ -999,7 +1012,12 @@ begin
 	while $options.fasta_score < 0 or $options.fasta_score > 93
 		print "Assumed quality must be between 0 and 93. Re-enter.\n"
 		$options.fasta_score = gets.chomp.to_i
-	end		
+	end	
+	if $options.interact
+		print "Are FASTQ qualities in Phred64? (y/n)\n"
+		t = gets.chomp.upcase
+		$options.phred64 = true if t == "Y" or t == "YES"
+	end	
 	$options.no_baits = false if ($options.every or $options.alt_alleles) # Override -p when needed
 	$options.filter = true if ($options.completebait or $options.params or $options.algorithm == "checkbaits" or $options.lc_filter or $options.mingc_filter or $options.maxgc_filter or $options.mint_filter or $options.maxt_filter or $options.maxmask_filter or $options.maxhomopoly_filter or $options.meanqual_filter or $options.minqual_filter or $options.gaps == "exclude" or $options.no_Ns or $options.collapse_ambiguities) # Force filtration as necessary
 	cmdline = get_command_line
@@ -1007,6 +1025,7 @@ begin
 	print "** Basic command: " + cmdline[0] + " **\n"
 	print "** Filtration options:" + cmdline[1] + " **\n" # filtered line always starts with a space if present
 	setup_output
+	build_fq_hash # Build FASTQ quality translation hash
 	write_file(".log.txt", "Parsed commands: " + cmdline[0] + cmdline[1] + "\n") if $options.log
 	case $options.algorithm
 	when "aln2baits"

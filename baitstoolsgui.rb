@@ -21,7 +21,7 @@ def start_baitstools
 			cmdline << " -e"
 			cmdline << " -L" + $options.baitlength + " -O" + $options.tileoffset + " -b" + $options.lenbef + " -k" + $options.tiledepth
 		else
-			cmdline << " -t" + $options.totalsnps + " -d" + $options.distance
+			cmdline << " -t" + $options.totalsnps + " -d" + $options.distance if $options.taxafile == ""
 			if $options.scale == 1
 				cmdline << " -j"
 			else
@@ -36,6 +36,11 @@ def start_baitstools
 		cmdline << " -r " + $options.refseq unless $options.no_baits == 1
 		cmdline << " -a" if $options.alt_alleles == 1
 		cmdline << " -V " + $options.varqual if $options.varqual_filter == 1
+		if $options.taxafile != ""
+			cmdline << " --taxafile " + $options.taxafile 
+			cmdline << " --taxacount " + $options.taxacount
+			cmdline << " --popcategories " + $options.popcategories if $options.popcategories != ""
+		end
 		cmdline << " -S" if $options.sort == 1
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe == 1
 	else
@@ -71,6 +76,7 @@ def start_baitstools
 	cmdline << " --shuffle" if $options.shuffle == 1
 	cmdline << " -D" if $options.ncbi == 1
 	cmdline << " -Y" if $options.rna == 1
+	cmdline << " --phred64" if $options.phred64 == 1
 	cmdline << " -G " + $options.gaps
 	cmdline << " -X" + $options.threads
 	# Generate filtration options
@@ -647,10 +653,15 @@ def general_window
 		text "Reverse complement"
 		place('x' => 50, 'y' => 300)
 	end
+	phred64 = TkCheckButton.new($root) do
+		variable $options.phred64
+		text "Phred64"
+		place('x' => 300, 'y' => 300)
+	end
 	gaps = TkLabel.new($root) do
 		text 'Gap strategy'
 		font TkFont.new('times 20')
-		place('x' => 300, 'y' => 300)
+		place('x' => 50, 'y' => 350)
 		pady 10
 	end
 	gapselect = Tk::Tile::Combobox.new($root) do
@@ -659,28 +670,28 @@ def general_window
 		state "readonly"
 		width 10
 		height 2
-		place('x' => 420, 'y' => 310)
+		place('x' => 170, 'y' => 360)
 	end
 	threads = TkLabel.new($root) do
 		text 'Threads'
 		font TkFont.new('times 20')
-		place('x' => 560, 'y' => 300)
+		place('x' => 310, 'y' => 350)
 		pady 10
 	end
 	threadentry = TkEntry.new($root) do
 		textvariable $options.threads
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 640, 'y' => 310)
+		place('x' => 390, 'y' => 360)
 		width 10
 	end
-	configure_buttons([outdir, bed, rbed, shuffle, log, ncbi, rna, rc])
+	configure_buttons([outdir, bed, rbed, shuffle, log, ncbi, rna, rc, phred64])
 	bed.state = shuffle.state = "disabled" if $options.algorithm == "checkbaits"
 	ncbi.state = "disabled" if $options.algorithm == "pyrad2baits"
 	rbed.state = "disabled" unless $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "tilebaits" or $options.algorithm == "aln2baits"
 	outdir.width = rbed.width = rc.width = 20
 	ncbi.width = 15
-	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, gaps, gapselect, threads, threadentry)
+	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gaps, gapselect, threads, threadentry)
 end
 #-----------------------------------------------------------------------------------------------
 def subcommand_window(subcommand)
@@ -814,6 +825,51 @@ def create_root_menu
 #	end
 #	$widgets.push(poonheli)
 	$labelVar.value = "Choose Subcommand"
+end
+#-----------------------------------------------------------------------------------------------
+def taxa_window
+	clear_widgets
+	$labelVar.value = "vcf2baits Taxa Options"
+	taxafile = TkButton.new($root) do
+		text 'Taxa file (optional)'
+		command '$options.taxafile.value = Tk.getOpenFile'
+		place('x' => 50, 'y' => 100)
+	end
+	taxalabel = TkLabel.new($root) do
+		textvariable $options.taxafile
+		font TkFont.new('times 12')
+		place('x' => 300, 'y' => 100)
+		pady 10
+	end
+	taxacount = TkLabel.new($root) do
+		text 'Category variants (order: all,between,within) (comma-separated list)'
+		font TkFont.new('times 20')
+		place('x' => 50, 'y' => 150)
+		pady 10
+	end
+	taxacountentry = TkEntry.new($root) do
+		textvariable $options.taxacount
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 50, 'y' => 210)
+		width 50
+	end
+	popcat = TkLabel.new($root) do
+		text 'Population-specific variants (order of taxa file) (comma-separated list)'
+		font TkFont.new('times 20')
+		place('x' => 50, 'y' => 250)
+		pady 10
+	end
+	popcatentry = TkEntry.new($root) do
+		textvariable $options.popcategories
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 50, 'y' => 310)
+		width 50
+	end	
+	configure_buttons([taxafile])
+	taxafile.width = 20
+	$widgets.push(taxafile, taxalabel, taxacount, popcat, taxacountentry, popcatentry)
 end
 #-----------------------------------------------------------------------------------------------
 def qc_window
@@ -1088,6 +1144,12 @@ end
 def go_back
 	case $labelVar.value
 	when "Filtration Options"
+		if $options.algorithm == "vcf2baits"
+			taxa_window
+		else
+			subcommand_window($options.algorithm)
+		end
+	when "vcf2baits Taxa Options"
 		subcommand_window($options.algorithm)
 	when "General Options"
 		qc_window
@@ -1178,9 +1240,42 @@ def go_forward
 			Tk::messageBox :message => 'Tiling depth cannot be less than 1.'
 		elsif ($options.alpha.to_f < 0.0 or $options.alpha.to_f > 1.0) && $options.hwe == 1
 			Tk::messageBox :message => 'Alpha must be between 0.0 and 1.0.'
+		elsif $labelVar.value == "vcf2baits Options"
+			taxa_window
 		else
 			qc_window
 		end
+	when "vcf2baits Taxa Options"
+		data_fails = false
+		if $options.taxafile != ""
+			taxacnt = $options.taxacount.value.split(",").map { |x| x.to_i }
+			if taxacnt.size != 3
+				Tk::messageBox :message => 'Three values needed for all categories (AllPopulations,BetweenPopulations,WithinPopulations)'
+				data_fails = true
+			elsif taxacnt[0] < 0
+				Tk::messageBox :message => 'The number of variants variable across populations must be at least 0.'
+				data_fails = true
+			elsif taxacnt[1] < 0
+				Tk::messageBox :message => 'The number of variants variable between populations must be at least 0.'
+				data_fails = true
+			elsif taxacnt[2] < 0
+				Tk::messageBox :message => 'The number of variants variable within populations must be at least 0.'
+				data_fails = true
+			elsif taxacnt[0] + taxacnt[1] + taxacnt[2] < 1  # Ruby 2.0 does not have Array#sum method
+				Tk::messageBox :message => 'The total number of variants must be greater than 0.'
+				data_fails = true
+			elsif $options.popcategories != "" # Check that population values are ok
+				popcnt = $options.popcategories.value.split(",").map { |x| x.to_i }
+				for pop in popcnt
+					if pop < 0 or pop > taxacnt[2]
+						data_fails = true
+						Tk::messageBox :message => 'Population-specific variant numbers must be between 0 and the total number of within-population variants.'
+						break
+					end
+				end
+			end
+		end
+		qc_window unless data_fails
 	when "Filtration Options"
 		data_fails = false
 		if $options.maxmask_filter == 1
@@ -1295,6 +1390,9 @@ def set_defaults
 	# Algorithm Parameters
 	$options.infile = TkVariable.new("") # Primary input file
 	$options.refseq = TkVariable.new("") # Reference sequence file
+	$options.taxafile = TkVariable.new("") # Taxa assignment file
+	$options.taxacount = TkVariable.new("") # Variant category counts
+	$options.popcategories = TkVariable.new("") # Population-specific variant counts
 	$options.baitlength = TkVariable.new(120) # Bait length
 	$options.tileoffset = TkVariable.new(60) # Offset between tiled baits
 	$options.bait_type = TkVariable.new("RNA-DNA") # Hybridization type
@@ -1347,6 +1445,7 @@ def set_defaults
 	$options.minqual_filter = TkVariable.new(0) # Flag to filter by minimum base quality
 	$options.minqual = TkVariable.new(10) # Minimum base quality
 	$options.fasta_score = TkVariable.new(0) # Asssumed base quality score for FASTA sequences
+	$options.phred64 = TkVariable.new(0) # Use phred64 quality encoding
 	# General Parameters
 	$options.outprefix = TkVariable.new("out") # Output prefix
 	$options.outdir = TkVariable.new(File.expand_path("./")) # Output directory

@@ -34,7 +34,7 @@ class Fa_Seq #container for fasta/fastq sexquences
 end
 #-----------------------------------------------------------------------------------------------
 class Chromo_SNP # Container for SNPs
-	attr_accessor :chromo, :snp, :popvar_data, :ref, :alt, :qual, :category
+	attr_accessor :chromo, :snp, :popvar_data, :ref, :alt, :qual, :category, :popcategory
 	def initialize(chromo, snp, popvar_data =[], ref = nil, alt = nil, qual = nil, line = nil)
 		@chromo = chromo # Chromosome
 		@snp = snp # SNP index in 1-based indexing
@@ -44,6 +44,7 @@ class Chromo_SNP # Container for SNPs
 		@qual = qual # Allele quality for vcf
 		@line = line # Original datalines for recall
 		@category = nil # Sorting category for vcf variants
+		@popcategory = {} # Sorting category for vcf variants within populations
 	end
 	def categorize # Categorize VCF variants
 		alleles = line.split("\t")[9..-1]
@@ -55,7 +56,10 @@ class Chromo_SNP # Container for SNPs
 		for i in 0 ... alleles.size
 			taxa_hash[$options.taxa[i]].push(alleles[i][0]) unless alleles[i][0] == "."
 			taxa_hash[$options.taxa[i]].push(alleles[i][2]) unless alleles[i][2] == "."
-			taxa_hash[$options.taxa[i]].uniq!
+			unless alleles[i][0] == "." or alleles[i][2] == "." # Get population-level variation
+				@popcategory[$options.taxa[i]] = true if alleles[i][0] != alleles[i][2]
+			end
+			taxa_hash[$options.taxa[i]] = taxa_hash[$options.taxa[i]].uniq 
 			taxa_hash[$options.taxa[i]].sort! unless taxa_hash[$options.taxa[i]].nil?
 		end
 		observed_combinations = {}
@@ -115,10 +119,21 @@ class Chromo_SNP # Container for SNPs
 			for pop in @popvar_data
 				@alt += pop.alleles
 			end
-			@alt.uniq!
+			@alt = @alt.uniq
 		end
 		return @alt
 	end
+end
+#-----------------------------------------------------------------------------------------------
+def checkpop # Method to determine whether popcategories input is reasonable
+	popbad = false
+	for pop in $options.popcategories
+		if pop < 0 or pop > $options.taxacount[2]
+			popbad = true
+			break
+		end
+	end
+	return popbad
 end
 #-----------------------------------------------------------------------------------------------
 def mean(val = [])
@@ -231,6 +246,23 @@ def collapse_ambiguity(bait, force = false) # Ambiguity handling, force turns of
 	bait.gsub!("n",nl[rand(4)]) unless ($options.no_Ns && !force)
 	bait.gsub!("t","u") if $options.rna # Remove any residual Ts after ambiguity collapsing
 	return bait
+end
+#-----------------------------------------------------------------------------------------------
+def build_fq_hash # method to build fastq quality hash
+	fq_val = ["!","\"","#","$","%","&","\'","(",")","*","+",",","-",".","/","0","1","2","3","4","5","6","7","8","9",
+		":",";","<","=",">","?","@","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T",
+		"U","V","W","X","Y","Z","[","\\","]","^","_","`","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o",
+		"p","q","r","s","t","u","v","w","x","y","z","{","|","}","~"]
+	$fq_hash = {}
+	if $options.phred64
+		for i in 0 .. 40
+			$fq_hash[fq_val[i]] = i + 31
+		end
+	else
+		for i in 0 .. 93
+			$fq_hash[fq_val[i]] = i
+		end
+	end
 end
 #-----------------------------------------------------------------------------------------------
 def extend_baits(bait, reference, seqst, seqend) # Extend baits with gap characters
@@ -559,6 +591,11 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 			snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" } if $options.taxacount[0] == 0
 			snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" } if $options.taxacount[1] == 0
 			snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations"} if $options.taxacount[2] == 0
+			unless $options.popcategories.nil? # Remove unwanted population-specific SNPs
+				for popcat in $options.popcategories.keys
+					snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) } if $options.popcategories[popcat] == 0
+				end
+			end
 			snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
 		end
 	end
@@ -566,6 +603,12 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	all_populations = 0
 	between_populations = 0
 	within_populations = 0
+	popcategories = $options.popcategories.dup
+	unless $options.popcategories.nil? # Set count of selected popcategories to 0
+		for key in popcategories.keys
+			popcategories[key] = 0
+		end
+	end
 	if !$options.every
 		for i in 1..$options.totalsnps
 			selected_contig = snp_hash.keys[rand(snp_hash.size)] # Get name of contig
@@ -610,6 +653,17 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 					end
 				when "WithinPopulations"
 					within_populations += 1
+					unless $options.popcategories.nil? # Remove unwanted population-specific SNPs
+						for popcat in $options.popcategories.keys
+							popcategories[popcat] += 1 if selected_snp.popcategory.include?(popcat)
+							if popcategories[popcat] == $options.popcategories[popcat]
+								for chromo in snp_hash.keys
+									snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) }
+									snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+								end
+							end
+						end
+					end
 					if within_populations == $options.taxacount[2]
 						for chromo in snp_hash.keys
 							snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations" }
@@ -649,6 +703,10 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 		write_file(".log.txt", "\nNumberTotalVariants\tNumberSelectedVariants\n" + totalvar.to_s + "\t" + selectvar.to_s + "\n")
 		if $options.taxafile != nil
 			write_file(".log.txt", "NumberAllPopulations\tNumberBetweenPopulations\tNumberWithinPopulations\n" + all_populations.to_s + "\t" + between_populations.to_s + "\t" + within_populations.to_s + "\n")
+			if $options.popcategories != nil
+				popcatline = "Population-Specific Variants\n" + $options.taxa.uniq.join("\t") + "\n" + popcategories.values.join("\t") + "\n"
+				write_file(".log.txt",popcatline)
+			end
 		end
 	end
 	return selectsnps
@@ -757,7 +815,7 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 											filteredsnps[refseq[Thread.current[:j]].header] = [Thread.current[:snp]]
 										else
 											filteredsnps[refseq[Thread.current[:j]].header].push(Thread.current[:snp])
-											filteredsnps[refseq[Thread.current[:j]].header].uniq!
+											filteredsnps[refseq[Thread.current[:j]].header] = filteredsnps[refseq[Thread.current[:j]].header].uniq
 										end
 									end
 									if $options.params
@@ -830,6 +888,13 @@ def get_command_line # Get command line for summary output
 		if $options.taxafile != nil
 			cmdline << " --taxafile " + $options.taxafile 
 			cmdline << " --taxacount " + $options.taxacount.join(",")
+			if $options.popcategories != nil
+				if $options.popcategories.is_a?(Hash) # Not converted to hash until later in vcf2baits
+					cmdline << " --popcategories " + $options.popcategories.values.join(",")
+				else
+					cmdline << " --popcategories " + $options.popcategories.join(",")
+				end
+			end
 		end
 		cmdline << " -S" if $options.sort
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe
@@ -871,6 +936,7 @@ def get_command_line # Get command line for summary output
 	cmdline << " -D" if $options.ncbi
 	cmdline << " -Y" if $options.rna
 	cmdline << " -R" if $options.rc
+	cmdline << " --phred64" if $options.phred64
 	cmdline << " -G " + $options.gaps
 	cmdline << " -X" + $options.threads.to_s
 	# Generate filtration options

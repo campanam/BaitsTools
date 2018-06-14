@@ -18,6 +18,9 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.2.0  
+Fixed possible issues due to uniq!  
+
 ### Version 1.1.0  
 Reworking to use new temp file methods  
 
@@ -91,6 +94,9 @@ Preliminary script to generate baits from an annotation file and a reference seq
 ### Version 1.2.0  
 fixed bugs in snp.line causing extra line breaks with write_file  
 Taxon-based SNP sorting  
+Fixed possible issues due to uniq!  
+FASTQ value hash converted to library method  
+phred64 encoding  
 
 ### Version 1.1.0  
 get_command_line and read_fasta use << to improve performance  
@@ -159,6 +165,11 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.2.0  
+Taxon-based SNP-sorting  
+Fixed bugs requesting filters when no baits are going to be output  
+phred64 quality encoding  
+
 ### Version 1.1.0  
 File start called with setup_output  
 Reworking to use new temp file methods  
@@ -276,6 +287,8 @@ Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_
 ## baitstoolsgui  
 ### Version 1.2.0  
 Fixed RC option bug  
+phred64 option  
+Taxon-based SNP sorting  
 
 ### Version 1.1.1  
 Fixed evalue window bug  
