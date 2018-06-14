@@ -442,21 +442,6 @@ end
 begin
 	$options = Parser.parse(ARGV)
 	exit if $options.kill
-	# Build FASTQ quality translation hash
-	fq_val = ["!","\"","#","$","%","&","\'","(",")","*","+",",","-",".","/","0","1","2","3","4","5","6","7","8","9",
-		":",";","<","=",">","?","@","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T",
-		"U","V","W","X","Y","Z","[","\\","]","^","_","`","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o",
-		"p","q","r","s","t","u","v","w","x","y","z","{","|","}","~"]
-	$fq_hash = {}
-	if $options.phred64
-		for i in 0 .. 40
-			$fq_hash[fq_val[i]] = i + 31
-		end
-	else
-		for i in 0 .. 93
-			$fq_hash[fq_val[i]] = i
-		end
-	end
 	# Interactive mode block
 	if $options.interact
 		print "Enter input file.\n"
@@ -1027,7 +1012,12 @@ begin
 	while $options.fasta_score < 0 or $options.fasta_score > 93
 		print "Assumed quality must be between 0 and 93. Re-enter.\n"
 		$options.fasta_score = gets.chomp.to_i
-	end		
+	end	
+	if $options.interact
+		print "Are FASTQ qualities in phred64? (y/n)\n"
+		t = gets.chomp.upcase
+		$options.phred64 = true if t == "Y" or t == "YES"
+	end	
 	$options.no_baits = false if ($options.every or $options.alt_alleles) # Override -p when needed
 	$options.filter = true if ($options.completebait or $options.params or $options.algorithm == "checkbaits" or $options.lc_filter or $options.mingc_filter or $options.maxgc_filter or $options.mint_filter or $options.maxt_filter or $options.maxmask_filter or $options.maxhomopoly_filter or $options.meanqual_filter or $options.minqual_filter or $options.gaps == "exclude" or $options.no_Ns or $options.collapse_ambiguities) # Force filtration as necessary
 	cmdline = get_command_line
@@ -1035,6 +1025,7 @@ begin
 	print "** Basic command: " + cmdline[0] + " **\n"
 	print "** Filtration options:" + cmdline[1] + " **\n" # filtered line always starts with a space if present
 	setup_output
+	build_fq_hash # Build FASTQ quality translation hash
 	write_file(".log.txt", "Parsed commands: " + cmdline[0] + cmdline[1] + "\n") if $options.log
 	case $options.algorithm
 	when "aln2baits"

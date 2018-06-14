@@ -248,6 +248,23 @@ def collapse_ambiguity(bait, force = false) # Ambiguity handling, force turns of
 	return bait
 end
 #-----------------------------------------------------------------------------------------------
+def build_fq_hash # method to build fastq quality hash
+	fq_val = ["!","\"","#","$","%","&","\'","(",")","*","+",",","-",".","/","0","1","2","3","4","5","6","7","8","9",
+		":",";","<","=",">","?","@","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T",
+		"U","V","W","X","Y","Z","[","\\","]","^","_","`","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o",
+		"p","q","r","s","t","u","v","w","x","y","z","{","|","}","~"]
+	$fq_hash = {}
+	if $options.phred64
+		for i in 0 .. 40
+			$fq_hash[fq_val[i]] = i + 31
+		end
+	else
+		for i in 0 .. 93
+			$fq_hash[fq_val[i]] = i
+		end
+	end
+end
+#-----------------------------------------------------------------------------------------------
 def extend_baits(bait, reference, seqst, seqend) # Extend baits with gap characters
 	bait.delete!("-")
 	while bait.length < $options.baitlength
@@ -919,6 +936,7 @@ def get_command_line # Get command line for summary output
 	cmdline << " -D" if $options.ncbi
 	cmdline << " -Y" if $options.rna
 	cmdline << " -R" if $options.rc
+	cmdline << " --phred64" if $options.phred64
 	cmdline << " -G " + $options.gaps
 	cmdline << " -X" + $options.threads.to_s
 	# Generate filtration options
