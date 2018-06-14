@@ -168,7 +168,7 @@ filter_probes definition removed into separate script for access by other script
 ### Version 1.2.0  
 Taxon-based SNP-sorting  
 Fixed bugs requesting filters when no baits are going to be output  
-Phred64 quality encoding  
+phred64 quality encoding  
 
 ### Version 1.1.0  
 File start called with setup_output  
@@ -287,6 +287,7 @@ Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_
 ## baitstoolsgui  
 ### Version 1.2.0  
 Fixed RC option bug  
+phred64 option  
 
 ### Version 1.1.1  
 Fixed evalue window bug  
