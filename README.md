@@ -251,6 +251,9 @@ tilebaits generates baits from a list of DNA sequences in FASTA or FASTQ format.
 vcf2baits selects variants and generates baits from a VCF file and a reference sequence.  
 
 `-i, --input [FILE]`: Input VCF file name. Include the path to the file if not in the current directory.  
+`--taxafile [FILE]`: Balance variants by taxa specified in optional TSV file  
+`--taxacount [VALUES]`: Comma-separated list of values for balancing variants by variation category (Order: AllPopulations,BetweenPopulations,WithinPopulations). AllPopulations are those variants for that are variable across all taxa. BetweenPopulations are variants that are homozygous within taxa, but variable across taxa. WithinPopulations are variable within a subset of the taxa (but not across all taxa).  
+`--popcategories [VALUES]`: Comma-separated list of maximum number of population-specific variants in order of appearance in taxa TSV file.  
 `-V, --varqual [VALUE]`: Minimum variant QUAL score to be included in subselected variants. Default is 30.  
 `-t, --totalvars [VALUE]`: Total requested variants. Default is 30,000.  
 `-j, --scale`: Scale the maximum number of variants per contig by that contig's length. Overrides the `-m` argument.  
