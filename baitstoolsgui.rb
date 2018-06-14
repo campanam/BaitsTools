@@ -71,6 +71,7 @@ def start_baitstools
 	cmdline << " --shuffle" if $options.shuffle == 1
 	cmdline << " -D" if $options.ncbi == 1
 	cmdline << " -Y" if $options.rna == 1
+	cmdline << " --phred64" if $options.phred64 == 1
 	cmdline << " -G " + $options.gaps
 	cmdline << " -X" + $options.threads
 	# Generate filtration options
@@ -647,10 +648,15 @@ def general_window
 		text "Reverse complement"
 		place('x' => 50, 'y' => 300)
 	end
+	phred64 = TkCheckButton.new($root) do
+		variable $options.phred64
+		text "phred64"
+		place('x' => 300, 'y' => 300)
+	end
 	gaps = TkLabel.new($root) do
 		text 'Gap strategy'
 		font TkFont.new('times 20')
-		place('x' => 300, 'y' => 300)
+		place('x' => 50, 'y' => 350)
 		pady 10
 	end
 	gapselect = Tk::Tile::Combobox.new($root) do
@@ -659,28 +665,28 @@ def general_window
 		state "readonly"
 		width 10
 		height 2
-		place('x' => 420, 'y' => 310)
+		place('x' => 170, 'y' => 360)
 	end
 	threads = TkLabel.new($root) do
 		text 'Threads'
 		font TkFont.new('times 20')
-		place('x' => 560, 'y' => 300)
+		place('x' => 310, 'y' => 350)
 		pady 10
 	end
 	threadentry = TkEntry.new($root) do
 		textvariable $options.threads
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 640, 'y' => 310)
+		place('x' => 390, 'y' => 360)
 		width 10
 	end
-	configure_buttons([outdir, bed, rbed, shuffle, log, ncbi, rna, rc])
+	configure_buttons([outdir, bed, rbed, shuffle, log, ncbi, rna, rc, phred64])
 	bed.state = shuffle.state = "disabled" if $options.algorithm == "checkbaits"
 	ncbi.state = "disabled" if $options.algorithm == "pyrad2baits"
 	rbed.state = "disabled" unless $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "tilebaits" or $options.algorithm == "aln2baits"
 	outdir.width = rbed.width = rc.width = 20
 	ncbi.width = 15
-	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, gaps, gapselect, threads, threadentry)
+	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gaps, gapselect, threads, threadentry)
 end
 #-----------------------------------------------------------------------------------------------
 def subcommand_window(subcommand)
@@ -1347,6 +1353,7 @@ def set_defaults
 	$options.minqual_filter = TkVariable.new(0) # Flag to filter by minimum base quality
 	$options.minqual = TkVariable.new(10) # Minimum base quality
 	$options.fasta_score = TkVariable.new(0) # Asssumed base quality score for FASTA sequences
+	$options.phred64 = TkVariable.new(0) # Use phred64 quality encoding
 	# General Parameters
 	$options.outprefix = TkVariable.new("out") # Output prefix
 	$options.outdir = TkVariable.new(File.expand_path("./")) # Output directory
