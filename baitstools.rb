@@ -96,6 +96,7 @@ class Parser
 		args.rna = false # Flag whether baits are output as RNA
 		args.alt_alleles = false # Flag to apply alternate alleles
 		args.rc = false # Flag to generate reverse-complement bait
+		args.phred64 = false # Flag to use phred64 quality encoding
 		args.varqual_filter = false # Flag to determine whether to filter vcf variants by QUAL scores
 		args.varqual = 30 # Minimum vcf variant QUAL score
 		args.taxafile = nil # File holding taxa IDs
@@ -379,6 +380,9 @@ class Parser
 				opts.on("-R", "--rc", "Output reverse-complemented baits") do
 					args.rc = true
 				end
+				opts.on("--phred64", "Quality scores are in phred64") do
+					args.phred64 = true
+				end
 				opts.on("-G", "--gaps [VALUE]", String, "Strategy to handle sequence gaps (-) (include, exclude, or extend) (Default = include)") do |gap|
 					args.gaps = gap if gap != nil
 				end
@@ -442,8 +446,14 @@ begin
 		"U","V","W","X","Y","Z","[","\\","]","^","_","`","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o",
 		"p","q","r","s","t","u","v","w","x","y","z","{","|","}","~"]
 	$fq_hash = {}
-	for i in 0..93
-		$fq_hash[fq_val[i]] = i
+	if $options.phred64
+		for i in 0 .. 40
+			$fq_hash[fq_val[i]] = i + 31
+		end
+	else
+		for i in 0 .. 93
+			$fq_hash[fq_val[i]] = i
+		end
 	end
 	# Interactive mode block
 	$options = Parser.parse(ARGV)
