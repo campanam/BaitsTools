@@ -95,6 +95,8 @@ Preliminary script to generate baits from an annotation file and a reference seq
 fixed bugs in snp.line causing extra line breaks with write_file  
 Taxon-based SNP sorting  
 Fixed possible issues due to uniq!  
+FASTQ value hash converted to library method  
+phred64 encoding  
 
 ### Version 1.1.0  
 get_command_line and read_fasta use << to improve performance  
