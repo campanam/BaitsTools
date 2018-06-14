@@ -288,6 +288,7 @@ Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_
 ### Version 1.2.0  
 Fixed RC option bug  
 phred64 option  
+Taxon-based SNP sorting  
 
 ### Version 1.1.1  
 Fixed evalue window bug  
