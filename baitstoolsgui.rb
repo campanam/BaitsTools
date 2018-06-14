@@ -650,7 +650,7 @@ def general_window
 	end
 	phred64 = TkCheckButton.new($root) do
 		variable $options.phred64
-		text "phred64"
+		text "Phred64"
 		place('x' => 300, 'y' => 300)
 	end
 	gaps = TkLabel.new($root) do

@@ -380,7 +380,7 @@ class Parser
 				opts.on("-R", "--rc", "Output reverse-complemented baits") do
 					args.rc = true
 				end
-				opts.on("--phred64", "Quality scores are in phred64") do
+				opts.on("--phred64", "Quality scores are in Phred64") do
 					args.phred64 = true
 				end
 				opts.on("-G", "--gaps [VALUE]", String, "Strategy to handle sequence gaps (-) (include, exclude, or extend) (Default = include)") do |gap|
@@ -1014,7 +1014,7 @@ begin
 		$options.fasta_score = gets.chomp.to_i
 	end	
 	if $options.interact
-		print "Are FASTQ qualities in phred64? (y/n)\n"
+		print "Are FASTQ qualities in Phred64? (y/n)\n"
 		t = gets.chomp.upcase
 		$options.phred64 = true if t == "Y" or t == "YES"
 	end	
