@@ -546,7 +546,7 @@ begin
 					end
 				end
 			end
-			if $options.interact
+			if $options.interact and !$options.taxafile.nil?
 				print "Control population-specific variants by quantity?\n"
 				t = gets.chomp.upcase
 				if t == "Y" or t == "YES"
