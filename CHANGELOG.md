@@ -18,6 +18,10 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.2.1  
+Fixed bugs in gap extension  
+Used appending for sequence variant generation  
+
 ### Version 1.2.0  
 Fixed possible issues due to uniq!  
 
@@ -165,6 +169,10 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.2.1  
+Fixed bug requesting population-specific variants when no taxa file specified  
+Replaced word SNP to variant in interactive mode  
+
 ### Version 1.2.0  
 Taxon-based SNP-sorting  
 Fixed bugs requesting filters when no baits are going to be output  
