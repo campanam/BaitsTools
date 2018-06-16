@@ -55,11 +55,11 @@ class Hap_Window # Object defining a haplotype window
 					if Thread.current[:k] % $options.threads == j
 						for Thread.current[:i] in 0...@haplotypes[0].length
 							Thread.current[:var] = Thread.current[:k] % variants[Thread.current[:i]].size
-							revised_haplos[Thread.current[:k]]+=variants[Thread.current[:i]][Thread.current[:var]] # Minimize lock time
+							revised_haplos[Thread.current[:k]] << variants[Thread.current[:i]][Thread.current[:var]] # Minimize lock time
 						end
 						if $options.gaps == "extend"
 							Thread.current[:refhap] = aln[rand(aln.size)] # Choose a random reference sequence
-							revised_haplos[Thread.current[:k]] = extend_baits(revised_haplos[Thread.current[:k]], Thread.current[:refhap], @seqstart, @seqend)
+							revised_haplos[Thread.current[:k]] = extend_baits(revised_haplos[Thread.current[:k]], Thread.current[:refhap].seq, @seqstart, @seqend)
 						end
 					end
 				end
@@ -110,7 +110,7 @@ def aln2baits(aln)
 							Thread.current[:tmp_seq] = Thread.current[:seq].seq[Thread.current[:seqstart]..Thread.current[:seqend]]
 							Thread.current[:tmp_seq].upcase! unless $options.maxmask_filter # Treat all cases the same unless the masking filter is requested
 							unless Thread.current[:window].haplotypes.include?(Thread.current[:tmp_seq]) # Add new sequences to haplotype list
-								Thread.current[:tmp_seq] = extend_baits(Thread.current[:tmp_seq], Thread.current[:seq], Thread.current[:seqstart], Thread.current[:seqend]) if ($options.gaps == "extend" && $options.haplodef == "haplotype")
+								Thread.current[:tmp_seq] = extend_baits(Thread.current[:tmp_seq], Thread.current[:seq].seq, Thread.current[:seqstart], Thread.current[:seqend]) if ($options.gaps == "extend" && $options.haplodef == "haplotype")
 								Thread.current[:window].haplotypes.push(Thread.current[:tmp_seq])
 								Thread.current[:window].bedstarts.push(Thread.current[:seq].bedstart)
 								Thread.current[:window].header.push(Thread.current[:seq].header)
