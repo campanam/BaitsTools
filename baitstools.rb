@@ -642,7 +642,7 @@ begin
 				$options.tileoffset = gets.chomp.to_i
 			end
 			if $options.interact
-				print "Enter number of baits per variant.\n"
+				print "Enter number of baits per SNP.\n"
 				$options.tiledepth = gets.chomp.to_i
 			end
 			while $options.tiledepth > $options.baitlength/$options.tileoffset or $options.tiledepth < 1
