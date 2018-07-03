@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.2.0"
+BAITSLIBVER = "1.2.2"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -321,7 +321,7 @@ def linguistic_complexity(bait)
 end
 #-----------------------------------------------------------------------------------------------
 def max_homopolymer(testbait)
-	bases = {"A" => ["A","R","W","M","D","H","V","N"], "T" => ["T","U","Y","W","K","B","D","H","N"], "G" => ["G","R","S","K","B","D","V","N"], "C" => ["C","Y","S","M","B","H","V","N"], "" => []}
+	bases = {"A" => ["A","R","W","M","D","H","V","N"], "T" => ["T","U","Y","W","K","B","D","H","N"], "U" => ["T","U","Y","W","K","B","D","H","N"], "G" => ["G","R","S","K","B","D","V","N"], "C" => ["C","Y","S","M","B","H","V","N"], "" => []}
 	homopoly = 1
 	max_homopoly = 1
 	bait = testbait.dup.upcase # Don't mess up original bait sequence
