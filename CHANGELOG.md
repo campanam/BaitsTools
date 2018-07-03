@@ -96,6 +96,9 @@ Preliminary script to generate baits from an annotation file and a reference seq
 
 ## baitslib  
 ### Version 1.2.0  
+Fixed bug in max_homopolymer for Y bases  
+
+### Version 1.2.0  
 fixed bugs in snp.line causing extra line breaks with write_file  
 Taxon-based SNP sorting  
 Fixed possible issues due to uniq!  
