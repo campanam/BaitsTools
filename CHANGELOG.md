@@ -331,6 +331,9 @@ pyrad2baits added
 Basic GUI compatible with baitstools 0.8  
 
 ## bed2baits  
+### Version 1.2.2  
+chromo bug fix for seq.bedheader  
+
 ### Version 1.1.0  
 Reworking to use new temp file methods  
 Log gives extracted region chromosome names  
