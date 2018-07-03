@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # bed2baits
-BED2BAITSVER = "1.1.0"
+BED2BAITSVER = "1.2.2"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ def bed2baits
 					seq.calc_quality
 				end
 				seq.seq = refhash[chromosome].seq[seqst..seqend-1] #Correct for 0-based counting
-				seq.bedheader = chromo
+				seq.bedheader = chromosome
 				seq.bedstart = seqst
 				regions.push(seq)
 				if $options.log
