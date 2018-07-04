@@ -95,7 +95,7 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
-### Version 1.2.0  
+### Version 1.2.2  
 Fixed bug in max_homopolymer for Y bases  
 
 ### Version 1.2.0  
