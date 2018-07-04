@@ -552,7 +552,7 @@ Filters probes based on GC content, length.
 Improved handling of Y/N prompts.
 
 ### Version 0.1  
-Selects SNPs from VCFs
+Selects SNPs from VCFs  
 Outputs probes based on reference sequence
 
 # Deprecated  
