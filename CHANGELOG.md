@@ -542,14 +542,14 @@ Fixed 'ouput' typo
 Removed unnecessary ::Version variable  
 
 ### Version 0.3  
-GC content is now floating point
-Altered the code to use OptionParser/ostruct.
-Set defaults for all major variables
-Fixed a bug that terminated reference sequence chromosome names only at spaces rather than line breaks
+GC content is now floating point  
+Altered the code to use OptionParser/ostruct.  
+Set defaults for all major variables  
+Fixed a bug that terminated reference sequence chromosome names only at spaces rather than line breaks  
 
 ### Version 0.2  
-Filters probes based on GC content, length.
-Improved handling of Y/N prompts.
+Filters probes based on GC content, length.  
+Improved handling of Y/N prompts.  
 
 ### Version 0.1  
 Selects SNPs from VCFs  
