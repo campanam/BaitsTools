@@ -87,7 +87,7 @@ bed2baits generates baits from a BED file and the corresponding regions in a FAS
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"out-regions.fa".   
 
 ## 4. annot2baits
-annot2baits generates baits from a GFF/GFT annotation file and the corresponding regions in a FASTA or FASTQ file. In this tutorial, we will use annot2baits to generate baits from extracted genome features from a DNA reference sequences.  
+annot2baits generates baits from a GFF/GTF annotation file and the corresponding regions in a FASTA or FASTQ file. In this tutorial, we will use annot2baits to generate baits from extracted genome features from a DNA reference sequences.  
 
 1. Locate the "Ananku.fa" and "Ananku.gff" files in the BaitsTools/example_data/ and move them to the location where you will execute baitstools.rb.  
 
