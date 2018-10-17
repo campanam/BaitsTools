@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.2.2"
+BAITSLIBVER = "1.2.3"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -603,8 +603,8 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	all_populations = 0
 	between_populations = 0
 	within_populations = 0
-	popcategories = $options.popcategories.dup
 	unless $options.popcategories.nil? # Set count of selected popcategories to 0
+		popcategories = $options.popcategories.dup
 		for key in popcategories.keys
 			popcategories[key] = 0
 		end
@@ -703,7 +703,7 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 		write_file(".log.txt", "\nNumberTotalVariants\tNumberSelectedVariants\n" + totalvar.to_s + "\t" + selectvar.to_s + "\n")
 		if $options.taxafile != nil
 			write_file(".log.txt", "NumberAllPopulations\tNumberBetweenPopulations\tNumberWithinPopulations\n" + all_populations.to_s + "\t" + between_populations.to_s + "\t" + within_populations.to_s + "\n")
-			if $options.popcategories != nil
+			unless $options.popcategories.nil?
 				popcatline = "Population-Specific Variants\n" + $options.taxa.uniq.join("\t") + "\n" + popcategories.values.join("\t") + "\n"
 				write_file(".log.txt",popcatline)
 			end
@@ -858,6 +858,21 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 		end
 	end
 	return filteredsnps
+end
+#-----------------------------------------------------------------------------------------------
+def tile_regions(regions, totallength)
+	if regions.size == 0 # Break out if no regions found
+		print "** No matching regions found. Exiting. **\n"
+		exit
+	else
+		#Write fasta sequences from the files
+		for reg in regions
+			write_file("-regions.fa", ">" + reg.header + "\n" + reg.seq)
+		end
+		write_file(".log.txt", "\nTotalRegions\tTotalRegionLength\n" + regions.size.to_s + "\t" + totallength.to_s + "\n") if $options.log
+		#Generate probes using methods from tilebaits
+		tilebaits(regions)
+	end
 end
 #-----------------------------------------------------------------------------------------------
 def get_command_line # Get command line for summary output

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # bed2baits
-BED2BAITSVER = "1.2.2"
+BED2BAITSVER = "1.2.3"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -54,11 +54,5 @@ def bed2baits
 			end
 		end
 	end
-	#Write fasta sequences from the files
-	for reg in regions
-		write_file("-regions.fa", ">" + reg.header + "\n" + reg.seq)
-	end
-	write_file(".log.txt", "\nTotalRegions\tTotalRegionLength\n" + regions.size.to_s + "\t" + totallength.to_s + "\n") if $options.log
-	#Generate probes using methods from tilebaits
-	tilebaits(regions)
+	tile_regions(regions, totallength)
 end

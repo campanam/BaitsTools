@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.2.1"
+BAITSTOOLSVER = "1.2.3"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -554,10 +554,14 @@ begin
 					$options.popcategories = gets.chomp.split(",").map! { |val| val.to_i }
 				end
 			end
-			unless $options.popcategories.nil? and !$options.taxafile.nil? # Check that population values are ok
-				while checkpop
-					print "Population-specific variant numbers must be between 0 and the total number of within-population variants. Re-enter.\n"
-					$options.popcategories = gets.chomp.split(",").map! { |val| val.to_i }
+			unless $options.popcategories.nil? # Check that population values are ok
+				if !$options.taxafile.nil? # Only check the values if a taxafile exists
+					while checkpop
+						print "Population-specific variant numbers must be between 0 and the total number of within-population variants. Re-enter.\n"
+						$options.popcategories = gets.chomp.split(",").map! { |val| val.to_i }
+					end
+				else
+					$options.popcategories = nil # Reset bad popcategories to nil to prevent crashes
 				end
 			end
 		end

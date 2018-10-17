@@ -74,6 +74,9 @@ Corrected double-tabbed output in parameters output
 Preliminary script to generate weighted bait set from a fasta alignment  
 
 ## annot2baits  
+### Version 1.2.3  
+region tiling code transferred to baitslib  
+
 ### Version 1.1.0  
 Reworking to use new temp file methods  
 Log gives extracted region chromosome names  
@@ -95,6 +98,11 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.2.3  
+Fixed dup error for $options.popcategories == nil  
+Transferred redundant region tiling code from annot2baits, bed2baits, blast2baits  
+new tile_regions code prints error and exits when no suitable region found  
+
 ### Version 1.2.2  
 Fixed bug in max_homopolymer for Y bases  
 
@@ -172,6 +180,9 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.2.3  
+Fixed popcategories bug when neither pop-specific variants or taxa file specified  
+
 ### Version 1.2.1  
 Fixed bug requesting population-specific variants when no taxa file specified  
 Replaced word SNP to variant in interactive mode  
@@ -334,6 +345,9 @@ pyrad2baits added
 Basic GUI compatible with baitstools 0.8  
 
 ## bed2baits  
+### Version 1.2.3  
+region tiling code transferred to baitslib  
+
 ### Version 1.2.2  
 chromo bug fix for seq.bedheader  
 
@@ -364,6 +378,9 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## blast2baits  
+### Version 1.2.3  
+region tiling code transferred to baitslib  
+
 ### Version 1.1.0  
 Preliminary script to generate baits from BLAST hit tables and a reference sequence  
 
