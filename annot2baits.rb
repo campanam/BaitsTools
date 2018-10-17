@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # annot2baits
-ANNOT2BAITSVER = "1.1.0"
+ANNOT2BAITSVER = "1.2.3"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -51,12 +51,17 @@ def annot2baits
 			end
 		end
 	end
-	#Write fasta sequences from the files
-	for reg in regions
-		write_file("-regions.fa", ">" + reg.header + "\n" + reg.seq)
+	if regions.size == 0 # Break from file if no features found
+		print "** No requested feature found. Exiting. **\n"
+		exit
+	else
+		#Write fasta sequences from the files
+		for reg in regions
+			write_file("-regions.fa", ">" + reg.header + "\n" + reg.seq)
+		end
+		write_file(".log.txt", "\nTotalRegions\tTotalRegionLength\n" + regions.size.to_s + "\t" + totallength.to_s + "\n") if $options.log
+		#Generate probes using methods from tilebaits
+		tilebaits(regions)
 	end
-	write_file(".log.txt", "\nTotalRegions\tTotalRegionLength\n" + regions.size.to_s + "\t" + totallength.to_s + "\n") if $options.log
-	#Generate probes using methods from tilebaits
-	tilebaits(regions)
 end
 
