@@ -554,12 +554,14 @@ begin
 					$options.popcategories = gets.chomp.split(",").map! { |val| val.to_i }
 				end
 			end
-			if !$options.taxafile.nil? # Check that population values are ok
-				unless $options.popcategories.nil?
+			unless $options.popcategories.nil? # Check that population values are ok
+				if !$options.taxafile.nil? # Only check the values if a taxafile exists
 					while checkpop
 						print "Population-specific variant numbers must be between 0 and the total number of within-population variants. Re-enter.\n"
 						$options.popcategories = gets.chomp.split(",").map! { |val| val.to_i }
 					end
+				else
+					$options.popcategories = nil # Reset bad popcategories to nil to prevent crashes
 				end
 			end
 		end
