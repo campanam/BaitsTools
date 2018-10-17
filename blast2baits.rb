@@ -65,16 +65,5 @@ def blast2baits
 			end
 		end
 	end
-	if regions.size == 0 # Exit if no BLAST hit found
-		print "** No matching BLAST hit found. Exiting. **\n"
-		exit
-	else
-		#Write fasta sequences from the files
-		for reg in regions
-			write_file("-regions.fa", ">" + reg.header + "\n" + reg.seq)
-		end
-		write_file(".log.txt", "\nTotalRegions\tTotalRegionLength\n" + regions.size.to_s + "\t" + totallength.to_s + "\n") if $options.log
-		#Generate probes using methods from tilebaits
-		tilebaits(regions)
-	end
+	tile_regions(regions, totallength)
 end
