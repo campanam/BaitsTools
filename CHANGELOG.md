@@ -75,7 +75,7 @@ Preliminary script to generate weighted bait set from a fasta alignment
 
 ## annot2baits  
 ### Version 1.2.3  
-region tiling code transferred to baitslib  
+Region tiling code transferred to baitslib  
 
 ### Version 1.1.0  
 Reworking to use new temp file methods  
@@ -101,13 +101,14 @@ Preliminary script to generate baits from an annotation file and a reference seq
 ### Version 1.2.3  
 Fixed dup error for $options.popcategories == nil  
 Transferred redundant region tiling code from annot2baits, bed2baits, blast2baits  
-new tile_regions code prints error and exits when no suitable region found  
+New tile_regions code prints error and exits when no suitable region found  
+Fixed bug in taxacount handling that allowed negative values  
 
 ### Version 1.2.2  
 Fixed bug in max_homopolymer for Y bases  
 
 ### Version 1.2.0  
-fixed bugs in snp.line causing extra line breaks with write_file  
+Fixed bugs in snp.line causing extra line breaks with write_file  
 Taxon-based SNP sorting  
 Fixed possible issues due to uniq!  
 FASTQ value hash converted to library method  
@@ -346,7 +347,7 @@ Basic GUI compatible with baitstools 0.8
 
 ## bed2baits  
 ### Version 1.2.3  
-region tiling code transferred to baitslib  
+Region tiling code transferred to baitslib  
 
 ### Version 1.2.2  
 chromo bug fix for seq.bedheader  
@@ -379,7 +380,7 @@ Preliminary script to turn a coordinates table and a reference sequence into bai
 
 ## blast2baits  
 ### Version 1.2.3  
-region tiling code transferred to baitslib  
+Region tiling code transferred to baitslib  
 
 ### Version 1.1.0  
 Preliminary script to generate baits from BLAST hit tables and a reference sequence  
