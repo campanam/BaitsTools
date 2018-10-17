@@ -860,6 +860,21 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 	return filteredsnps
 end
 #-----------------------------------------------------------------------------------------------
+def tile_regions(regions, totallength)
+	if regions.size == 0 # Break out if no regions found
+		print "** No matching regions found. Exiting.\n **"
+		exit
+	else
+		#Write fasta sequences from the files
+		for reg in regions
+			write_file("-regions.fa", ">" + reg.header + "\n" + reg.seq)
+		end
+		write_file(".log.txt", "\nTotalRegions\tTotalRegionLength\n" + regions.size.to_s + "\t" + totallength.to_s + "\n") if $options.log
+		#Generate probes using methods from tilebaits
+		tilebaits(regions)
+	end
+end
+#-----------------------------------------------------------------------------------------------
 def get_command_line # Get command line for summary output
 	# Generate basic command line
 	cmdline = $options.algorithm + " -i " + $options.infile
