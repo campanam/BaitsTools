@@ -862,7 +862,7 @@ end
 #-----------------------------------------------------------------------------------------------
 def tile_regions(regions, totallength)
 	if regions.size == 0 # Break out if no regions found
-		print "** No matching regions found. Exiting.\n **"
+		print "** No matching regions found. Exiting. **\n"
 		exit
 	else
 		#Write fasta sequences from the files
