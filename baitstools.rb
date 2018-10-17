@@ -514,7 +514,7 @@ begin
 					$options.taxafile = gets.chomp
 				end
 				$options.totalsnps = $options.taxacount[0] + $options.taxacount[1] + $options.taxacount[2] # Ruby 2.0 does not have Array#sum method
-				while $options.totalsnps < 1
+				while $options.totalsnps < 1 or $options.taxacount[0] < 0 or $options.taxacount[1] < 0 or $options.taxacount[2] < 0
 					if $options.interact
 						print "Enter requested number of variants variable across populations.\n"
 						$options.taxacount[0] = gets.chomp.to_i
