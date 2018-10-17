@@ -603,8 +603,8 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	all_populations = 0
 	between_populations = 0
 	within_populations = 0
-	popcategories = $options.popcategories.dup
 	unless $options.popcategories.nil? # Set count of selected popcategories to 0
+		popcategories = $options.popcategories.dup
 		for key in popcategories.keys
 			popcategories[key] = 0
 		end
@@ -703,7 +703,7 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 		write_file(".log.txt", "\nNumberTotalVariants\tNumberSelectedVariants\n" + totalvar.to_s + "\t" + selectvar.to_s + "\n")
 		if $options.taxafile != nil
 			write_file(".log.txt", "NumberAllPopulations\tNumberBetweenPopulations\tNumberWithinPopulations\n" + all_populations.to_s + "\t" + between_populations.to_s + "\t" + within_populations.to_s + "\n")
-			if $options.popcategories != nil
+			unless $options.popcategories.nil?
 				popcatline = "Population-Specific Variants\n" + $options.taxa.uniq.join("\t") + "\n" + popcategories.values.join("\t") + "\n"
 				write_file(".log.txt",popcatline)
 			end
