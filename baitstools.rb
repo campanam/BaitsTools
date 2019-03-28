@@ -63,6 +63,7 @@ class Parser
 		args.maxt_filter = false # Flag to filter by maximum melting temperature
 		args.maxt = 120.0 # Maximum melting temperature
 		args.params = false # Flag to output filtration parameters
+		args.list_format = "bed" # File format for bed2baits intervals
 		args.coords = false # Flag to output BED file of baits (absolute coordinates)
 		args.rbed = false # Flag to output BED file of baits (relative coordinates)
 		args.percid = 0.0 # Minimum percent identity to include blast hit
@@ -193,7 +194,7 @@ class Parser
 				else
 					case args.algorithm
 					when "bed2baits"
-						inputstr = "Input BED file"
+						inputstr = "Input BED or interval list file"
 					when "blast2baits"
 						inputstr = "Input BLAST hit table"
 					when "annot2baits"
@@ -205,6 +206,9 @@ class Parser
 						args.infile = fa
 					end
 					if args.algorithm == "bed2baits" or args.algorithm == "annot2baits" or args.algorithm == "blast2baits"
+						opts.on("--list [VALUE]", String, "Interval list file format (bed, GATK, Picard) (Default = bed)") do |strat|
+							args.list_format = strat if strat != nil
+						end
 						opts.on("-r","--refseq [FILE]", String, "Reference FASTA/FASTQ sequence file") do |ref|
 							args.refseq = ref
 						end
@@ -455,6 +459,16 @@ begin
 		print "Input file not found. Please re-enter.\n"
 		$options.infile = gets.chomp
 	end
+	if $options.algorithm == "bed2baits"
+			if $options.interact
+				print "File format (bed, GATK, or Picard)?\n"
+				$options.list_format = gets.chomp
+			end
+			while $options.list_format != 'bed' and $options.list_format != 'GATK' and $options.list_format != 'Picard'
+				print "Please choose a recognized file format (bed, GATK, or Picard)?\n"
+				$options.list_format = gets.chomp
+			end
+		end
 	if $options.interact
 		print "Enter output file prefix.\n"
 		$options.outprefix = gets.chomp

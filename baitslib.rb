@@ -915,8 +915,8 @@ def get_command_line # Get command line for summary output
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe
 	else
 		if $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "blast2baits"
-			cmdline << " -r " + $options.refseq
-			cmdline << " -P" + $options.pad.to_s
+			cmdline << " --list " + $options.list_format if $options.algorithm == "bed2baits"
+			cmdline << " -r " + $options.refseq + " -P" + $options.pad.to_s
 		end
 		cmdline << " -L" + $options.baitlength.to_s
 		cmdline << " -O" + $options.tileoffset.to_s unless $options.algorithm == "checkbaits"

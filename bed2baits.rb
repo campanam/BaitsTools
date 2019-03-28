@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # bed2baits
-BED2BAITSVER = "1.2.3"
+BED2BAITSVER = "1.3.0"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -15,16 +15,38 @@ def bed2baits
 		refhash[ref.header]=ref
 	end
 	#Read coordinates table
-	print "** Reading BED file **\n"
+	if $options.list_format == "bed"
+		print "** Reading BED file **\n" 
+	else
+		print "** Reading interval list **\n"
+	end
 	regions = [] #Array to hold generated fasta sequences
 	write_file(".log.txt", "ExtractedRegions\nRegion\tChromosome\tStart\tEnd\tLength") if $options.log
 	totallength = 0
 	File.open($options.infile, 'r') do |coord|
 		while line = coord.gets
-			line_arr = line.split("\t")
-			chromosome = line_arr[0]
-			seqst = line_arr[1].to_i - $options.pad
-			seqend = line_arr[2].to_i + $options.pad
+			case $options.list_format
+			when "bed"
+				line_arr = line.split("\t")
+				chromosome = line_arr[0]
+				seqst = line_arr[1].to_i
+				seqend = line_arr[2].to_i
+			when "GATK"
+				chromosome = line.split(":")[0]
+				seqst = line.split(":")[1].split("-")[0].to_i
+				seqend = line.split(":")[1].split("-")[1].to_i
+			when "Picard"
+				if line[0].chr == "@"
+					next
+				else
+					line_arr = line.split("\t")
+					chromosome = line_arr[0]
+					seqst = line_arr[1].to_i - 1
+					seqend = line_arr[2].to_i
+				end
+			end
+			seqst -= $options.pad
+			seqend += $options.pad
 			if refhash.include?(chromosome)
 				if seqst < 0
 					print "** Chromosome " + chromosome + " starting coordinate set to 1. **\n"

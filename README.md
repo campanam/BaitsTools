@@ -179,7 +179,8 @@ annot2baits generates baits from an annotation file in GTF or GFF and a correspo
 ### bed2baits  
 bed2baits generates baits from a track file in headerless BED and a a corresponding DNA sequence in FASTA or FASTQ format.  
 
-`-i, --input [FILE]`: Input BED file name. Include the path to the file if not in the current directory.  
+`-i, --input [FILE]`: Input BED or interval list file name. Include the path to the file if not in the current directory.  
+`--list [VALUE]`: BED or interval list file format (bed, GATK, or Picard). Default is BED.  
 `-r, --refseq [FILE]`: Input reference sequence file name. Include the path to the file if not in the current directory.  
 `-P, --pad [VALUE]`: Length to pad beginning and ending of extracted regions. Padding the BED coordinates helps ensure that baits cover the entire region evenly. Default is 0 bp.  
 `-L, --length [VALUE]`: Requested bait length. Default is 120 bp.  

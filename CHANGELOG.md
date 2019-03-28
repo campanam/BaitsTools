@@ -100,6 +100,7 @@ Preliminary script to generate baits from an annotation file and a reference seq
 ## baitslib  
 ### Version 1.3.0  
 RNG seed option  
+Interval list option  
 
 ### Version 1.2.3  
 Fixed dup error for $options.popcategories == nil  
@@ -186,6 +187,7 @@ filter_probes definition removed into separate script for access by other script
 ## baitstools  
 ### Version 1.3.0  
 RNG seed option  
+Interval list option  
 
 ### Version 1.2.3  
 Fixed popcategories bug when neither pop-specific variants or taxa file specified  
@@ -316,6 +318,7 @@ Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_
 ## baitstoolsgui  
 ### Version 1.3.0  
 RNG seed option  
+Interval list option  
 
 ### Version 1.2.0  
 Fixed RC option bug  
@@ -355,6 +358,9 @@ pyrad2baits added
 Basic GUI compatible with baitstools 0.8  
 
 ## bed2baits  
+### Version 1.3.0  
+Interval list option  
+
 ### Version 1.2.3  
 Region tiling code transferred to baitslib  
 
