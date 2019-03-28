@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.2.3"
-# Michael G. Campana, 2017-2018
+BAITSTOOLSVER = "1.3.0"
+# Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -108,6 +108,7 @@ class Parser
 		args.log = false # Flag to output detailed log
 		args.filestem = args.outdir + args.outprefix # File stem for output
 		args.default_files = [] # Default files to be written
+		args.rng = srand # Random number seed
 		opt_parser = OptionParser.new do |opts|
 			if algorithms.include?(args.algorithm) # Process correct commands
 				opts.banner = "Command-line usage: ruby baitstools.rb "+args.algorithm+" [options]"
@@ -388,6 +389,9 @@ class Parser
 				end
 				opts.on("-X", "--threads [VALUE]", Integer, "Number of threads (Default = 1)") do |thr|
 					args.threads = thr if thr != nil
+				end
+				opts.on("--rng [NUMBER]", Integer, "Random number seed (Default uses system entropy)") do |rng|
+					args.rng = rng if rng != nil
 				end
 				opts.on_tail("-h","--help", "Show help") do
 					print "Welcome to baitstools " + args.algorithm + '.' +"\n\n"
@@ -1021,10 +1025,17 @@ begin
 		print "Are FASTQ qualities in Phred64? (y/n)\n"
 		t = gets.chomp.upcase
 		$options.phred64 = true if t == "Y" or t == "YES"
+		print "Set random number seed (otherwise uses system entropy)? (y/n)\n"
+		t = gets.chomp.upcase
+		if t == "Y" or t == "YES"
+			print "Enter random number seed.\n"
+			$options.rng = gets.chomp.to_i
+		end
 	end	
 	$options.no_baits = false if ($options.every or $options.alt_alleles) # Override -p when needed
 	$options.filter = true if ($options.completebait or $options.params or $options.algorithm == "checkbaits" or $options.lc_filter or $options.mingc_filter or $options.maxgc_filter or $options.mint_filter or $options.maxt_filter or $options.maxmask_filter or $options.maxhomopoly_filter or $options.meanqual_filter or $options.minqual_filter or $options.gaps == "exclude" or $options.no_Ns or $options.collapse_ambiguities) # Force filtration as necessary
 	cmdline = get_command_line
+	srand($options.rng) # Set random number seed
 	print "** Starting program with the following options: **\n"
 	print "** Basic command: " + cmdline[0] + " **\n"
 	print "** Filtration options:" + cmdline[1] + " **\n" # filtered line always starts with a space if present

@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.2.3"
-# Michael G. Campana, 2017-2018
+BAITSLIBVER = "1.3.0"
+# Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -952,8 +952,7 @@ def get_command_line # Get command line for summary output
 	cmdline << " -Y" if $options.rna
 	cmdline << " -R" if $options.rc
 	cmdline << " --phred64" if $options.phred64
-	cmdline << " -G " + $options.gaps
-	cmdline << " -X" + $options.threads.to_s
+	cmdline << " -G " + $options.gaps + " -X" + $options.threads.to_s + " --rng " + $options.rng.to_s
 	# Generate filtration options
 	fltline = ""
 	fltline << " -w" if $options.params
