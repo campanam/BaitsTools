@@ -390,7 +390,7 @@ class Parser
 				opts.on("-X", "--threads [VALUE]", Integer, "Number of threads (Default = 1)") do |thr|
 					args.threads = thr if thr != nil
 				end
-				opts.on("--rng [NUMBER]", Integer, "Random number seed (Default uses system entropy)") do |rng|
+				opts.on("--rng [VALUE]", Integer, "Random number seed (Default uses system entropy)") do |rng|
 					args.rng = rng if rng != nil
 				end
 				opts.on_tail("-h","--help", "Show help") do

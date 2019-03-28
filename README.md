@@ -111,7 +111,8 @@ A tutorial and example data are available in the example_data subdirectory of th
 `-Y, --rna`: Output bait sequences as RNA rather than DNA.  
 `-R, --rc`: Output reverse-complemented baits.  
 `--phred64`: Qualities are encoded in phred64 rather than phred33.  
-`-X, --threads [VALUE]`: Number of threads (Default = 1)  
+`-X, --threads [VALUE]`: Number of threads. Default is 1.  
+`--rng [VALUE]`: Random number seed. Default uses system entropy.  
 `-h, --help`: Print subcommand-specific help to the screen. Use without other arguments (e.g. `ruby baitstools.rb vcf2baits -h`).  
 `-v, --version`: Print subcommand version to the screen (which may not correspond with the BaitsTools release version). Use without other arguments (e.g. `ruby baitstools.rb vcf2baits -v`).
 
