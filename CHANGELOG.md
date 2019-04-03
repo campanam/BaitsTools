@@ -1,5 +1,5 @@
 # BaitsTools Change Log  
-Michael G. Campana, 2017-2018  
+Michael G. Campana, 2017-2019  
 Smithsonian Conservation Biology Institute  
 Contact: campanam@si.edu  
 
