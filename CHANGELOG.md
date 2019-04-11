@@ -1,5 +1,5 @@
 # BaitsTools Change Log  
-Michael G. Campana, 2017-2018  
+Michael G. Campana, 2017-2019  
 Smithsonian Conservation Biology Institute  
 Contact: campanam@si.edu  
 
@@ -98,6 +98,10 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.3.0  
+RNG seed option  
+Interval list option  
+
 ### Version 1.2.3  
 Fixed dup error for $options.popcategories == nil  
 Transferred redundant region tiling code from annot2baits, bed2baits, blast2baits  
@@ -181,6 +185,10 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.3.0  
+RNG seed option  
+Interval list option  
+
 ### Version 1.2.3  
 Fixed popcategories bug when neither pop-specific variants or taxa file specified  
 
@@ -308,6 +316,10 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.3.0  
+RNG seed option  
+Interval list option  
+
 ### Version 1.2.0  
 Fixed RC option bug  
 phred64 option  
@@ -346,6 +358,9 @@ pyrad2baits added
 Basic GUI compatible with baitstools 0.8  
 
 ## bed2baits  
+### Version 1.3.0  
+Interval list option  
+
 ### Version 1.2.3  
 Region tiling code transferred to baitslib  
 

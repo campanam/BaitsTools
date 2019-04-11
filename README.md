@@ -1,6 +1,6 @@
 # BaitsTools: software for hybridization capture bait design
 
-Michael G. Campana, 2017-2018  
+Michael G. Campana, 2017-2019  
 Smithsonian Conservation Biology Institute  
 Contact: <campanam@si.edu>  
 
@@ -111,7 +111,8 @@ A tutorial and example data are available in the example_data subdirectory of th
 `-Y, --rna`: Output bait sequences as RNA rather than DNA.  
 `-R, --rc`: Output reverse-complemented baits.  
 `--phred64`: Qualities are encoded in phred64 rather than phred33.  
-`-X, --threads [VALUE]`: Number of threads (Default = 1)  
+`-X, --threads [VALUE]`: Number of threads. Default is 1.  
+`--rng [VALUE]`: Random number seed. Default uses system entropy.  
 `-h, --help`: Print subcommand-specific help to the screen. Use without other arguments (e.g. `ruby baitstools.rb vcf2baits -h`).  
 `-v, --version`: Print subcommand version to the screen (which may not correspond with the BaitsTools release version). Use without other arguments (e.g. `ruby baitstools.rb vcf2baits -v`).
 
@@ -178,7 +179,8 @@ annot2baits generates baits from an annotation file in GTF or GFF and a correspo
 ### bed2baits  
 bed2baits generates baits from a track file in headerless BED and a a corresponding DNA sequence in FASTA or FASTQ format.  
 
-`-i, --input [FILE]`: Input BED file name. Include the path to the file if not in the current directory.  
+`-i, --input [FILE]`: Input BED or interval list file name. Include the path to the file if not in the current directory.  
+`--list [VALUE]`: BED or interval list file format (bed, GATK, or Picard). Default is BED.  
 `-r, --refseq [FILE]`: Input reference sequence file name. Include the path to the file if not in the current directory.  
 `-P, --pad [VALUE]`: Length to pad beginning and ending of extracted regions. Padding the BED coordinates helps ensure that baits cover the entire region evenly. Default is 0 bp.  
 `-L, --length [VALUE]`: Requested bait length. Default is 120 bp.  

@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.2.3"
-# Michael G. Campana, 2017-2018
+BAITSTOOLSVER = "1.3.0"
+# Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -63,6 +63,7 @@ class Parser
 		args.maxt_filter = false # Flag to filter by maximum melting temperature
 		args.maxt = 120.0 # Maximum melting temperature
 		args.params = false # Flag to output filtration parameters
+		args.list_format = "bed" # File format for bed2baits intervals
 		args.coords = false # Flag to output BED file of baits (absolute coordinates)
 		args.rbed = false # Flag to output BED file of baits (relative coordinates)
 		args.percid = 0.0 # Minimum percent identity to include blast hit
@@ -108,6 +109,7 @@ class Parser
 		args.log = false # Flag to output detailed log
 		args.filestem = args.outdir + args.outprefix # File stem for output
 		args.default_files = [] # Default files to be written
+		args.rng = srand # Random number seed
 		opt_parser = OptionParser.new do |opts|
 			if algorithms.include?(args.algorithm) # Process correct commands
 				opts.banner = "Command-line usage: ruby baitstools.rb "+args.algorithm+" [options]"
@@ -192,7 +194,7 @@ class Parser
 				else
 					case args.algorithm
 					when "bed2baits"
-						inputstr = "Input BED file"
+						inputstr = "Input BED or interval list file"
 					when "blast2baits"
 						inputstr = "Input BLAST hit table"
 					when "annot2baits"
@@ -204,6 +206,9 @@ class Parser
 						args.infile = fa
 					end
 					if args.algorithm == "bed2baits" or args.algorithm == "annot2baits" or args.algorithm == "blast2baits"
+						opts.on("--list [VALUE]", String, "Interval list file format (bed, GATK, Picard) (Default = bed)") do |strat|
+							args.list_format = strat if strat != nil
+						end
 						opts.on("-r","--refseq [FILE]", String, "Reference FASTA/FASTQ sequence file") do |ref|
 							args.refseq = ref
 						end
@@ -389,6 +394,9 @@ class Parser
 				opts.on("-X", "--threads [VALUE]", Integer, "Number of threads (Default = 1)") do |thr|
 					args.threads = thr if thr != nil
 				end
+				opts.on("--rng [VALUE]", Integer, "Random number seed (Default uses system entropy)") do |rng|
+					args.rng = rng if rng != nil
+				end
 				opts.on_tail("-h","--help", "Show help") do
 					print "Welcome to baitstools " + args.algorithm + '.' +"\n\n"
 					print "To use the interactive interface, enter <ruby baitstools.rb " + args.algorithm + "> without command-line options.\n"
@@ -451,6 +459,16 @@ begin
 		print "Input file not found. Please re-enter.\n"
 		$options.infile = gets.chomp
 	end
+	if $options.algorithm == "bed2baits"
+			if $options.interact
+				print "File format (bed, GATK, or Picard)?\n"
+				$options.list_format = gets.chomp
+			end
+			while $options.list_format != 'bed' and $options.list_format != 'GATK' and $options.list_format != 'Picard'
+				print "Please choose a recognized file format (bed, GATK, or Picard)?\n"
+				$options.list_format = gets.chomp
+			end
+		end
 	if $options.interact
 		print "Enter output file prefix.\n"
 		$options.outprefix = gets.chomp
@@ -1021,10 +1039,17 @@ begin
 		print "Are FASTQ qualities in Phred64? (y/n)\n"
 		t = gets.chomp.upcase
 		$options.phred64 = true if t == "Y" or t == "YES"
+		print "Set random number seed (otherwise uses system entropy)? (y/n)\n"
+		t = gets.chomp.upcase
+		if t == "Y" or t == "YES"
+			print "Enter random number seed.\n"
+			$options.rng = gets.chomp.to_i
+		end
 	end	
 	$options.no_baits = false if ($options.every or $options.alt_alleles) # Override -p when needed
 	$options.filter = true if ($options.completebait or $options.params or $options.algorithm == "checkbaits" or $options.lc_filter or $options.mingc_filter or $options.maxgc_filter or $options.mint_filter or $options.maxt_filter or $options.maxmask_filter or $options.maxhomopoly_filter or $options.meanqual_filter or $options.minqual_filter or $options.gaps == "exclude" or $options.no_Ns or $options.collapse_ambiguities) # Force filtration as necessary
 	cmdline = get_command_line
+	srand($options.rng) # Set random number seed
 	print "** Starting program with the following options: **\n"
 	print "** Basic command: " + cmdline[0] + " **\n"
 	print "** Filtration options:" + cmdline[1] + " **\n" # filtered line always starts with a space if present

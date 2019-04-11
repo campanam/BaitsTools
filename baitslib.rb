@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.2.3"
-# Michael G. Campana, 2017-2018
+BAITSLIBVER = "1.3.0"
+# Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -915,8 +915,8 @@ def get_command_line # Get command line for summary output
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe
 	else
 		if $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "blast2baits"
-			cmdline << " -r " + $options.refseq
-			cmdline << " -P" + $options.pad.to_s
+			cmdline << " --list " + $options.list_format if $options.algorithm == "bed2baits"
+			cmdline << " -r " + $options.refseq + " -P" + $options.pad.to_s
 		end
 		cmdline << " -L" + $options.baitlength.to_s
 		cmdline << " -O" + $options.tileoffset.to_s unless $options.algorithm == "checkbaits"
@@ -952,8 +952,7 @@ def get_command_line # Get command line for summary output
 	cmdline << " -Y" if $options.rna
 	cmdline << " -R" if $options.rc
 	cmdline << " --phred64" if $options.phred64
-	cmdline << " -G " + $options.gaps
-	cmdline << " -X" + $options.threads.to_s
+	cmdline << " -G " + $options.gaps + " -X" + $options.threads.to_s + " --rng " + $options.rng.to_s
 	# Generate filtration options
 	fltline = ""
 	fltline << " -w" if $options.params

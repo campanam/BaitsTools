@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.2.0"
-# Michael G. Campana, 2017-2018
+BAITSTOOLSGUI = "1.3.0"
+# Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -45,8 +45,8 @@ def start_baitstools
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe == 1
 	else
 		if $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "blast2baits"
-			cmdline << " -r " + $options.refseq
-			cmdline << " -P" + $options.pad
+			cmdline << " --list " + $options.list_format if $options.algorithm == "bed2baits"
+			cmdline << " -r " + $options.refseq + " -P" + $options.pad			
 		end
 		cmdline << " -L" + $options.baitlength
 		cmdline << " -O" + $options.tileoffset unless $options.algorithm == "checkbaits"
@@ -77,8 +77,7 @@ def start_baitstools
 	cmdline << " -D" if $options.ncbi == 1
 	cmdline << " -Y" if $options.rna == 1
 	cmdline << " --phred64" if $options.phred64 == 1
-	cmdline << " -G " + $options.gaps
-	cmdline << " -X" + $options.threads
+	cmdline << " -G " + $options.gaps + " -X" + $options.threads + " --rng " + $options.rng
 	# Generate filtration options
 	cmdline << " -w" if $options.params == 1
 	cmdline << " --disable-lc" if $options.no_lc == 1
@@ -379,6 +378,24 @@ def update_alt_alleles
 	end
 end
 #-----------------------------------------------------------------------------------------------
+def list_format_window
+	$listformat = TkLabel.new($root) do
+		text 'File format'
+		font TkFont.new('times 20')
+		place('x' => 50, 'y' => 150)
+		pady 10
+	end
+	$listselect = Tk::Tile::Combobox.new($root) do
+		textvariable $options.list_format
+		values ["bed", "GATK", "Picard"]
+		state "readonly"
+		width 10
+		height 2
+		place('x' => 160, 'y' => 160)
+	end
+	$widgets.push($listformat, $listselect)
+end
+#-----------------------------------------------------------------------------------------------
 def haplodef_window
 	$haplo = TkLabel.new($root) do
 		text 'Haplotype definition'
@@ -397,18 +414,18 @@ def haplodef_window
 	$widgets.push($haplo, $haploselect)
 end
 #-----------------------------------------------------------------------------------------------
-def reference_window
+def reference_window(winy = 150)
 	$reffile = TkButton.new($root) do
 		text 'Reference sequence'
 		command '$options.refseq.value = Tk.getOpenFile'
-		place('x' => 50, 'y' => 150)
+		place('x' => 50, 'y' => winy)
 	end
 	configure_buttons([$reffile])
 	$reffile.width = 20
 	$reflabel = TkLabel.new($root) do
 		textvariable $options.refseq
 		font TkFont.new('times 12')
-		place('x' => 300, 'y' => 150)
+		place('x' => 300, 'y' => winy)
 		pady 10
 	end
 	$widgets.push($reffile, $reflabel)
@@ -520,18 +537,18 @@ def update_sort
 	end
 end
 #-----------------------------------------------------------------------------------------------
-def pad_window
+def pad_window(winy = 200)
 	$pad = TkLabel.new($root) do
 		text 'Pad length'
 		font TkFont.new('times 20')
-		place('x' => 50, 'y' => 200)
+		place('x' => 50, 'y' => winy)
 		pady 10
 	end
 	$padentry = TkEntry.new($root) do
 		textvariable $options.pad
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 180, 'y' => 210)
+		place('x' => 180, 'y' => winy + 10)
 		width 10
 	end
 	$widgets.push($pad, $padentry)
@@ -685,13 +702,26 @@ def general_window
 		place('x' => 390, 'y' => 360)
 		width 10
 	end
+	rng = TkLabel.new($root) do
+		text 'Random number seed'
+		font TkFont.new('times 20')
+		place('x' => 50, 'y' => 400)
+		pady 10
+	end
+	rngentry = TkEntry.new($root) do
+		textvariable $options.rng
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 240, 'y' => 410)
+		width 80
+	end
 	configure_buttons([outdir, bed, rbed, shuffle, log, ncbi, rna, rc, phred64])
 	bed.state = shuffle.state = "disabled" if $options.algorithm == "checkbaits"
 	ncbi.state = "disabled" if $options.algorithm == "pyrad2baits"
 	rbed.state = "disabled" unless $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "tilebaits" or $options.algorithm == "aln2baits"
 	outdir.width = rbed.width = rc.width = 20
 	ncbi.width = 15
-	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gaps, gapselect, threads, threadentry)
+	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gaps, gapselect, threads, threadentry, rng, rngentry)
 end
 #-----------------------------------------------------------------------------------------------
 def subcommand_window(subcommand)
@@ -716,11 +746,12 @@ def subcommand_window(subcommand)
 		feature_window
 		inputlabel = "Input GFF/GTF"
 	when "bed2baits"
-		reference_window
-		pad_window
-		length_window(250)
-		offset_window(300)
-		inputlabel = "Input BED"
+		list_format_window
+		reference_window(200)
+		pad_window(250)
+		length_window(300)
+		offset_window(350)
+		inputlabel = "Input BED/Interval List"
 	when "blast2baits"
 		reference_window
 		pad_window
@@ -1397,6 +1428,7 @@ def set_defaults
 	$options.tileoffset = TkVariable.new(60) # Offset between tiled baits
 	$options.bait_type = TkVariable.new("RNA-DNA") # Hybridization type
 	$options.haplodef = TkVariable.new("haplotype") # Haplotype definition for aln2baits
+	$options.list_format = TkVariable.new("bed") # Interval list file format
 	$options.features = TkVariable.new("") # Desired features in comma-separated list
 	$options.pad = TkVariable.new(0) # BP to pad ends of extracted regions
 	$options.totalsnps = TkVariable.new(30000) # Maximum requested SNPs
@@ -1458,6 +1490,7 @@ def set_defaults
 	$options.rc = TkVariable.new(0) # Flag to output reverse complement baits
 	$options.gaps = TkVariable.new("include") # Flag to omit bait sequences with gaps
 	$options.threads = TkVariable.new(1) # Number of threads
+	$options.rng = TkVariable.new(srand) # RNG seed
 end
 #-----------------------------------------------------------------------------------------------
 $root = TkRoot.new { title "BaitsTools" }
