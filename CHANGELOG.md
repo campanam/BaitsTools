@@ -520,6 +520,9 @@ Output now controlled by baitslib write_probes function
 Preliminary script to divide genic/genomic sequences into tiled baits
 
 ## vcf2baits  
+### Version 1.3.1  
+fixed bug in header column causing extra line break with write_file  
+
 ### Version 1.2.0  
 fixed bug in snp.line causing extra line breaks with write_file  
 Taxon-based SNP sorting  
