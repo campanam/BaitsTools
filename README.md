@@ -287,7 +287,7 @@ vcf2baits selects variants and generates baits from a VCF file and a reference s
 6. It is possible to generate baits from paired-end sequences that do not overlap in a single BaitsTools run. Concatenate the two reads (reverse-complementing as appropriate) with a pad of Ns between the two reads. Using the `-N` option will then exclude candidate baits that overlap the N pad. This could be helpful for generating baits from FASTA/FASTQ alignments (e.g. using `aln2baits`) in which some sequences overlap and can be merged, but others have an unsequenced gap between the paired reads. This trick can also be used for unmerged paired-end PyRAD/ipyrad loci in `pyrad2baits`.  
 
 ## Bug Reports and Feature Requests  
-BaitsTools is a complex program under active development. Bugs and technical issues are inevitable. Please report any issues and associated error reports using the issues template and e-mail <campanam@si.edu>. Feature requests can be filed using the appropriate issue template or e-mailed to <campanam@si.edu>.  
+BaitsTools is a complex program under active development. Bugs and technical issues are inevitable. Please report any issues and associated error reports using the issues template and e-mail <campanam@si.edu>. Feature requests can be filed using the appropriate issue template or e-mailed to <campanam@si.edu>. Please see the CONTRIBUTING guidelines.  
 
 
 ## Citation  
