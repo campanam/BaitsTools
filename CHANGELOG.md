@@ -394,6 +394,10 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## blast2baits  
+### Version 1.3.1  
+Prevent crash for missing sequence in reference file  
+Notifications of coordinate adjustments for out-of-bounds coordinates  
+
 ### Version 1.2.3  
 Region tiling code transferred to baitslib  
 
