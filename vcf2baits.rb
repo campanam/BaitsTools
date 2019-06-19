@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # vcf2baits
-VCF2BAITSVER = "1.2.0"
+VCF2BAITSVER = "1.3.1"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ def vcf2baits
 		while line = snpreg.gets
 			vcfout << line if line[0..1] == "##" # Add info lines to header
 			if line[0..1] == "#C" # Get column header separately so I can insert new information
-				columns = line 
+				columns = line[0..-2] # Remove line break or extraneous line is added by write_file
 				@samples = line[0..-2].split("\t")[9..-1] # Get sample names
 			end
 			if $options.scale and line[0..12] == "##contig=<ID="
