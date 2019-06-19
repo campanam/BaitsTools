@@ -41,7 +41,7 @@ def blast2baits
 					seqst = 0 
 				end
 				if refhash[chromo].nil?
-					print "** Sequence " + chromo " not found in reference sequence file. **\n"
+					print "** Sequence " + chromo + " not found in reference sequence file. **\n"
 				else
 					if seqend > refhash[chromo].seq.length - 1 # Correct for padding going off end
 						print "** Sequence " + chromo + " final coordinate set to " + refhash[chromo].seq.length.to_s + " **\n"
