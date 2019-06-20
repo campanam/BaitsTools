@@ -30,7 +30,7 @@ end
 def resolve_unix_path(path)
 	reserved = ["\\", ";", "&", "(", ")","*","?","[","]","~",">","<","!","\"","\'", "$", " "] # \ first to prevent repeated gsub issues
 	for reschar in reserved
-		path.gsub!(reschar, "\\" + reschar)
+		path.gsub!(reschar) {"\\" + reschar} # Use odd syntax because escape character causes issues with backslash in sub
 	end
 	return path
 end
