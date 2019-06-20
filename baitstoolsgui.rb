@@ -1525,7 +1525,7 @@ $next_btn = TkButton.new($root) do
 	place('x' => 660, 'y' => 520)
 end
 credit = TkLabel.new($root) do
-	text "Michael G. Campana, 2017-2018\nSmithsonian Conservation Biology Institute"
+	text "Michael G. Campana, 2017-2019\nSmithsonian Conservation Biology Institute"
 	borderwidth 5
 	font TkFont.new('times 12')
 	pack("side" => "bottom",  "padx"=> "50", "pady"=> "10")
