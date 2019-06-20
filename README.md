@@ -50,7 +50,7 @@ You can test your BaitsTools installation by running the tutorials included in t
 ### GUI Installation  
 The GUI requires the Ruby gem 'tk' (typically installed using `gem install tk` on most UNIX-like operating systems with the appropriate RubyGems package installed). macOS requires the [Ruby Version Manager](https://get.rvm.io) to manually install Ruby gems. The GUI requires BaitsTools Ruby files to be in your $PATH. Please note that the GUI has only been tested on macOS and may not work well on other operating systems. Due to its requirement of external dependencies, the GUI can be difficult to install. I have included instructions for automatic and manual installation on macOS. Please report any encountered bugs to <campanam@si.edu>.  
 
-_Installation of macOS Mojave_  
+_Installation on macOS Mojave:_  
 The tk gem will not compile correctly on macOS Mojave using the default Tk framework. Install [ActiveTcl 8.5](https://www.activestate.com/products/activetcl/downloads/) and then follow the steps described below. Please note that the tk gem is not currently compatible with Tcl-Tk 8.6, so you will need to install the 8.5 version.  
 
 _Automatic GUI Installation (macOS):_  
