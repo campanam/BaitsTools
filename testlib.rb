@@ -39,8 +39,8 @@ $options = Option.new
 @exit = ""
 while @exit == ""
 	print "Enter path\n"
-	path = gets.chomp.to_f
-	put resolved_unix_path(path)
+	path = gets.chomp
+	puts resolve_unix_path(path)
 	print "Exit? Return for no. Any string for yes.\n"
 	@exit = gets.chomp
 end
