@@ -28,7 +28,7 @@ def chi_prob(test, df)
 	end
 end
 def resolve_unix_path(path)
-	reserved = ["\\", ";", ";", "(", ")","*","?","[","]","~",">","<","!","\"","\'", "$", " "] # \ first to prevent repeated gsub issues
+	reserved = ["\\", ";", "&", "(", ")","*","?","[","]","~",">","<","!","\"","\'", "$", " "] # \ first to prevent repeated gsub issues
 	for reschar in reserved
 		path.gsub!(reschar, "\\" + reschar)
 	end
