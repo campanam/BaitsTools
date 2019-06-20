@@ -98,6 +98,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.3.2  
+Bug fix for reserved characters in file paths  
+
 ### Version 1.3.0  
 RNG seed option  
 Interval list option  
@@ -316,6 +319,9 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.3.2  
+Bug fix for reserved characters in file paths  
+
 ### Version 1.3.0  
 RNG seed option  
 Interval list option  
