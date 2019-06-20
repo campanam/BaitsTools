@@ -27,15 +27,20 @@ def chi_prob(test, df)
 		return 0.0
 	end
 end
+def resolve_unix_path(path)
+	reserved = ["\\", ";", ";", "(", ")","*","?","[","]","~",">","<","!","\"","\'", "$", " "] # \ first to prevent repeated gsub issues
+	for reschar in reserved
+		path.gsub!(reschar, "\\" + reschar)
+	end
+	return path
+end
 #====TEST CONTROL CODE==========================================================================
 $options = Option.new
 @exit = ""
 while @exit == ""
-	print "Enter chi-squared test statistic\n"
-	test = gets.chomp.to_f
-	print "Enter degrees of freedom\n"
-	df = gets.chomp.to_f
-	print chi_prob(test, df).to_s + "\n"
+	print "Enter path\n"
+	path = gets.chomp.to_f
+	put resolved_unix_path(path)
 	print "Exit? Return for no. Any string for yes.\n"
 	@exit = gets.chomp
 end
