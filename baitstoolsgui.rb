@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.3.0"
+BAITSTOOLSGUI = "1.3.2"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -10,11 +10,12 @@ require 'tk'
 require 'tkextlib/tile'
 require 'ostruct'
 require 'shell'
+require_relative 'baitslib.rb'
 
 #-----------------------------------------------------------------------------------------------
 def start_baitstools
 	# Generate basic command line
-	cmdline = "baitstools.rb " + $options.algorithm + " -i " + $options.infile
+	cmdline = "baitstools.rb " + $options.algorithm + " -i " + resolve_unix_path($options.infile.to_s)
 	case $options.algorithm
 	when "vcf2baits", "stacks2baits"
 		if $options.every == 1
@@ -33,11 +34,11 @@ def start_baitstools
 				cmdline << " -L" + $options.baitlength + " -O" + $options.tileoffset + " -b" + $options.lenbef + " -k" + $options.tiledepth
 			end
 		end
-		cmdline << " -r " + $options.refseq unless $options.no_baits == 1
+		cmdline << " -r " + resolve_unix_path($options.refseq.to_s) unless $options.no_baits == 1
 		cmdline << " -a" if $options.alt_alleles == 1
 		cmdline << " -V " + $options.varqual if $options.varqual_filter == 1
 		if $options.taxafile != ""
-			cmdline << " --taxafile " + $options.taxafile 
+			cmdline << " --taxafile " + resolve_unix_path($options.taxafile.to_s)
 			cmdline << " --taxacount " + $options.taxacount
 			cmdline << " --popcategories " + $options.popcategories if $options.popcategories != ""
 		end
@@ -46,7 +47,7 @@ def start_baitstools
 	else
 		if $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "blast2baits"
 			cmdline << " --list " + $options.list_format if $options.algorithm == "bed2baits"
-			cmdline << " -r " + $options.refseq + " -P" + $options.pad			
+			cmdline << " -r " + resolve_unix_path($options.refseq.to_s) + " -P" + $options.pad			
 		end
 		cmdline << " -L" + $options.baitlength
 		cmdline << " -O" + $options.tileoffset unless $options.algorithm == "checkbaits"
@@ -68,8 +69,8 @@ def start_baitstools
 			cmdline << " -a" if $options.alt_alleles
 		end
 	end
-	cmdline << " -o " + $options.outprefix
-	cmdline << " -Z " + $options.outdir
+	cmdline << " -o " + resolve_unix_path($options.outprefix.to_s)
+	cmdline << " -Z " + resolve_unix_path($options.outdir.to_s)
 	cmdline << " -l" if $options.log == 1
 	cmdline << " -B" if $options.coords == 1
 	cmdline << " -E" if $options.rbed == 1

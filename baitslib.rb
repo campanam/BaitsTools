@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.3.0"
+BAITSLIBVER = "1.3.2"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -453,12 +453,21 @@ def write_file(fileid, message, tmp = false, tmpfile = 0)
 	end
 end
 #-----------------------------------------------------------------------------------------------
+def resolve_unix_path(path)
+	reserved = ["\\", ";", "&", "(", ")","*","?","[","]","~",">","<","!","\"","\'", "$", " "] # \ first to prevent repeated gsub issues
+	outpath = path.dup # Avoid rewriting original string
+	for reschar in reserved
+		outpath.gsub!(reschar) {"\\" + reschar} # Use odd syntax because escape character causes issues with backslash in sub
+	end
+	return outpath
+end
+#-----------------------------------------------------------------------------------------------
 def cat_files(files = $options.default_files)
 	for file in files
 		for i in 1 ... $options.used_threads
 			tmpfile = $options.filestem + '.tmp' + i.to_s + file
 			if File.exist?(tmpfile)
-				system("cat #{tmpfile} >> #{$options.filestem + file}")
+				system("cat #{resolve_unix_path(tmpfile)} >> ", $options.filestem + file)
 				system("rm", tmpfile)
 			end
 		end
@@ -877,7 +886,7 @@ end
 #-----------------------------------------------------------------------------------------------
 def get_command_line # Get command line for summary output
 	# Generate basic command line
-	cmdline = $options.algorithm + " -i " + $options.infile
+	cmdline = $options.algorithm + " -i " + resolve_unix_path($options.infile)
 	case $options.algorithm
 	when "vcf2baits", "stacks2baits"
 		if $options.every
@@ -897,11 +906,11 @@ def get_command_line # Get command line for summary output
 				cmdline << " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
 			end
 		end
-		cmdline << " -r " + $options.refseq unless $options.no_baits
+		cmdline << " -r " + resolve_unix_path($options.refseq) unless $options.no_baits
 		cmdline << " -a" if $options.alt_alleles
 		cmdline << " -V" + $options.varqual.to_s if $options.varqual_filter
 		if $options.taxafile != nil
-			cmdline << " --taxafile " + $options.taxafile 
+			cmdline << " --taxafile " + resolve_unix_path($options.taxafile)
 			cmdline << " --taxacount " + $options.taxacount.join(",")
 			if $options.popcategories != nil
 				if $options.popcategories.is_a?(Hash) # Not converted to hash until later in vcf2baits
@@ -916,7 +925,7 @@ def get_command_line # Get command line for summary output
 	else
 		if $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "blast2baits"
 			cmdline << " --list " + $options.list_format if $options.algorithm == "bed2baits"
-			cmdline << " -r " + $options.refseq + " -P" + $options.pad.to_s
+			cmdline << " -r " + resolve_unix_path($options.refseq) + " -P" + $options.pad.to_s
 		end
 		cmdline << " -L" + $options.baitlength.to_s
 		cmdline << " -O" + $options.tileoffset.to_s unless $options.algorithm == "checkbaits"
@@ -942,8 +951,8 @@ def get_command_line # Get command line for summary output
 			cmdline << " -a" if $options.alt_alleles
 		end
 	end
-	cmdline << " -o " + $options.outprefix
-	cmdline << " -Z " + $options.outdir
+	cmdline << " -o " + resolve_unix_path($options.outprefix)
+	cmdline << " -Z " + resolve_unix_path($options.outdir)
 	cmdline << " -l" if $options.log
 	cmdline << " -B" if $options.coords
 	cmdline << " -E" if $options.rbed
