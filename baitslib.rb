@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.3.2"
+BAITSLIBVER = "1.3.3"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -467,7 +467,7 @@ def cat_files(files = $options.default_files)
 		for i in 1 ... $options.used_threads
 			tmpfile = $options.filestem + '.tmp' + i.to_s + file
 			if File.exist?(tmpfile)
-				system("cat #{resolve_unix_path(tmpfile)} >> ", $options.filestem + file)
+				system("cat #{resolve_unix_path(tmpfile)} >> #{resolve_unix_path($options.filestem + file)}")
 				system("rm", tmpfile)
 			end
 		end
