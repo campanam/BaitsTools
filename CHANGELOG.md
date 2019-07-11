@@ -98,6 +98,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.3.3  
+Multithreading concatenation bug fix introduced by unix path resolution  
+
 ### Version 1.3.2  
 Bug fix for reserved characters in file paths  
 
