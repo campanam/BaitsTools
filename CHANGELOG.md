@@ -77,6 +77,9 @@ Corrected double-tabbed output in parameters output
 Preliminary script to generate weighted bait set from a fasta alignment  
 
 ## annot2baits  
+### Version 1.4.0  
+Circular sequence handling for padding that extends beyond sequence break  
+
 ### Version 1.2.3  
 Region tiling code transferred to baitslib  
 
