@@ -40,14 +40,15 @@ def annot2baits
 								seqst += refhash[chromo].seq.length
 							end				
 						else
-							if seqend > refhash[chromo].seq.length - 1 # Correct for padding going off end
-								print "** Chromosome " + chromo + " starting coordinate set to 1. **\n"
-								seqend = refhash[chromo].seq.length - 1
-							end
 							if seqst < 0
-								print "** Chromosome " + chromo + " final coordinate set to " + refhash[chromo].seq.length.to_s + " **\n"
+								print "** Chromosome " + chromo + " starting coordinate set to 1. **\n"
 								seqst = 0
 							end
+							if seqend > refhash[chromo].seq.length - 1 # Correct for padding going off end
+								print "** Chromosome " + chromo + " final coordinate set to " + refhash[chromo].seq.length.to_s + " **\n"
+								seqend = refhash[chromo].seq.length - 1
+							end
+							
 						end
 						if refhash[chromo].fasta
 							seq = Fa_Seq.new(chromo + "_" + (seqst+1).to_s + "-" + (seqend+1).to_s, false, true) #Correct for 0-based counting
