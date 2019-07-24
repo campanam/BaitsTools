@@ -49,7 +49,6 @@ def blast2baits
 								seq.qual.reverse!
 								seq.qual_array.reverse!
 							end
-
 							regions.push(seq)
 							if $options.log
 								write_file(".log.txt", seq.header + "\t" + chromo + "\t" + (seqst+1).to_s + "\t" + (seqend+1).to_s + "\t" + seq.seq.length.to_s + "\t" + strand)
