@@ -50,7 +50,7 @@ def bed2baits
 			seqcycles = -2 # Number of times around reference sequence
 			if refhash.include?(chromosome)
 				if refhash[chromosome].circular
-					while seqend > refhash[chromosome].seq.length - 2 # Correct for 0/1-based counting
+					while seqend > refhash[chromosome].seq.length
 						seqcycles += 1
 						seqend -= refhash[chromosome].seq.length # Correct for padding going off end
 					end
