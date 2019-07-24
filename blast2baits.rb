@@ -47,6 +47,7 @@ def blast2baits
 							if line_arr[9].to_i < line_arr[8].to_i
 seq.seq = reversecomp(seq.seq)
 seq.qual.reverse!
+seq.qual_array.reverse!
 end
 
 							regions.push(seq)
