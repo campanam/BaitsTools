@@ -13,7 +13,7 @@ Contact: campanam@si.edu
 [blast2baits](#blast2baits)  
 [checkbaits](#checkbaits)  
 [osx_install](#osx_install)  
-[pyrad2baits](#pyrad2baits)
+[pyrad2baits](#pyrad2baits)  
 [stacks2baits](#stacks2baits)  
 [tilebaits](#tilebaits)  
 [vcf2baits](#vcf2baits)  
