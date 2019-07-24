@@ -77,6 +77,9 @@ Corrected double-tabbed output in parameters output
 Preliminary script to generate weighted bait set from a fasta alignment  
 
 ## annot2baits  
+### Version 1.4.1  
+Reduced code redundancy using baitslib functions get_looped_sequences, get_padded faseq  
+
 ### Version 1.4.0  
 Circular sequence handling for padding that extends beyond sequence break  
 
@@ -104,6 +107,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.4.1  
+Reduced code redundancy using baitslib functions get_looped_sequences, get_padded faseq  
+
 ### Version 1.4.0  
 get_sequence_tags method cleans up redundant code in read_fasta  
 Bug fixes to prevent crashes with unnamed sequences, sequences named 'circ' and sequence names starting with 'loc'  
@@ -377,7 +383,10 @@ pyrad2baits added
 ### Version 0.1  
 Basic GUI compatible with baitstools 0.8  
 
-## bed2baits  
+## bed2baits
+### Version 1.4.1  
+Reduced code redundancy using baitslib functions get_looped_sequences, get_padded faseq  
+
 ### Version 1.4.0  
 Circular sequence handling for padding that extends beyond sequence break  
 
@@ -417,6 +426,9 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## blast2baits  
+### Version 1.4.1  
+Reduced code redundancy using baitslib functions get_looped_sequences, get_padded faseq  
+
 ### Version 1.4.0  
 Circular sequence handling for padding that extends beyond sequence break  
 
