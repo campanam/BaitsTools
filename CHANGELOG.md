@@ -491,6 +491,7 @@ Preliminary script to turn a Stacks summary tsv file and a reference sequence in
 ### Version 1.4.0  
 Baits can extend multiple times around ultra-short reference sequences  
 Fixed bug in quality scores for FASTQ files  
+Fixed bug that permitted going off sequence end of short linear sequences when shuffle option turned on.  
 
 ### Version 1.1.0  
 Reworking to use new temp file methods  
