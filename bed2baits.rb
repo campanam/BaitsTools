@@ -47,23 +47,47 @@ def bed2baits
 			end
 			seqst -= $options.pad
 			seqend += $options.pad
+			seqcycles = -2 # Number of times around reference sequence
 			if refhash.include?(chromosome)
-				if seqst < 0
-					print "** Chromosome " + chromosome + " starting coordinate set to 1. **\n"
-					seqst = 0
-				end
-				if seqend > refhash[chromosome].seq.length 
-					print "** Chromosome " + chromosome + " final coordinate set to " + refhash[chromosome].seq.length.to_s + " **\n"
-					seqend = refhash[chromosome].seq.length
+				if refhash[chromosome].circular
+					while seqend > refhash[chromosome].seq.length - 2 # Correct for 0/1-based counting
+						seqcycles += 1
+						seqend -= refhash[chromosome].seq.length # Correct for padding going off end
+					end
+					while seqst < 0
+						seqcycles += 1
+						seqst += refhash[chromosome].seq.length
+					end	
+				else
+					if seqst < 0
+						print "** Chromosome " + chromosome + " starting coordinate set to 1. **\n"
+						seqst = 0
+					end
+					if seqend > refhash[chromosome].seq.length 
+						print "** Chromosome " + chromosome + " final coordinate set to " + refhash[chromosome].seq.length.to_s + " **\n"
+						seqend = refhash[chromosome].seq.length
+					end
 				end
 				if refhash[chromosome].fasta
 					seq = Fa_Seq.new(chromosome + "_" + (seqst+1).to_s + "-" + seqend.to_s, false, true)
 				else
 					seq = Fa_Seq.new(chromosome + "_" + (seqst+1).to_s + "-" + seqend.to_s, false, false)
-					seq.qual = refhash[chromosome].qual[seqst..seqend-1] #Correct for 0/1-based counting
+					if seqcycles == -2
+						seq.qual = refhash[chromosome].qual[seqst..seqend-1] #Correct for 0/1-based counting
+					else
+						seq.qual = refhash[chromosome].qual[seqst..-1]
+						(seqcycles+1).times { seq.qual << refhash[chromosome].qual }
+						seq.qual << refhash[chromosome].qual[0..seqend-1]
+					end
 					seq.calc_quality
 				end
-				seq.seq = refhash[chromosome].seq[seqst..seqend-1] #Correct for 0-based counting
+				if seqcycles == -2
+					seq.seq = refhash[chromosome].seq[seqst..seqend-1] #Correct for 0-based counting
+				else
+					seq.seq = refhash[chromosome].seq[seqst..-1]
+					(seqcycles+1).times { seq.seq << refhash[chromosome].seq }
+					seq.seq << refhash[chromosome].seq[0..seqend-1]
+				end 
 				seq.bedheader = chromosome
 				seq.bedstart = seqst
 				regions.push(seq)

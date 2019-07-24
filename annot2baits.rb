@@ -33,7 +33,7 @@ def annot2baits
 						if refhash[chromo].circular
 							while seqend > refhash[chromo].seq.length - 1
 								seqcycles += 1
-								seqend -= refhash[chromo].seq.length if seqend > refhash[chromo].seq.length - 1 # Correct for padding going off end
+								seqend -= refhash[chromo].seq.length # Correct for padding going off end
 							end
 							while seqst < 0
 								seqcycles += 1
