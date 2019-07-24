@@ -378,6 +378,9 @@ pyrad2baits added
 Basic GUI compatible with baitstools 0.8  
 
 ## bed2baits  
+### Version 1.4.0  
+Circular sequence handling for padding that extends beyond sequence break  
+
 ### Version 1.3.0  
 Interval list option  
 
