@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # annot2baits
-ANNOT2BAITSVER = "1.2.3"
-# Michael G. Campana, 2017-2018
+ANNOT2BAITSVER = "1.4.0"
+# Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -26,19 +26,43 @@ def annot2baits
 				chromo = line_arr[0]
 				feature = line_arr[2]
 				seqst = line_arr[3].to_i - 1 - $options.pad # Correct for 0-based counting and padding
-				seqst = 0 if seqst < 0 # Correct for padding going off end
 				seqend = line_arr[4].to_i - 1 + $options.pad # Correct for 0-based counting and padding
+				seqcycles = -2 # Number of times around reference sequence
 				unless feature.nil? # Skip bad feature lines such as line breaks
 					if $options.features.include?(feature.upcase) # test whether included feature
-						seqend = refhash[chromo].seq.length - 1 if seqend > refhash[chromo].seq.length - 1 # Correct for padding going off end
+						if refhash[chromo].circular
+							while seqend > refhash[chromo].seq.length - 1
+								seqcycles += 1
+								seqend -= refhash[chromo].seq.length if seqend > refhash[chromo].seq.length - 1 # Correct for padding going off end
+							end
+							while seqst < 0
+								seqcycles += 1
+								seqst += refhash[chromo].seq.length
+							end				
+						else
+							seqend = refhash[chromo].seq.length - 1 if seqend > refhash[chromo].seq.length - 1 # Correct for padding going off end
+							seqst = 0 if seqst < 0
+						end
 						if refhash[chromo].fasta
 							seq = Fa_Seq.new(chromo + "_" + (seqst+1).to_s + "-" + (seqend+1).to_s, false, true) #Correct for 0-based counting
 						else
 							seq = Fa_Seq.new(chromo + "_" + (seqst+1).to_s + "-" + (seqend+1).to_s, false, false) #Correct for 0-based counting
-							seq.qual = refhash[chromo].qual[seqst..seqend] 
+							if seqcycles == -2
+								seq.qual = refhash[chromo].qual[seqst..seqend]
+							else
+								seq.qual = refhash[chromo].qual[seqst..-1]
+								seqcycles.times { seq.qual << refhash[chromo].qual }
+								seq.qual << refhash[chromo].qual[0..seqend]
+							end
 							seq.calc_quality
 						end
-						seq.seq = refhash[chromo].seq[seqst..seqend]
+						if seqcycles == -2
+							seq.seq = refhash[chromo].seq[seqst..seqend]
+						else
+							seq.seq = refhash[chromo].seq[seqst..-1]
+							(seqcycles+1).times { seq.seq << refhash[chromo].seq }
+							seq.seq << refhash[chromo].seq[0..seqend]
+						end
 						seq.bedheader = chromo
 						seq.bedstart = seqst 
 						regions.push(seq)
