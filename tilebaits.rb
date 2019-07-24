@@ -43,9 +43,9 @@ def tilebaits(seq_array)
 					elsif Thread.current[:seqend] > seq_array[Thread.current[:j]].seq.length and seq_array[Thread.current[:j]].circular #add beginning of sequence to end
 						Thread.current[:prb] = ""
 						while Thread.current[:seqend] > seq_array[Thread.current[:j]].seq.length
-							Thread.current[:prb] << seq_array[Thread.current[:j]].seq[Thread.current[:seqst]-1..seq_array[Thread.current[:j]].seq.length-1] #
+							Thread.current[:prb] << seq_array[Thread.current[:j]].seq[Thread.current[:seqst]-1..-1] #
 							Thread.current[:prb] << seq_array[Thread.current[:j]].seq[0..Thread.current[:seqst]-2] if Thread.current[:seqst] > 1 # Re-add beginning section but don't go backwards
-							Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality[Thread.current[:seqst]-1..seq_array[Thread.current[:j]].seq.length-1] + seq_array[Thread.current[:j]].numeric_quality[0..Thread.current[:seqst]-2] unless seq_array[Thread.current[:j]].fasta
+							Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality[Thread.current[:seqst]-1..-1] + seq_array[Thread.current[:j]].numeric_quality[0..Thread.current[:seqst]-2] unless seq_array[Thread.current[:j]].fasta
 							Thread.current[:seqend] -= seq_array[Thread.current[:j]].seq.length
 						end
 						Thread.current[:prb] << seq_array[Thread.current[:j]].seq[Thread.current[:seqst]-1..Thread.current[:seqend]-1] #Correct for 0-based counting
