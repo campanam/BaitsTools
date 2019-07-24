@@ -98,6 +98,11 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.4.0  
+get_sequence_tags method cleans up redundant code in read_fasta  
+Bug fixes to prevent crashes with unnamed sequences, sequences named 'circ' and sequence names starting with 'loc'  
+extend_baits can wrap around circular sequences  
+
 ### Version 1.3.3  
 Multithreading concatenation bug fix introduced by unix path resolution  
 
@@ -483,6 +488,10 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
 ## tilebaits  
+### Version 1.4.0  
+Baits can extend multiple times around ultra-short reference sequences  
+Fixed bug in quality scores for FASTQ files  
+
 ### Version 1.1.0  
 Reworking to use new temp file methods  
 
