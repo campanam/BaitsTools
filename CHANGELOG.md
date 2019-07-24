@@ -10,6 +10,7 @@ Contact: campanam@si.edu
 [baitstools](#baitstools)  
 [baitstoolsgui](#baitstoolsgui)  
 [bed2baits](#bed2baits)  
+[blast2baits](#blast2baits)  
 [checkbaits](#checkbaits)  
 [osx_install](#osx_install)  
 [stacks2baits](#stacks2baits)  
