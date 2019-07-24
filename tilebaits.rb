@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # tilebaits
-TILEBAITSVER = "1.1.0"
-# Michael G. Campana, 2017-2018
+TILEBAITSVER = "1.4.0"
+# Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -34,13 +34,22 @@ def tilebaits(seq_array)
 					Thread.current[:seqend] = Thread.current[:seqst]+$options.baitlength-1 #End of bait coordinate
 					if Thread.current[:seqend] > seq_array[Thread.current[:j]].seq.length and !seq_array[Thread.current[:j]].circular #correct for running off end of linear sequence
 						Thread.current[:seqend] = seq_array[Thread.current[:j]].seq.length
-						Thread.current[:seqst] = Thread.current[:seqend] - $options.baitlength + 1 if $options.shuffle
+						if $options.shuffle
+							Thread.current[:seqst] = Thread.current[:seqend] - $options.baitlength + 1
+							Thread.current[:seqst] = 1 if Thread.current[:seqst] < 1
+						end
 						Thread.current[:prb] = seq_array[Thread.current[:j]].seq[Thread.current[:seqst]-1..Thread.current[:seqend]-1] #Correct for 0-based counting
 						Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality[Thread.current[:seqst]-1..Thread.current[:seqend]-1] unless seq_array[Thread.current[:j]].fasta
 					elsif Thread.current[:seqend] > seq_array[Thread.current[:j]].seq.length and seq_array[Thread.current[:j]].circular #add beginning of sequence to end
-						Thread.current[:seqend] -= seq_array[Thread.current[:j]].seq.length
-						Thread.current[:prb] = seq_array[Thread.current[:j]].seq[Thread.current[:seqst]-1..seq_array[Thread.current[:j]].seq.length-1] + seq_array[Thread.current[:j]].seq[0..Thread.current[:seqend]-1] #Correct for 0-based counting
-						Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality[Thread.current[:seqst]-1..seq.seq.length-1] + seq_array[Thread.current[:j]].numeric_quality[0..Thread.current[:seqend]-1] unless seq_array[Thread.current[:j]].fasta
+						Thread.current[:prb] = ""
+						while Thread.current[:seqend] > seq_array[Thread.current[:j]].seq.length
+							Thread.current[:prb] << seq_array[Thread.current[:j]].seq[Thread.current[:seqst]-1..-1] #
+							Thread.current[:prb] << seq_array[Thread.current[:j]].seq[0..Thread.current[:seqst]-2] if Thread.current[:seqst] > 1 # Re-add beginning section but don't go backwards
+							Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality[Thread.current[:seqst]-1..-1] + seq_array[Thread.current[:j]].numeric_quality[0..Thread.current[:seqst]-2] unless seq_array[Thread.current[:j]].fasta
+							Thread.current[:seqend] -= seq_array[Thread.current[:j]].seq.length
+						end
+						Thread.current[:prb] << seq_array[Thread.current[:j]].seq[Thread.current[:seqst]-1..Thread.current[:seqend]-1] #Correct for 0-based counting
+						Thread.current[:qual] << seq_array[Thread.current[:j]].numeric_quality[Thread.current[:seqst]-1..Thread.current[:seqend]-1] unless seq_array[Thread.current[:j]].fasta
 					else
 						Thread.current[:prb] = seq_array[Thread.current[:j]].seq[Thread.current[:seqst]-1..Thread.current[:seqend]-1] #Correct for 0-based counting
 						Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality[Thread.current[:seqst]-1..Thread.current[:seqend]-1] unless seq_array[Thread.current[:j]].fasta
@@ -48,7 +57,7 @@ def tilebaits(seq_array)
 					Thread.current[:prb] = reversecomp(Thread.current[:prb]) if $options.rc # Output reverse complemented baits if requested
 					Thread.current[:prb].gsub!("T","U") if $options.rna # RNA output handling
 					Thread.current[:prb].gsub!("t","u") if $options.rna # RNA output handling
-					Thread.current[:prb] = extend_baits(Thread.current[:prb],  seq_array[Thread.current[:j]].seq, Thread.current[:seqst]-1, Thread.current[:seqend]-1) if $options.gaps == "extend"
+					Thread.current[:prb] = extend_baits(Thread.current[:prb],  seq_array[Thread.current[:j]].seq, Thread.current[:seqst]-1, Thread.current[:seqend]-1, seq_array[Thread.current[:j]].circular) if $options.gaps == "extend"
 					Thread.current[:bait] = ">" + seq_array[Thread.current[:j]].header + "_" + Thread.current[:seqst].to_s + "-" + Thread.current[:seqend].to_s + "\n" + Thread.current[:prb]
 					if $options.algorithm == "bed2baits" or $options.algorithm == "annot2baits" or $options.algorithm = "tilebaits"
 						bedstart = (Thread.current[:seqst]-1 + seq_array[Thread.current[:j]].bedstart).to_s

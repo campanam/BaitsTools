@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # aln2baits
-ALN2BAITSVER = "1.2.1"
-# Michael G. Campana, 2017-2018
+ALN2BAITSVER = "1.4.0"
+# Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -97,17 +97,29 @@ def aln2baits(aln)
 					Thread.current[:aln] = aln_hash[aln_hash.keys[Thread.current[:j]]]
 					while Thread.current[:seqstart] < Thread.current[:aln][0].seq.length
 						Thread.current[:seqend] = Thread.current[:seqstart] + $options.baitlength - 1
-						if Thread.current[:seqend] > Thread.current[:aln][0].seq.length-1 # Correct for circular sequences later
+						Thread.current[:seqcycles] = -1 # Number of complete cycles through short baits. First cycle through brings to 0
+						if Thread.current[:seqend] > Thread.current[:aln][0].seq.length-1 and !Thread.current[:aln][0].circular
 							Thread.current[:seqend] = Thread.current[:aln][0].seq.length - 1
 							if $options.shuffle
 								Thread.current[:seqstart] = Thread.current[:seqend] - $options.baitlength + 1
 								Thread.current[:seqstart] = 0 if Thread.current[:seqstart] < 0
 							end
+						elsif Thread.current[:seqend] > Thread.current[:aln][0].seq.length-1 and Thread.current[:aln][0].circular
+							while Thread.current[:seqend] > Thread.current[:aln][0].seq.length-1
+								Thread.current[:seqcycles] += 1
+								Thread.current[:seqend] -= Thread.current[:aln][0].seq.length
+							end
 						end
 						Thread.current[:window] = Hap_Window.new([], Thread.current[:seqstart], Thread.current[:seqend])
 						Thread.current[:window].locus = Thread.current[:aln][0].locus
 						for Thread.current[:seq] in Thread.current[:aln]
-							Thread.current[:tmp_seq] = Thread.current[:seq].seq[Thread.current[:seqstart]..Thread.current[:seqend]]
+							if Thread.current[:seqcycles] == -1
+								Thread.current[:tmp_seq] = Thread.current[:seq].seq[Thread.current[:seqstart]..Thread.current[:seqend]]
+							else
+								Thread.current[:tmp_seq] = Thread.current[:seq].seq[Thread.current[:seqstart]..-1]
+								Thread.current[:seqcycles].times { Thread.current[:tmp_seq] << Thread.current[:seq].seq }
+								Thread.current[:tmp_seq] << Thread.current[:seq].seq[0..Thread.current[:seqend]]
+							end
 							Thread.current[:tmp_seq].upcase! unless $options.maxmask_filter # Treat all cases the same unless the masking filter is requested
 							unless Thread.current[:window].haplotypes.include?(Thread.current[:tmp_seq]) # Add new sequences to haplotype list
 								Thread.current[:tmp_seq] = extend_baits(Thread.current[:tmp_seq], Thread.current[:seq].seq, Thread.current[:seqstart], Thread.current[:seqend]) if ($options.gaps == "extend" && $options.haplodef == "haplotype")

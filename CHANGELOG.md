@@ -18,6 +18,9 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.4.0  
+Circular sequence handling  
+
 ### Version 1.2.1  
 Fixed bugs in gap extension  
 Used appending for sequence variant generation  
@@ -74,6 +77,9 @@ Corrected double-tabbed output in parameters output
 Preliminary script to generate weighted bait set from a fasta alignment  
 
 ## annot2baits  
+### Version 1.4.0  
+Circular sequence handling for padding that extends beyond sequence break  
+
 ### Version 1.2.3  
 Region tiling code transferred to baitslib  
 
@@ -98,6 +104,11 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.4.0  
+get_sequence_tags method cleans up redundant code in read_fasta  
+Bug fixes to prevent crashes with unnamed sequences, sequences named 'circ' and sequence names starting with 'loc'  
+extend_baits can wrap around circular sequences  
+
 ### Version 1.3.3  
 Multithreading concatenation bug fix introduced by unix path resolution  
 
@@ -367,6 +378,9 @@ pyrad2baits added
 Basic GUI compatible with baitstools 0.8  
 
 ## bed2baits  
+### Version 1.4.0  
+Circular sequence handling for padding that extends beyond sequence break  
+
 ### Version 1.3.0  
 Interval list option  
 
@@ -403,6 +417,9 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## blast2baits  
+### Version 1.4.0  
+Circular sequence handling for padding that extends beyond sequence break  
+
 ### Version 1.3.1  
 Prevent crash for missing sequence in reference file  
 Notifications of coordinate adjustments for out-of-bounds coordinates  
@@ -483,6 +500,11 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
 ## tilebaits  
+### Version 1.4.0  
+Baits can extend multiple times around ultra-short reference sequences  
+Fixed bug in quality scores for FASTQ files  
+Fixed bug that permitted going off sequence end of short linear sequences when shuffle option turned on.  
+
 ### Version 1.1.0  
 Reworking to use new temp file methods  
 
