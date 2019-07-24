@@ -18,6 +18,9 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.4.0  
+Circular sequence handling  
+
 ### Version 1.2.1  
 Fixed bugs in gap extension  
 Used appending for sequence variant generation  
