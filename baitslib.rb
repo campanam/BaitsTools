@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.4.0"
+BAITSLIBVER = "1.4.1"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -861,6 +861,57 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 		end
 	end
 	return filteredsnps
+end
+#-----------------------------------------------------------------------------------------------
+def get_looped_sequence(refhash, chromo, seqst, seqend)
+	seqcycles = -2 # Number of times around reference sequence
+	if refhash[chromo].circular
+		while seqend > refhash[chromo].seq.length - 1
+			seqcycles += 1
+			seqend -= refhash[chromo].seq.length # Correct for padding going off end
+		end
+		while seqst < 0
+			seqcycles += 1
+			seqst += refhash[chromo].seq.length
+		end
+		seqcycles += 1 # Needed so that sequence is actually printed
+	else
+		if seqst < 0
+			print "** Chromosome " + chromo + " starting coordinate set to 1. **\n"
+			seqst = 0
+		end
+		if seqend > refhash[chromo].seq.length - 1
+			print "** Chromosome " + chromo + " final coordinate set to " + refhash[chromo].seq.length.to_s + " **\n"
+			seqend = refhash[chromo].seq.length - 1
+		end
+	end
+	return seqst, seqend, seqcycles
+end
+#-----------------------------------------------------------------------------------------------
+def get_padded_faseq(refhash, chromo, seqst, seqend, seqcycles)
+	if refhash[chromo].fasta
+		seq = Fa_Seq.new(chromo + "_" + (seqst+1).to_s + "-" + (seqend+1).to_s, false, true)
+	else
+		seq = Fa_Seq.new(chromo + "_" + (seqst+1).to_s + "-" + (seqend+1).to_s, false, false)
+		if seqcycles == -2
+			seq.qual = refhash[chromo].qual[seqst..seqend]
+		else
+			seq.qual = refhash[chromo].qual[seqst..-1]
+			seqcycles.times { seq.qual << refhash[chromo].qual }
+			seq.qual << refhash[chromo].qual[0..seqend]
+		end
+		seq.calc_quality
+		end
+		if seqcycles == -2
+			seq.seq = refhash[chromo].seq[seqst..seqend]
+		else
+			seq.seq = refhash[chromo].seq[seqst..-1]
+			seqcycles.times { seq.seq << refhash[chromo].seq }
+			seq.seq << refhash[chromo].seq[0..seqend]
+		end 
+		seq.bedheader = chromo
+		seq.bedstart = seqst
+	return seq
 end
 #-----------------------------------------------------------------------------------------------
 def tile_regions(regions, totallength)

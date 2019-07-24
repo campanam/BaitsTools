@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # bed2baits
-BED2BAITSVER = "1.4.0"
+BED2BAITSVER = "1.4.1"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -28,75 +28,35 @@ def bed2baits
 			case $options.list_format
 			when "bed"
 				line_arr = line.split("\t")
-				chromosome = line_arr[0]
+				chromo = line_arr[0]
 				seqst = line_arr[1].to_i
-				seqend = line_arr[2].to_i
+				seqend = line_arr[2].to_i - 1
 			when "GATK"
-				chromosome = line.split(":")[0]
+				chromo = line.split(":")[0]
 				seqst = line.split(":")[1].split("-")[0].to_i
-				seqend = line.split(":")[1].split("-")[1].to_i
+				seqend = line.split(":")[1].split("-")[1].to_i - 1
 			when "Picard"
 				if line[0].chr == "@"
 					next
 				else
 					line_arr = line.split("\t")
-					chromosome = line_arr[0]
+					chromo = line_arr[0]
 					seqst = line_arr[1].to_i - 1
-					seqend = line_arr[2].to_i
+					seqend = line_arr[2].to_i - 1
 				end
 			end
 			seqst -= $options.pad
 			seqend += $options.pad
-			seqcycles = -2 # Number of times around reference sequence
-			if refhash.include?(chromosome)
-				if refhash[chromosome].circular
-					while seqend > refhash[chromosome].seq.length
-						seqcycles += 1
-						seqend -= refhash[chromosome].seq.length # Correct for padding going off end
-					end
-					while seqst < 0
-						seqcycles += 1
-						seqst += refhash[chromosome].seq.length
-					end	
-				else
-					if seqst < 0
-						print "** Chromosome " + chromosome + " starting coordinate set to 1. **\n"
-						seqst = 0
-					end
-					if seqend > refhash[chromosome].seq.length 
-						print "** Chromosome " + chromosome + " final coordinate set to " + refhash[chromosome].seq.length.to_s + " **\n"
-						seqend = refhash[chromosome].seq.length
-					end
-				end
-				if refhash[chromosome].fasta
-					seq = Fa_Seq.new(chromosome + "_" + (seqst+1).to_s + "-" + seqend.to_s, false, true)
-				else
-					seq = Fa_Seq.new(chromosome + "_" + (seqst+1).to_s + "-" + seqend.to_s, false, false)
-					if seqcycles == -2
-						seq.qual = refhash[chromosome].qual[seqst..seqend-1] #Correct for 0/1-based counting
-					else
-						seq.qual = refhash[chromosome].qual[seqst..-1]
-						(seqcycles+1).times { seq.qual << refhash[chromosome].qual }
-						seq.qual << refhash[chromosome].qual[0..seqend-1]
-					end
-					seq.calc_quality
-				end
-				if seqcycles == -2
-					seq.seq = refhash[chromosome].seq[seqst..seqend-1] #Correct for 0-based counting
-				else
-					seq.seq = refhash[chromosome].seq[seqst..-1]
-					(seqcycles+1).times { seq.seq << refhash[chromosome].seq }
-					seq.seq << refhash[chromosome].seq[0..seqend-1]
-				end 
-				seq.bedheader = chromosome
-				seq.bedstart = seqst
+			if refhash.include?(chromo)
+				seqst, seqend, seqcycles = get_looped_sequence(refhash, chromo, seqst, seqend)
+				seq = get_padded_faseq(refhash, chromo, seqst, seqend, seqcycles)
 				regions.push(seq)
 				if $options.log
-					write_file(".log.txt", seq.header + "\t" + chromosome + "\t" + (seqst+1).to_s + "\t" + seqend.to_s + "\t" + seq.seq.length.to_s)
+					write_file(".log.txt", seq.header + "\t" + chromo + "\t" + (seqst+1).to_s + "\t" + (seqend+1).to_s + "\t" + seq.seq.length.to_s)
 					totallength += seq.seq.length
 				end
 			else
-				print "** Chromosome " + chromosome + " not found in reference sequence file. **\n"
+				print "** Chromosome " + chromo + " not found in reference sequence file. **\n"
 			end
 		end
 	end
