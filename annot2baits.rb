@@ -58,7 +58,7 @@ def annot2baits
 								seq.qual = refhash[chromo].qual[seqst..seqend]
 							else
 								seq.qual = refhash[chromo].qual[seqst..-1]
-								seqcycles.times { seq.qual << refhash[chromo].qual }
+								(seqcycles+1).times { seq.qual << refhash[chromo].qual }
 								seq.qual << refhash[chromo].qual[0..seqend]
 							end
 							seq.calc_quality
