@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.3.3"
+BAITSLIBVER = "1.4.0"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -265,13 +265,24 @@ def build_fq_hash # method to build fastq quality hash
 	end
 end
 #-----------------------------------------------------------------------------------------------
-def extend_baits(bait, reference, seqst, seqend) # Extend baits with gap characters
+def extend_baits(bait, reference, seqst, seqend, circular = false) # Extend baits with gap characters
 	bait.delete!("-")
 	while bait.length < $options.baitlength
 		seqend += 1
 		break if seqend >= reference.length
-		bait += reference[seqend].chr
+		bait << reference[seqend].chr
 		bait.delete!("-")
+	end
+	if circular
+		tmpref = reference.dup # Generate temporary reference for circular baits
+		while tmpref.length < $options.baitlength
+			tmpref << reference.dup
+		end
+		while bait.length < $options.baitlength
+			seqend += 1
+			bait << tmpref[seqend].chr
+			bait.delete!("-")
+		end
 	end
 	while bait.length < $options.baitlength
 		seqst -=1
@@ -474,6 +485,35 @@ def cat_files(files = $options.default_files)
 	end
 end
 #-----------------------------------------------------------------------------------------------
+def get_sequence_tags(seq_array, faseq, line, fasta)
+	if !faseq.nil? # push previously completed sequence into array
+		seq_array.push(faseq)
+	end
+	header = line[1...-1] # Remove final line break and beginning >
+	header = "unnamed_sequence" if header == "" # Prevent crashout if no sequence name
+	header_array = header.split("#")
+	if header_array[1..-1].include?("circ") # Determine circularity but ignore sequences named exactly 'circ'
+		circular = true
+		header_array[1..-1].delete("circ") # Delete array value so bed value always at same index but ignore sequences named exactly 'circ'
+	else
+		circular = false
+	end
+	# Get locus information
+	locus = header_array[1..-1].find { |gene| /^loc/ =~ gene } # Ignore sequences starting with the name 'loc'
+	header_array.delete(locus) unless locus.nil?
+	if header_array[1].nil?
+		bedstart = 0 # Set default bedstart to 0
+	else
+		bedstart = header_array[1][3..-1].to_i
+	end
+	header_array = header_array[0].split(" ") if $options.ncbi # Remove sequence description from sequence name for NCBI-formatted files
+	header = header_array[0]
+	faseq = Fa_Seq.new(header, circular, fasta)
+	faseq.bedstart = bedstart
+	faseq.locus = locus[3..-1] unless locus.nil?
+	return faseq	
+end
+#-----------------------------------------------------------------------------------------------
 def read_fasta(file) # Read fasta and fastq files
 	seq_array = []
 	faseq = nil # Dummy value
@@ -482,58 +522,12 @@ def read_fasta(file) # Read fasta and fastq files
 		while line = seq.gets
 			unless line == "\n" # Remove extraneous line breaks
 				if line[0].chr == ">" and qual == false
-					if !faseq.nil? # push previously completed sequence into array
-						seq_array.push(faseq)
-					end
-					header = line[1...-1] # Remove final line break and beginning >
-					header_array = header.split("#")
-					if header_array.include?("circ")  # Determine circularity
-						circular = true
-						header_array.delete("circ") # Delete array value so bed value always at same index
-					else
-						circular = false
-					end
-					# Get locus information
-					locus = header_array.find { |gene| /^loc/ =~ gene }
-					header_array.delete(locus) unless locus.nil?
-					if header_array[1].nil?
-						bedstart = 0 # Set default bedstart to 0
-					else
-						bedstart = header_array[1][3..-1].to_i
-					end
-					header_array = header_array[0].split(" ") if $options.ncbi # Remove sequence description from sequence name for NCBI-formatted files
-					header = header_array[0]
-					faseq = Fa_Seq.new(header, circular, true)
-					faseq.bedstart = bedstart
-					faseq.locus = locus[3..-1] unless locus.nil?
+					faseq = get_sequence_tags(seq_array, faseq, line, true)
 				elsif qual and faseq.qual.length < faseq.seq.length # Test if quality line is complete
 					faseq.qual << line[0...-1] #Exclude final line break, allow multi-line fastq
 			 	elsif line[0].chr == "@" # Start new sequence
 					qual = false
-					if !faseq.nil? # push previously completed sequence into array
-						seq_array.push(faseq)
-					end
-					header = line[1...-1] # Remove final line break and beginning >
-					header_array = header.split("#")
-					if header_array.include?("circ")  # Determine circularity
-						circular = true
-						header_array.delete!("circ") # Delete array value so bed value always at same index
-					else
-						circular = false
-					end
-					# Get locus information
-					locus = header_array.find { |gene| /^loc/ =~ gene }
-					header_array.delete(locus) unless locus.nil?
-					if header_array[1].nil?
-						bedstart = 0 # Set default bedstart to 0
-					else
-						bedstart = header_array[1][3..-1].to_i
-					end
-					header_array = header_array[0].split(" ") if $options.ncbi # Remove sequence description from sequence name for NCBI-formatted files
-					header = header_array[0]
-					faseq = Fa_Seq.new(header, circular, false)
-					faseq.bedstart = bedstart
-					faseq.locus = locus[3..-1] unless locus.nil?
+					faseq = get_sequence_tags(seq_array, faseq, line, false)
 				elsif line[0].chr == "+"
 					qual = true
 				else
