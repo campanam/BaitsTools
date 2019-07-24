@@ -34,7 +34,10 @@ def tilebaits(seq_array)
 					Thread.current[:seqend] = Thread.current[:seqst]+$options.baitlength-1 #End of bait coordinate
 					if Thread.current[:seqend] > seq_array[Thread.current[:j]].seq.length and !seq_array[Thread.current[:j]].circular #correct for running off end of linear sequence
 						Thread.current[:seqend] = seq_array[Thread.current[:j]].seq.length
-						Thread.current[:seqst] = Thread.current[:seqend] - $options.baitlength + 1 if $options.shuffle
+						if $options.shuffle
+							Thread.current[:seqst] = Thread.current[:seqend] - $options.baitlength + 1
+							Thread.current[:seqst] = 1 if Thread.current[:seqst] < 1
+						end
 						Thread.current[:prb] = seq_array[Thread.current[:j]].seq[Thread.current[:seqst]-1..Thread.current[:seqend]-1] #Correct for 0-based counting
 						Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality[Thread.current[:seqst]-1..Thread.current[:seqend]-1] unless seq_array[Thread.current[:j]].fasta
 					elsif Thread.current[:seqend] > seq_array[Thread.current[:j]].seq.length and seq_array[Thread.current[:j]].circular #add beginning of sequence to end
