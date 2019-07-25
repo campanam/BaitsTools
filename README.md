@@ -32,7 +32,7 @@ The software is made available under the Smithsonian Institution [terms of use](
 7h. [tilebaits](#tilebaits)  
 7i. [vcf2baits](#vcf2baits)  
 8. [Tips and Tricks](#tips-and-tricks)  
-9. [Bug Reports](#bug-reports)
+9. [Bug Reports](#bug-reports-and-feature-requests)
 10. [Citation](#citation)  
 
 ## Installation  
