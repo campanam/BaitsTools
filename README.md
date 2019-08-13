@@ -43,7 +43,7 @@ In a terminal window, execute the following commands:
 `cd BaitsTools`  
 `chmod +x *.rb`  
 
-Optionally, the Ruby files (.rb files) can be placed within the users $PATH so that they can be executed from any location. Depending on your operating system, you may need to change the shebang lines in the scripts (first lines starting with #!) to specify the path of your Ruby executable.  
+Optionally, the Ruby files (.rb files) can be placed within the user’s $PATH so that they can be executed from any location. Depending on your operating system, you may need to change the shebang lines in the scripts (first lines starting with #!) to specify the path of your Ruby executable.  
 
 You can test your BaitsTools installation by running the tutorials included in the example data. The archive "tutorial.tgz" includes the expected output of each tutorial. Note that vcf2baits and stacks2baits output will vary slightly due to the random number generator.  
 
