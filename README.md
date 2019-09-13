@@ -116,6 +116,7 @@ A tutorial and example data are available in the example_data subdirectory of th
 `--phred64`: Qualities are encoded in phred64 rather than phred33.  
 `-X, --threads [VALUE]`: Number of threads. Default is 1.  
 `--rng [VALUE]`: Random number seed. Default uses system entropy.  
+`--gzip`: Gzip output files.  
 `-h, --help`: Print subcommand-specific help to the screen. Use without other arguments (e.g. `ruby baitstools.rb vcf2baits -h`).  
 `-v, --version`: Print subcommand version to the screen (which may not correspond with the BaitsTools release version). Use without other arguments (e.g. `ruby baitstools.rb vcf2baits -v`).
 
@@ -288,6 +289,8 @@ vcf2baits selects variants and generates baits from a VCF file and a reference s
 5. If you need to enter a negative value into the command-line interface (e.g. a negative melting temperature), omit the space between the parameter and the value (e.g. `-q-30.0` rather than `-q -30.0`). Including the space will cause a Ruby parsing error.  
 
 6. It is possible to generate baits from paired-end sequences that do not overlap in a single BaitsTools run. Concatenate the two reads (reverse-complementing as appropriate) with a pad of Ns between the two reads. Using the `-N` option will then exclude candidate baits that overlap the N pad. This could be helpful for generating baits from FASTA/FASTQ alignments (e.g. using `aln2baits`) in which some sequences overlap and can be merged, but others have an unsequenced gap between the paired reads. This trick can also be used for unmerged paired-end PyRAD/ipyrad loci in `pyrad2baits`.  
+
+7. As of version 1.5.0, BaitsTools considers files with the terminal extension '.gz' to be gzip compressed. All other file names are assumed to be uncompressed.  
 
 ## Bug Reports and Feature Requests  
 BaitsTools is a complex program under active development. Bugs and technical issues are inevitable. Please report any issues and associated error reports using the issues template and e-mail <campanam@si.edu>. Feature requests can be filed using the appropriate issue template or e-mailed to <campanam@si.edu>. Please see the CONTRIBUTING guidelines.  
