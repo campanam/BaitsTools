@@ -79,6 +79,9 @@ Corrected double-tabbed output in parameters output
 Preliminary script to generate weighted bait set from a fasta alignment  
 
 ## annot2baits  
+### Version 1.5.0  
+Read/write gzip files  
+
 ### Version 1.4.1  
 Reduced code redundancy using baitslib functions get_looped_sequences, get_padded faseq  
 
@@ -109,6 +112,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.5.0  
+Read/write gzip files  
+
 ### Version 1.4.1  
 Reduced code redundancy using baitslib functions get_looped_sequences, get_padded faseq  
 
@@ -210,6 +216,9 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.5.0  
+Read/write gzip files  
+
 ### Version 1.3.0  
 RNG seed option  
 Interval list option  
@@ -341,6 +350,9 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.5.0  
+Read/write gzip files  
+
 ### Version 1.3.2  
 Bug fix for reserved characters in file paths  
 
@@ -385,7 +397,10 @@ pyrad2baits added
 ### Version 0.1  
 Basic GUI compatible with baitstools 0.8  
 
-## bed2baits
+## bed2baits  
+### Version 1.5.0  
+Read/write gzip files  
+
 ### Version 1.4.1  
 Reduced code redundancy using baitslib functions get_looped_sequences, get_padded faseq  
 
@@ -428,6 +443,9 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## blast2baits  
+### Version 1.5.0  
+Read/write gzip files  
+
 ### Version 1.4.2  
 Reverse-complement quality bug fix  
 
@@ -473,7 +491,10 @@ Version constant added to header
 ### Version 0.1  
 Preliminary script to filter predefined baits through quality filters  
 
-## osx_install
+## osx_install  
+### Version 1.5.0  
+Updated Ruby version to latest    
+
 ### Version 1.0.3  
 Changes now recorded in change log.  
 Versioning added to header of script  
@@ -482,6 +503,9 @@ Versioning added to header of script
 RVM default bug fixed  
 
 ## pyrad2baits  
+### Version 1.5.0  
+Read/write gzip files  
+
 ### Version 1.1.0  
 Reworking to use new temp file methods  
 
@@ -492,6 +516,9 @@ pyrad2baits can produce an uncollapsed reference sequence
 Preliminary script to generate baits from PyRAD/ipyrad loci files  
 
 ## stacks2baits  
+### Version 1.5.0  
+Read/write gzip files  
+
 ### Version 1.1.0  
 Reworking to use new temp file methods  
 HWE test uses floats rather than integers for precision  
@@ -572,6 +599,9 @@ Output now controlled by baitslib write_probes function
 Preliminary script to divide genic/genomic sequences into tiled baits
 
 ## vcf2baits  
+### Version 1.5.0  
+Read/write gzip files  
+
 ### Version 1.3.1  
 fixed bug in header column causing extra line break with write_file  
 
