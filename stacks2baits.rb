@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # stacks2baits
-STACKS2BAITSVER = "1.1.0"
+STACKS2BAITSVER = "1.5.0"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ def stacks2baits
 	print "** Reading stacks tsv **\n"
 	stacksvars = {} # Hash, keying by stacks Locus ID and SNP index
 	stacksheader = "" # Stacks TSV header
-	File.open($options.infile, 'r') do |stacks|
+	eval(gz_file_open($options.infile)).open($options.infile) do |stacks|
 		while line = stacks.gets
 			if line[0].chr != "#"
 				split_line = line.split("\t")

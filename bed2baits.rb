@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # bed2baits
-BED2BAITSVER = "1.4.1"
+BED2BAITSVER = "1.5.0"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -23,7 +23,7 @@ def bed2baits
 	regions = [] #Array to hold generated fasta sequences
 	write_file(".log.txt", "ExtractedRegions\nRegion\tChromosome\tStart\tEnd\tLength") if $options.log
 	totallength = 0
-	File.open($options.infile, 'r') do |coord|
+	eval(gz_file_open($options.infile)).open($options.infile) do |coord|
 		while line = coord.gets
 			case $options.list_format
 			when "bed"

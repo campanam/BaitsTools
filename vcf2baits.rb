@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # vcf2baits
-VCF2BAITSVER = "1.3.1"
+VCF2BAITSVER = "1.5.0"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@ def vcf2baits
 	temp_snps = []
 	columns = ""
 	print "** Reading VCF **\n"
-	File.open($options.infile, 'r') do |snpreg|
+	eval(gz_file_open($options.infile)).open($options.infile) do |snpreg|
 		while line = snpreg.gets
 			vcfout << line if line[0..1] == "##" # Add info lines to header
 			if line[0..1] == "#C" # Get column header separately so I can insert new information
@@ -48,7 +48,7 @@ def vcf2baits
 	@snps.delete_if {|key, value| value == []} # Delete empty contigs due to QUAL filter
 	unless $options.taxafile.nil?
 		print "** Reading taxa file and sorting variants **\n"
-		File.open($options.taxafile, 'r') do |taxafile| # Get taxa assignments
+		eval(gz_file_open($options.taxafile)).open($options.taxafile) do |taxafile| # Get taxa assignments
 			while line = taxafile.gets
 				taxon = line[0..-2].split("\t")
 				$options.taxa[taxon[0]] = taxon[1]

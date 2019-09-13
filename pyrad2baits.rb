@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # pyrad2baits
-PYRAD2BAITSVER = "1.1.0"
+PYRAD2BAITSVER = "1.5.0"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -61,7 +61,7 @@ def pyrad2baits
 	loc = Pyrad_Locus.new
 	locid = 0
 	write_file(".log.txt", "Locus Coverage:\nLocus\tNumberIndividuals\tKept") if $options.log
-	File.open($options.infile, 'r') do |pyr|
+	eval(gz_file_open($options.infile)).open($options.infile) do |pyr|
 		while line = pyr.gets
 			if line[0..1] != "//"
 				diplo = line.split

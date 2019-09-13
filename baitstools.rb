@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.4.2"
+BAITSTOOLSVER = "1.5.0"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -110,6 +110,7 @@ class Parser
 		args.filestem = args.outdir + args.outprefix # File stem for output
 		args.default_files = [] # Default files to be written
 		args.rng = srand # Random number seed
+		args.gzip = false # Gzip output files
 		opt_parser = OptionParser.new do |opts|
 			if algorithms.include?(args.algorithm) # Process correct commands
 				opts.banner = "Command-line usage: ruby baitstools.rb "+args.algorithm+" [options]"
@@ -396,6 +397,9 @@ class Parser
 				end
 				opts.on("--rng [VALUE]", Integer, "Random number seed (Default uses system entropy)") do |rng|
 					args.rng = rng if rng != nil
+				end
+				opts.on("--gzip", "Gzip output files") do
+					args.gzip = true
 				end
 				opts.on_tail("-h","--help", "Show help") do
 					print "Welcome to baitstools " + args.algorithm + '.' +"\n\n"
@@ -1038,13 +1042,16 @@ begin
 	if $options.interact
 		print "Are FASTQ qualities in Phred64? (y/n)\n"
 		t = gets.chomp.upcase
-		$options.phred64 = true if t == "Y" or t == "YES"
+		$options.phred64 = true if (t == "Y" or t == "YES")
 		print "Set random number seed (otherwise uses system entropy)? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
 			print "Enter random number seed.\n"
 			$options.rng = gets.chomp.to_i
 		end
+		print "Gzip output files? (y/n)\n"
+		t = gets.chomp.upcase
+		$options.gzip = true if (t == "Y" or t == "YES")
 	end	
 	$options.no_baits = false if ($options.every or $options.alt_alleles) # Override -p when needed
 	$options.filter = true if ($options.completebait or $options.params or $options.algorithm == "checkbaits" or $options.lc_filter or $options.mingc_filter or $options.maxgc_filter or $options.mint_filter or $options.maxt_filter or $options.maxmask_filter or $options.maxhomopoly_filter or $options.meanqual_filter or $options.minqual_filter or $options.gaps == "exclude" or $options.no_Ns or $options.collapse_ambiguities) # Force filtration as necessary

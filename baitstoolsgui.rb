@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.3.2"
+BAITSTOOLSGUI = "1.5.0"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -78,6 +78,7 @@ def start_baitstools
 	cmdline << " -D" if $options.ncbi == 1
 	cmdline << " -Y" if $options.rna == 1
 	cmdline << " --phred64" if $options.phred64 == 1
+	cmdline << " --gzip" if $options.gzip == 1
 	cmdline << " -G " + $options.gaps + " -X" + $options.threads + " --rng " + $options.rng
 	# Generate filtration options
 	cmdline << " -w" if $options.params == 1
@@ -673,8 +674,13 @@ def general_window
 	end
 	phred64 = TkCheckButton.new($root) do
 		variable $options.phred64
-		text "Phred64"
+		text "Phred64 Input"
 		place('x' => 300, 'y' => 300)
+	end
+	gzip = TkCheckButton.new($root) do
+		variable $options.gzip
+		text "Gzip Output"
+		place('x' => 550, 'y' => 300)
 	end
 	gaps = TkLabel.new($root) do
 		text 'Gap strategy'
@@ -716,13 +722,13 @@ def general_window
 		place('x' => 240, 'y' => 410)
 		width 80
 	end
-	configure_buttons([outdir, bed, rbed, shuffle, log, ncbi, rna, rc, phred64])
+	configure_buttons([outdir, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gzip])
 	bed.state = shuffle.state = "disabled" if $options.algorithm == "checkbaits"
 	ncbi.state = "disabled" if $options.algorithm == "pyrad2baits"
 	rbed.state = "disabled" unless $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "tilebaits" or $options.algorithm == "aln2baits"
 	outdir.width = rbed.width = rc.width = 20
-	ncbi.width = 15
-	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gaps, gapselect, threads, threadentry, rng, rngentry)
+	ncbi.width = phred64.width = 15
+	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gzip, gaps, gapselect, threads, threadentry, rng, rngentry)
 end
 #-----------------------------------------------------------------------------------------------
 def subcommand_window(subcommand)
@@ -1479,6 +1485,7 @@ def set_defaults
 	$options.minqual = TkVariable.new(10) # Minimum base quality
 	$options.fasta_score = TkVariable.new(0) # Asssumed base quality score for FASTA sequences
 	$options.phred64 = TkVariable.new(0) # Use phred64 quality encoding
+	$options.gzip = TkVariable.new(0) # Gzip output
 	# General Parameters
 	$options.outprefix = TkVariable.new("out") # Output prefix
 	$options.outdir = TkVariable.new(File.expand_path("./")) # Output directory

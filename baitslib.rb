@@ -1,10 +1,12 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.4.1"
+BAITSLIBVER = "1.5.0"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
+
+require 'zlib'
 
 class Fa_Seq #container for fasta/fastq sexquences
 	attr_accessor :header, :circular, :fasta, :seq, :qual, :qual_array, :bedstart, :locus, :bedheader
@@ -464,6 +466,14 @@ def write_file(fileid, message, tmp = false, tmpfile = 0)
 	end
 end
 #-----------------------------------------------------------------------------------------------
+def gz_file_open(file)
+	if file[-3..-1] == ".gz"
+		return "Zlib::GzipReader"
+	else
+		return "File"
+	end
+end
+#-----------------------------------------------------------------------------------------------
 def resolve_unix_path(path)
 	reserved = ["\\", ";", "&", "(", ")","*","?","[","]","~",">","<","!","\"","\'", "$", " "] # \ first to prevent repeated gsub issues
 	outpath = path.dup # Avoid rewriting original string
@@ -482,6 +492,7 @@ def cat_files(files = $options.default_files)
 				system("rm", tmpfile)
 			end
 		end
+		system("gzip #{resolve_unix_path($options.filestem + file)}") if $options.gzip
 	end
 end
 #-----------------------------------------------------------------------------------------------
@@ -518,7 +529,7 @@ def read_fasta(file) # Read fasta and fastq files
 	seq_array = []
 	faseq = nil # Dummy value
 	qual = false # Denotes whether sequence or quality string
-	File.open(file, 'r') do |seq|
+	eval(gz_file_open(file)).open(file) do |seq|
 		while line = seq.gets
 			unless line == "\n" # Remove extraneous line breaks
 				if line[0].chr == ">" and qual == false
@@ -1006,6 +1017,7 @@ def get_command_line # Get command line for summary output
 	cmdline << " -Y" if $options.rna
 	cmdline << " -R" if $options.rc
 	cmdline << " --phred64" if $options.phred64
+	cmdline << " --gzip" if $options.gzip
 	cmdline << " -G " + $options.gaps + " -X" + $options.threads.to_s + " --rng " + $options.rng.to_s
 	# Generate filtration options
 	fltline = ""
