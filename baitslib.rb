@@ -574,6 +574,7 @@ def read_fasta(file) # Read fasta and fastq files
 					faseq = get_sequence_tags(seq_array, faseq, line, true)
 				elsif qual and faseq.qual.length < faseq.seq.length # Test if quality line is complete
 					faseq.qual << line[0...-1] #Exclude final line break, allow multi-line fastq
+					qual = false if faseq.qual.length >= faseq.seq.length
 			 	elsif line[0].chr == "@" # Start new sequence
 					qual = false
 					faseq = get_sequence_tags(seq_array, faseq, line, false)
