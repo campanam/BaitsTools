@@ -26,7 +26,7 @@ def checkbaits
 				seq_array[Thread.current[:j]].fasta ? Thread.current[:qual] = [$options.fasta_score] : Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality
 				Thread.current[:prb], Thread.current[:qual] = fill_in_baits(Thread.current[:prb], Thread.current[:qual], seq_array[Thread.current[:j]].fasta) if $options.fillin_switch
 				Thread.current[:prb], Thread.current[:qual] = reversecomp(Thread.current[:prb], Thread.current[:qual]) if $options.rc # Output reverse complemented baits if requested
-				Thread.current[:prb] = make_rna(seq_array[Thread.current[:j]].seq) if $options.rna # RNA output handling
+				Thread.current[:prb] = make_rna(Thread.current[:prb]) if $options.rna # RNA output handling
 				Thread.current[:completeprb] = $options.fiveprime + Thread.current[:prb] + $options.threeprime
 				unless $options.noaddenda
 					Thread.current[:prb] = Thread.current[:completeprb]
