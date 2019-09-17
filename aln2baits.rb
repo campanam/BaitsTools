@@ -165,10 +165,7 @@ def aln2baits(aln)
 					Thread.current[:prb] = reversecomp(Thread.current[:prb])[0] if $options.rc  # Output reverse complemented baits if requested
 					Thread.current[:prb] = make_rna(Thread.current[:prb]) if $options.rna # Correct RNA
 					Thread.current[:completeprb] = $options.fiveprime + Thread.current[:prb] + $options.threeprime
-					unless $options.noaddenda
-						Thread.current[:prb] = Thread.current[:completeprb]
-						Thread.current[:qual] = addend_qual(Thread.current[:qual]) unless seq_array[Thread.current[:j]].fasta
-					end
+					Thread.current[:prb] = Thread.current[:completeprb] unless $options.noaddenda
 					$options.haplodef == "haplotype" ? Thread.current[:header] = @windows[Thread.current[:j]].header[Thread.current[:hapno]-1] : Thread.current[:header] = "Alignment"
 					Thread.current[:bait] = ">" + Thread.current[:header] +"_locus" + @windows[Thread.current[:j]].locus + "_" + Thread.current[:rng] + "_haplotype" + Thread.current[:hapno].to_s + "\n" + Thread.current[:completeprb]
 					Thread.current[:bedstart] = (@windows[Thread.current[:j]].seqstart + @windows[Thread.current[:j]].bedstarts[Thread.current[:hapno]-1]).to_s
