@@ -114,6 +114,9 @@ A tutorial and example data are available in the example_data subdirectory of th
 `-Y, --rna`: Output bait sequences as RNA rather than DNA.  
 `-R, --rc`: Output reverse-complemented baits.  
 `--phred64`: Qualities are encoded in phred64 rather than phred33.  
+`-5, --5prime [VALUE]`: Sequence to addend to 5' end of baits.  
+`-3, --3prime [VALUE]`: Sequence to addend to 3' end of baits.  
+`--fillin [VALUE]`: Fill in baits shorter than requested length with specified sequence repeat motif.
 `-X, --threads [VALUE]`: Number of threads. Default is 1.  
 `--rng [VALUE]`: Random number seed. Default uses system entropy.  
 `--gzip`: Gzip output files.  
@@ -126,6 +129,7 @@ A tutorial and example data are available in the example_data subdirectory of th
 `-c, --complete`: Remove candidate baits that are shorter than the requested bait length.  
 `-N, --noNs`: Exclude candidate baits that include unknown bases (Ns).  
 `-C, --collapse`: Collapse ambiguity codes to a single nucleotide. One nucleotide will be chosen randomly from the possible nucleotides (e.g. either A or G will be selected for a R site). If `-N` is specified, N sites will be treated as missing data and filtered out as specified. Otherwise, N sites will be treated as matching any nucleotide (A, G, C, T(U)).  
+`--noaddenda`: Exclude 5' and 3' addended sequences from bait parameter calculations.  
 `-n, --mingc [VALUE]`: Exclude candidate baits with a GC% less than the specified value. Default is 30.0%.  
 `-x, --maxgc [VALUE]`: Exclude candidate baits with a GC% greater than the specified value. Default is 50.0%.  
 `-q, --mint [VALUE]`: Exclude candidate baits with melting temperature below the specified value. Default is 0.0°C.  
