@@ -920,13 +920,13 @@ begin
 		end
 		print "Addend a sequence to 5' end of baits? (y/n)\n"
 		t = gets.chomp.upcase
-		if t = "Y" or t == "YES"
+		if t == "Y" or t == "YES"
 			print "Enter 5' sequence.\n"
 			$options.fiveprime = gets.chomp
 		end
 		print "Addend a sequence to 3' end of baits? (y/n)\n"
 		t = gets.chomp.upcase
-		if t = "Y" or t == "YES"
+		if t == "Y" or t == "YES"
 			print "Enter 3' sequence.\n"
 			$options.threeprime = gets.chomp
 		end
@@ -939,7 +939,7 @@ begin
 		end
 		print "Fill in incomplete baits with a specified sequence repeat motif? (y/n)\n"
 		t = gets.chomp.upcase
-		if t = "Y" or t == "YES"
+		if t == "Y" or t == "YES"
 			print "Enter sequence motif.\n"
 			$options.fillin = gets.chomp
 			$options.fillin_switch = true unless $options.fillin == ""
