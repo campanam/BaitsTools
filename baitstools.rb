@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.5.0"
+BAITSTOOLSVER = "1.6.0"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -111,6 +111,11 @@ class Parser
 		args.default_files = [] # Default files to be written
 		args.rng = srand # Random number seed
 		args.gzip = false # Gzip output files
+		args.fiveprime = "" # Sequence to addend to 5' end
+		args.threeprime = "" # Sequence to addend to 3' end
+		args.fillin = "" # Motif to fill-in short baits
+		args.fillin_switch = false # Switch to turn off if filling in
+		args.noaddenda = false # Exclude 5' and 3' addended sequences from QC calculations
 		opt_parser = OptionParser.new do |opts|
 			if algorithms.include?(args.algorithm) # Process correct commands
 				opts.banner = "Command-line usage: ruby baitstools.rb "+args.algorithm+" [options]"
@@ -300,6 +305,9 @@ class Parser
 				opts.on("-C", "--collapse", "Collapse ambiguities to a single nucleotide") do
 					args.collapse_ambiguities = true
 				end
+				opts.on("--noaddenda", "Exclude 5' and 3' addended sequences from bait parameter calculations") do
+					args.noaddenda = true
+				end
 				opts.on("-n","--mingc [VALUE]", Float, "Minimum GC content in % (Default = 30.0)") do |mgc|
 					args.mingc = mgc if mgc != nil
 					args.mingc_filter = true
@@ -391,6 +399,18 @@ class Parser
 				end
 				opts.on("-G", "--gaps [VALUE]", String, "Strategy to handle sequence gaps (-) (include, exclude, or extend) (Default = include)") do |gap|
 					args.gaps = gap if gap != nil
+				end
+				opts.on("-5", "--5prime [VALUE]", String, "Sequence to addend to 5' end of baits") do |fivepr|
+					args.fiveprime = fivepr if fivepr != nil
+				end
+				opts.on("-3", "--3prime [VALUE]", String, "Sequence to addend to 3' end of baits") do |threepr|
+					args.threeprime = threepr if threepr != nil
+				end
+				opts.on("--fillin [VALUE]", String, "Fill in baits shorter than requested length with specified sequence repeat motif") do |fillin|
+					if fillin != nil
+						args.fillin = fillin
+						args.fillin_switch = true
+					end
 				end
 				opts.on("-X", "--threads [VALUE]", Integer, "Number of threads (Default = 1)") do |thr|
 					args.threads = thr if thr != nil
@@ -1062,6 +1082,7 @@ begin
 	print "** Filtration options:" + cmdline[1] + " **\n" # filtered line always starts with a space if present
 	setup_output
 	build_fq_hash # Build FASTQ quality translation hash
+	build_rc_hash # Build reverse complementation hash
 	write_file(".log.txt", "Parsed commands: " + cmdline[0] + cmdline[1] + "\n") if $options.log
 	case $options.algorithm
 	when "aln2baits"
