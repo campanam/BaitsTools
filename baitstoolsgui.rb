@@ -90,7 +90,7 @@ def start_baitstools
 	cmdline << " -c" if $options.completebait == 1
 	cmdline << " -N" if $options.no_Ns == 1
 	cmdline << " -C" if $options.collapse_ambiguities == 1
-	fltline << " --noaddenda" if $options.noaddenda == 1
+	cmdline << " --noaddenda" if $options.noaddenda == 1
 	cmdline << " -n" + $options.mingc if $options.mingc_filter == 1
 	cmdline << " -x" + $options.maxgc if $options.maxgc_filter == 1
 	cmdline << " -q" + $options.mint if $options.mint_filter == 1
