@@ -124,6 +124,7 @@ Sequence motif fill-in
 Correction of bugs/improvement of reversecomp/RNA qualities and ordering  
 Numerous new methods for improved handling  
 Used thread bug fix  
+read_fasta bug fix  
 
 ### Version 1.5.0  
 Read/write gzip files  
