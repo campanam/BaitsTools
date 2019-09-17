@@ -24,6 +24,7 @@ Contact: campanam@si.edu
 5' and 3' addenda  
 Sequence motif fill-in  
 Correction of bugs/improvement of reversecomp/RNA qualities and ordering  
+Used thread bug fix  
 
 ### Version 1.4.0  
 Circular sequence handling  
@@ -122,6 +123,7 @@ Preliminary script to generate baits from an annotation file and a reference seq
 Sequence motif fill-in  
 Correction of bugs/improvement of reversecomp/RNA qualities and ordering  
 Numerous new methods for improved handling  
+Used thread bug fix  
 
 ### Version 1.5.0  
 Read/write gzip files  
@@ -484,6 +486,11 @@ Region tiling code transferred to baitslib
 Preliminary script to generate baits from BLAST hit tables and a reference sequence  
 
 ## checkbaits  
+5' and 3' addenda  
+Sequence motif fill-in  
+Code-update and bug fixes  
+Used thread bug fix  
+
 ### Version 1.1.0  
 Reworking to use new temp file methods  
 
@@ -566,6 +573,7 @@ Preliminary script to turn a Stacks summary tsv file and a reference sequence in
 5' and 3' addenda  
 Sequence motif fill-in  
 Correction of bugs/improvement of reversecomp/RNA qualities and ordering  
+Used thread bug fix  
 
 ### Version 1.4.0  
 Baits can extend multiple times around ultra-short reference sequences  
