@@ -67,7 +67,7 @@ class Hap_Window # Object defining a haplotype window
 			}
 		end
 		threads.each { |thr| thr.join }
-		@haplotypes = revised_haplos.uniq! # Remove new redundant haplotypes
+		@haplotypes = revised_haplos.uniq # Remove new redundant haplotypes
 	end
 end
 #-----------------------------------------------------------------------------------------------
