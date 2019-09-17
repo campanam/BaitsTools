@@ -18,7 +18,7 @@ def checkbaits
 	@splits = setup_temp(seq_array.size)
 	threads = []
 	@kept = []
-	$options.threads.times do |i|
+	$options.used_threads.times do |i|
 		@kept.push(0)
 		threads[i] = Thread.new {
 			for Thread.current[:j] in @splits[i] ... @splits[i+1]

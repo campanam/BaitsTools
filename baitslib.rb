@@ -778,7 +778,7 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 		write_file(".log.txt", logtext)
 	end
 	@splits = setup_temp(refseq.size)
-	$options.threads.times do |i|
+	$options.used_threads.times do |i|
 		threads[i] = Thread.new {
 			for Thread.current[:j] in @splits[i] ... @splits[i+1]
 				if selectedsnps.keys.include?(refseq[Thread.current[:j]].header)

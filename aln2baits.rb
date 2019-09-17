@@ -155,7 +155,7 @@ def aln2baits(aln)
 	end
 	threads = []
 	@splits = setup_temp(@windows.size)
-	$options.threads.times do |i|
+	$options.used_threads.times do |i|
 		threads[i] = Thread.new {
 			for Thread.current[:j] in @splits[i] ... @splits[i+1]
 				Thread.current[:filtnum] = 0
