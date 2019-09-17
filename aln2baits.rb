@@ -67,7 +67,7 @@ class Hap_Window # Object defining a haplotype window
 			}
 		end
 		threads.each { |thr| thr.join }
-		@haplotypes = revised_haplos
+		@haplotypes = revised_haplos.uniq! # Remove new redundant haplotypes
 	end
 end
 #-----------------------------------------------------------------------------------------------
@@ -122,14 +122,16 @@ def aln2baits(aln)
 								Thread.current[:tmp_seq] << Thread.current[:seq].seq[0..Thread.current[:seqend]]
 							end
 							Thread.current[:tmp_seq].upcase! unless $options.maxmask_filter # Treat all cases the same unless the masking filter is requested
-							unless Thread.current[:window].haplotypes.include?(Thread.current[:tmp_seq]) # Add new sequences to haplotype list
+							unless Thread.current[:window].haplotypes.include?(Thread.current[:tmp_seq]) # Add new sequences to haplotype list. Extra include test prevents some baits from being extended/filled-in multiple times.
 								if $options.haplodef == "haplotype"
 									Thread.current[:tmp_seq] = extend_baits(Thread.current[:tmp_seq], $options.fasta_score, Thread.current[:seq], Thread.current[:seqstart], Thread.current[:seqend])[0] if $options.gaps == "extend"
 									Thread.current[:tmp_seq] = fill_in_baits(Thread.current[:tmp_seq], $options.fasta_score, true)[0] if $options.fillin_switch
 								end
-								Thread.current[:window].haplotypes.push(Thread.current[:tmp_seq])
-								Thread.current[:window].bedstarts.push(Thread.current[:seq].bedstart)
-								Thread.current[:window].header.push(Thread.current[:seq].header)
+								unless Thread.current[:window].haplotypes.include?(Thread.current[:tmp_seq]) # Sequence revisions can make redundant baits
+									Thread.current[:window].haplotypes.push(Thread.current[:tmp_seq])
+									Thread.current[:window].bedstarts.push(Thread.current[:seq].bedstart)
+									Thread.current[:window].header.push(Thread.current[:seq].header)
+								end
 							end
 						end
 						Thread.current[:window].var_permutations(aln) if $options.haplodef == "variant" # Call here for code efficiency
