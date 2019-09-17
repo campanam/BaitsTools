@@ -33,7 +33,7 @@ def checkbaits
 					Thread.current[:qual] = addend_qual(Thread.current[:qual]) unless seq_array[Thread.current[:j]].fasta
 				end
 				Thread.current[:bait] = ">" + seq_array[Thread.current[:j]].header + "\n" + Thread.current[:completeprb]
-				Thread.current[:flt] = filter_baits(seq_array[Thread.current[:prb], Thread.current[:qual])
+				Thread.current[:flt] = filter_baits(Thread.current[:prb], Thread.current[:qual])
 				if Thread.current[:flt][0]
 					write_file("-filtered-baits.fa", Thread.current[:bait], true, i)
 					@kept[i] += 1
