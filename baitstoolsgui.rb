@@ -730,27 +730,27 @@ def general_window
 	threeprime = TkLabel.new($root) do
 		text '3\' Sequence'
 		font TkFont.new('times 20')
-		place('x' => 50, 'y' => 400)
+		place('x' => 270, 'y' => 400)
 		pady 10
 	end
 	threeprimeentry = TkEntry.new($root) do
 		textvariable $options.threeprime
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 170, 'y' => 410)
+		place('x' => 390, 'y' => 410)
 		width 10
 	end
 	fiveprime = TkLabel.new($root) do
 		text '5\' Sequence'
 		font TkFont.new('times 20')
-		place('x' => 270, 'y' => 400)
+		place('x' => 50, 'y' => 400)
 		pady 10
 	end
 	fiveprimeentry = TkEntry.new($root) do
 		textvariable $options.fiveprime
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 390, 'y' => 410)
+		place('x' => 170, 'y' => 410)
 		width 10
 	end
 	noaddenda = TkCheckButton.new($root) do
