@@ -20,6 +20,11 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.6.0  
+5' and 3' addenda  
+Sequence motif fill-in  
+Correction of bugs/improvement of reversecomp/RNA qualities and ordering  
+
 ### Version 1.4.0  
 Circular sequence handling  
 
@@ -112,6 +117,12 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.6.0  
+5' and 3' addenda  
+Sequence motif fill-in  
+Correction of bugs/improvement of reversecomp/RNA qualities and ordering  
+Numerous new methods for improved handling  
+
 ### Version 1.5.0  
 Read/write gzip files  
 
@@ -216,6 +227,10 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.6.0  
+5' and 3' addenda  
+Sequence motif fill-in  
+
 ### Version 1.5.0  
 Read/write gzip files  
 
@@ -443,6 +458,9 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## blast2baits  
+### Version 1.6.0  
+Correction of bugs/improvement of reversecomp/RNA qualities and ordering  
+
 ### Version 1.5.0  
 Read/write gzip files  
 
@@ -544,6 +562,11 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
 ## tilebaits  
+### Version 1.6.0  
+5' and 3' addenda  
+Sequence motif fill-in  
+Correction of bugs/improvement of reversecomp/RNA qualities and ordering  
+
 ### Version 1.4.0  
 Baits can extend multiple times around ultra-short reference sequences  
 Fixed bug in quality scores for FASTQ files  
