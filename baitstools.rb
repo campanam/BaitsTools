@@ -917,7 +917,33 @@ begin
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
 			$options.rc = true
-		end 
+		end
+		print "Addend a sequence to 5' end of baits? (y/n)\n"
+		t = gets.chomp.upcase
+		if t = "Y" or t == "YES"
+			print "Enter 5' sequence.\n"
+			$options.fiveprime = gets.chomp
+		end
+		print "Addend a sequence to 3' end of baits? (y/n)\n"
+		t = gets.chomp.upcase
+		if t = "Y" or t == "YES"
+			print "Enter 3' sequence.\n"
+			$options.threeprime = gets.chomp
+		end
+		unless $options.fiveprime == "" && $options.threeprime == ""
+			print "Exclude sequence addenda from bait filtration parameter calculations? (y/n)\n"
+			t = gets.chomp.upcase
+			if t == "Y" or t == "YES"
+				$options.noaddenda = true
+			end
+		end
+		print "Fill in incomplete baits with a specified sequence repeat motif? (y/n)\n"
+		t = gets.chomp.upcase
+		if t = "Y" or t == "YES"
+			print "Enter sequence motif.\n"
+			$options.fillin = gets.chomp
+			$options.fillin_switch = true unless $options.fillin == ""
+		end
 		print "Filter by minimum GC content? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
