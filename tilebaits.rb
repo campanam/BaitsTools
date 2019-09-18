@@ -54,15 +54,7 @@ def tilebaits(seq_array)
 						Thread.current[:prb] = seq_array[Thread.current[:j]].seq[Thread.current[:seqst]-1..Thread.current[:seqend]-1] #Correct for 0-based counting
 						Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality[Thread.current[:seqst]-1..Thread.current[:seqend]-1] unless seq_array[Thread.current[:j]].fasta
 					end
-					Thread.current[:prb], Thread.current[:qual] = extend_baits(Thread.current[:prb], Thread.current[:qual], seq_array[Thread.current[:j]], Thread.current[:seqst]-1, Thread.current[:seqend]-1, seq_array[Thread.current[:j]].circular) if $options.gaps == "extend"
-					Thread.current[:prb], Thread.current[:qual] = fill_in_baits(Thread.current[:prb], Thread.current[:qual], seq_array[Thread.current[:j]].fasta) if $options.fillin_switch
-					Thread.current[:prb], Thread.current[:qual] = reversecomp(Thread.current[:prb], Thread.current[:qual]) if $options.rc # Output reverse complemented baits if requested
-					Thread.current[:prb] = make_rna(Thread.current[:prb]) if $options.rna # RNA output handling
-					Thread.current[:completeprb] = $options.fiveprime + Thread.current[:prb] + $options.threeprime
-					unless $options.noaddenda
-						Thread.current[:prb] = Thread.current[:completeprb]
-						Thread.current[:qual] = addend_qual(Thread.current[:qual]) unless seq_array[Thread.current[:j]].fasta
-					end
+					Thread.current[:prb], Thread.current[:qual], Thread.current[:completeprb] = revise_baits(Thread.current[:prb], Thread.current[:qual], seq_array[Thread.current[:j]],  Thread.current[:seqst], Thread.current[:seqend])
 					Thread.current[:bait] = ">" + seq_array[Thread.current[:j]].header + "_" + Thread.current[:seqst].to_s + "-" + Thread.current[:seqend].to_s + "\n" + Thread.current[:completeprb]
 					if $options.algorithm == "bed2baits" or $options.algorithm == "annot2baits" or $options.algorithm = "tilebaits"
 						bedstart = (Thread.current[:seqst]-1 + seq_array[Thread.current[:j]].bedstart).to_s

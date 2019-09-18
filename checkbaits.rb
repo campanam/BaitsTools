@@ -24,14 +24,7 @@ def checkbaits
 			for Thread.current[:j] in @splits[i] ... @splits[i+1]
 				Thread.current[:prb] = seq_array[Thread.current[:j]].seq
 				seq_array[Thread.current[:j]].fasta ? Thread.current[:qual] = [$options.fasta_score] : Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality
-				Thread.current[:prb], Thread.current[:qual] = fill_in_baits(Thread.current[:prb], Thread.current[:qual], seq_array[Thread.current[:j]].fasta) if $options.fillin_switch
-				Thread.current[:prb], Thread.current[:qual] = reversecomp(Thread.current[:prb], Thread.current[:qual]) if $options.rc # Output reverse complemented baits if requested
-				Thread.current[:prb] = make_rna(Thread.current[:prb]) if $options.rna # RNA output handling
-				Thread.current[:completeprb] = $options.fiveprime + Thread.current[:prb] + $options.threeprime
-				unless $options.noaddenda
-					Thread.current[:prb] = Thread.current[:completeprb]
-					Thread.current[:qual] = addend_qual(Thread.current[:qual]) unless seq_array[Thread.current[:j]].fasta
-				end
+				Thread.current[:prb], Thread.current[:qual], Thread.current[:completeprb] = revise_baits(Thread.current[:prb], Thread.current[:qual], seq_array[Thread.current[:j]],  Thread.current[:seqst], Thread.current[:seqend])
 				Thread.current[:bait] = ">" + seq_array[Thread.current[:j]].header + "\n" + Thread.current[:completeprb]
 				Thread.current[:flt] = filter_baits(Thread.current[:prb], Thread.current[:qual])
 				if Thread.current[:flt][0]

@@ -28,7 +28,7 @@ class Hap_Window # Object defining a haplotype window
 					if Thread.current[:i] % $options.threads == j
 						Thread.current[:vars] = []
 						for Thread.current[:seq] in @haplotypes
-							Thread.current[:vars].push(get_ambiguity(Thread.current[:seq][Thread.current[:i]]))
+							Thread.current[:vars].push($ambig_hash[Thread.current[:seq][Thread.current[:i]]])
 						end
 						Thread.current[:vars] = Thread.current[:vars].flatten!.uniq # Remove duplicate variants
 						variants[Thread.current[:i]] = Thread.current[:vars] # Minimize lock time
@@ -165,8 +165,16 @@ def aln2baits(aln)
 					Thread.current[:prb] = @windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]
 					Thread.current[:rng] = (@windows[Thread.current[:j]].seqstart+1).to_s+"-"+(@windows[Thread.current[:j]].seqend+1).to_s # Adjust for 1-based indexing
 					Thread.current[:prb] = reversecomp(Thread.current[:prb])[0] if $options.rc  # Output reverse complemented baits if requested
-					Thread.current[:prb] = make_rna(Thread.current[:prb]) if $options.rna # Correct RNA
+					if $options.collapse_ambiguities
+						Thread.current[:fiveprime] = collapse_ambiguity($options.fiveprime)
+						Thread.current[:threeprime] = collapse_ambiguity($options.threeprime)
+						Thread.current[:prb] = collapse_ambiguity(Thread.current[:prb])
+					end
 					Thread.current[:completeprb] = $options.fiveprime + Thread.current[:prb] + $options.threeprime
+					if $options.rna # Correct RNA
+						Thread.current[:prb] = make_rna(Thread.current[:prb]) 
+						Thread.current[:completeprb] = make_rna(Thread.current[:completeprb])
+					end
 					Thread.current[:prb] = Thread.current[:completeprb] unless $options.noaddenda
 					$options.haplodef == "haplotype" ? Thread.current[:header] = @windows[Thread.current[:j]].header[Thread.current[:hapno]-1] : Thread.current[:header] = "Alignment"
 					Thread.current[:bait] = ">" + Thread.current[:header] +"_locus" + @windows[Thread.current[:j]].locus + "_" + Thread.current[:rng] + "_haplotype" + Thread.current[:hapno].to_s + "\n" + Thread.current[:completeprb]

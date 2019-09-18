@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # pyrad2baits
-PYRAD2BAITSVER = "1.5.0"
+PYRAD2BAITSVER = "1.6.0"
 # Michael G. Campana, 2017-2018
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ class Pyrad_Locus
 	def get_variants(snp)
 		vars = []
 		for dip in @diplotypes
-			vars.push(get_ambiguity(dip[snp - 1]))
+			vars.push($ambig_hash[dip[snp - 1]])
 		end
 		vars.flatten!.uniq!
 	end
@@ -41,7 +41,7 @@ def pyrad_to_selectsnps(pyradloci)
 		for snp in snps
 			vars = []
 			for dip in locus.diplotypes
-				vars.push(get_ambiguity(dip.seq[snp - 1]))
+				vars.push($ambig_hash[dip[snp - 1]])
 			end
 			vars.flatten!.uniq!
 			ref = locus.refseq.seq[snp - 1]

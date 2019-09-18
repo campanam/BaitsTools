@@ -302,9 +302,6 @@ class Parser
 				opts.on("-N", "--noNs", "Exclude bait sequences with Ns") do
 					args.no_Ns = true
 				end
-				opts.on("-C", "--collapse", "Collapse ambiguities to a single nucleotide") do
-					args.collapse_ambiguities = true
-				end
 				opts.on("--noaddenda", "Exclude 5' and 3' addended sequences from bait parameter calculations") do
 					args.noaddenda = true
 				end
@@ -387,6 +384,9 @@ class Parser
 					opts.on("-D", "--ncbi", "FASTA/FASTQ file headers have NCBI-style descriptions") do
 						args.ncbi = true
 					end
+				end
+				opts.on("-C", "--collapse", "Collapse ambiguities to a single nucleotide") do
+					args.collapse_ambiguities = true
 				end
 				opts.on("-Y","--rna", "Output baits as RNA rather than DNA") do
 					args.rna = true
@@ -1109,6 +1109,7 @@ begin
 	setup_output
 	build_fq_hash # Build FASTQ quality translation hash
 	build_rc_hash # Build reverse complementation hash
+	build_ambig_hash # Build ambiguity hash
 	write_file(".log.txt", "Parsed commands: " + cmdline[0] + cmdline[1] + "\n") if $options.log
 	case $options.algorithm
 	when "aln2baits"
