@@ -25,6 +25,7 @@ Contact: campanam@si.edu
 Sequence motif fill-in  
 Correction of bugs/improvement of reversecomp/RNA qualities and ordering  
 Used thread bug fix  
+Collapsed baits output  
 
 ### Version 1.4.0  
 Circular sequence handling  
@@ -125,6 +126,8 @@ Correction of bugs/improvement of reversecomp/RNA qualities and ordering
 Numerous new methods for improved handling  
 Used thread bug fix  
 read_fasta bug fix  
+Revision of ambiguity handling code  
+Collapsed baits output  
 
 ### Version 1.5.0  
 Read/write gzip files  
@@ -233,6 +236,8 @@ filter_probes definition removed into separate script for access by other script
 ### Version 1.6.0  
 5' and 3' addenda  
 Sequence motif fill-in  
+--collapse moved to general options  
+Ambiguities and reverse complement hashes generated at start-up  
 
 ### Version 1.5.0  
 Read/write gzip files  
@@ -368,6 +373,9 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.6.0  
+Sequence addenda/fill-in handling added  
+
 ### Version 1.5.0  
 Read/write gzip files  
 
@@ -491,6 +499,7 @@ Preliminary script to generate baits from BLAST hit tables and a reference seque
 Sequence motif fill-in  
 Code-update and bug fixes  
 Used thread bug fix  
+Collapsed baits output  
 
 ### Version 1.1.0  
 Reworking to use new temp file methods  
@@ -529,6 +538,9 @@ Versioning added to header of script
 RVM default bug fixed  
 
 ## pyrad2baits  
+### Version 1.6.0  
+Updated to use $ambig_hash  
+
 ### Version 1.5.0  
 Read/write gzip files  
 
@@ -575,6 +587,7 @@ Preliminary script to turn a Stacks summary tsv file and a reference sequence in
 Sequence motif fill-in  
 Correction of bugs/improvement of reversecomp/RNA qualities and ordering  
 Used thread bug fix  
+Collapsed baits output  
 
 ### Version 1.4.0  
 Baits can extend multiple times around ultra-short reference sequences  
