@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.6.0"
+BAITSLIBVER = "1.6.1"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -335,9 +335,9 @@ def max_homopolymer(testbait)
 		if bases[base].include?(bait[i])
 			homopoly += 1
 		else
-			posbases = $ambig_hash[bait[i]]
+			posbases = $ambig_hash[bait[i]].dup
 			for j in i + 1 ... bait.length # Check if ambiguities allow a possible forward homopolymer
-				nextposbases = $ambig_hash[bait[j]]
+				nextposbases = $ambig_hash[bait[j]].dup
 				for posbase in posbases
 					posbases.delete(posbase) unless nextposbases.include?(posbase)
 				end
