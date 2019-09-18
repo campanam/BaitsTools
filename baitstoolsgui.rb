@@ -76,20 +76,20 @@ def start_baitstools
 	cmdline << " -E" if $options.rbed == 1
 	cmdline << " --shuffle" if $options.shuffle == 1
 	cmdline << " -D" if $options.ncbi == 1
-	cmdline << " -Y" if $options.rna == 1
 	cmdline << " --phred64" if $options.phred64 == 1
-	cmdline << " --gzip" if $options.gzip == 1
+	cmdline << " -C" if $options.collapse_ambiguities == 1
+	cmdline << " -Y" if $options.rna == 1
 	cmdline << " -G " + $options.gaps
 	cmdline << " -5 " + $options.fiveprime if $options.fiveprime != ""
 	cmdline << " -3 " + $options.threeprime if $options.threeprime != ""
 	cmdline << " --fillin " + $options.fillin if $options.fillin != ""
 	cmdline << " -X" + $options.threads + " --rng " + $options.rng
+	cmdline << " --gzip" if $options.gzip == 1
 	# Generate filtration options
 	cmdline << " -w" if $options.params == 1
 	cmdline << " --disable-lc" if $options.no_lc == 1
 	cmdline << " -c" if $options.completebait == 1
 	cmdline << " -N" if $options.no_Ns == 1
-	cmdline << " -C" if $options.collapse_ambiguities == 1
 	cmdline << " --noaddenda" if $options.noaddenda == 1
 	cmdline << " -n" + $options.mingc if $options.mingc_filter == 1
 	cmdline << " -x" + $options.maxgc if $options.maxgc_filter == 1
