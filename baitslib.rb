@@ -1001,22 +1001,22 @@ def get_command_line # Get command line for summary output
 	cmdline << " -E" if $options.rbed
 	cmdline << " --shuffle" if $options.shuffle
 	cmdline << " -D" if $options.ncbi
+	cmdline << " --phred64" if $options.phred64
+	cmdline << " -C" if $options.collapse_ambiguities
 	cmdline << " -Y" if $options.rna
 	cmdline << " -R" if $options.rc
-	cmdline << " --phred64" if $options.phred64
-	cmdline << " --gzip" if $options.gzip
 	cmdline << " -G " + $options.gaps
 	cmdline << " -5 " + $options.fiveprime if $options.fiveprime != ""
 	cmdline << " -3 " + $options.threeprime if $options.threeprime != ""
 	cmdline << " --fillin " + $options.fillin if $options.fillin_switch
 	cmdline << " -X" + $options.threads.to_s + " --rng " + $options.rng.to_s
+	cmdline << " --gzip" if $options.gzip
 	# Generate filtration options
 	fltline = ""
 	fltline << " -w" if $options.params
 	fltline << " --disable-lc" if $options.no_lc
 	fltline << " -c" if $options.completebait
 	fltline << " -N" if $options.no_Ns
-	fltline << " -C" if $options.collapse_ambiguities
 	fltline << " --noaddenda" if $options.noaddenda
 	fltline << " -n" + $options.mingc.to_s if $options.mingc_filter
 	fltline << " -x" + $options.maxgc.to_s if $options.maxgc_filter
