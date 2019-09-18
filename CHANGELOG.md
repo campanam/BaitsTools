@@ -542,6 +542,10 @@ RVM default bug fixed
 
 ## pyrad2baits  
 ### Version 1.6.0  
+Diplotype sequence bug fix  
+Removal of unused get_variants method from Pyrad_Locus  
+
+### Version 1.6.0  
 Updated to use $ambig_hash  
 
 ### Version 1.5.0  
