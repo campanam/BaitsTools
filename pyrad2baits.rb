@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # pyrad2baits
-PYRAD2BAITSVER = "1.6.0"
-# Michael G. Campana, 2017-2018
+PYRAD2BAITSVER = "1.6.1"
+# Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -14,13 +14,6 @@ class Pyrad_Locus
 		@snp_sites = snp_sites # All SNP locations, 1-indexed
 		@phylo_sites = phylo_sites # Phylogenetically informative SNP locations,1-indexed
 		@refseq = refseq
-	end
-	def get_variants(snp)
-		vars = []
-		for dip in @diplotypes
-			vars.push($ambig_hash[dip[snp - 1]])
-		end
-		vars.flatten!.uniq!
 	end
 	def make_reference # Create a random reference for bait generation
 		if $options.uncollapsed_ref
@@ -41,7 +34,7 @@ def pyrad_to_selectsnps(pyradloci)
 		for snp in snps
 			vars = []
 			for dip in locus.diplotypes
-				vars.push($ambig_hash[dip[snp - 1]])
+				vars.push($ambig_hash[dip.seq[snp - 1]])
 			end
 			vars.flatten!.uniq!
 			ref = locus.refseq.seq[snp - 1]
