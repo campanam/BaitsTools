@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
-# aln2baits
+# blast2baits
 BLAST2BAITSVER = "1.6.0"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
