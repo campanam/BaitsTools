@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # aln2baits
-ALN2BAITSVER = "1.4.0"
+ALN2BAITSVER = "1.6.0"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ class Hap_Window # Object defining a haplotype window
 					if Thread.current[:i] % $options.threads == j
 						Thread.current[:vars] = []
 						for Thread.current[:seq] in @haplotypes
-							Thread.current[:vars].push(get_ambiguity(Thread.current[:seq][Thread.current[:i]]))
+							Thread.current[:vars].push($ambig_hash[Thread.current[:seq][Thread.current[:i]]])
 						end
 						Thread.current[:vars] = Thread.current[:vars].flatten!.uniq # Remove duplicate variants
 						variants[Thread.current[:i]] = Thread.current[:vars] # Minimize lock time
@@ -59,14 +59,15 @@ class Hap_Window # Object defining a haplotype window
 						end
 						if $options.gaps == "extend"
 							Thread.current[:refhap] = aln[rand(aln.size)] # Choose a random reference sequence
-							revised_haplos[Thread.current[:k]] = extend_baits(revised_haplos[Thread.current[:k]], Thread.current[:refhap].seq, @seqstart, @seqend)
+							revised_haplos[Thread.current[:k]] = extend_baits(revised_haplos[Thread.current[:k]], $options.fasta_score, Thread.current[:refhap], @seqstart, @seqend)[0]
 						end
+						revised_haplos[Thread.current[:k]] = fill_in_baits(revised_haplos[Thread.current[:k]], $options.fasta_score, true)[0] if $options.fillin_switch
 					end
 				end
 			}
 		end
 		threads.each { |thr| thr.join }
-		@haplotypes = revised_haplos
+		@haplotypes = revised_haplos.uniq # Remove new redundant haplotypes
 	end
 end
 #-----------------------------------------------------------------------------------------------
@@ -121,11 +122,16 @@ def aln2baits(aln)
 								Thread.current[:tmp_seq] << Thread.current[:seq].seq[0..Thread.current[:seqend]]
 							end
 							Thread.current[:tmp_seq].upcase! unless $options.maxmask_filter # Treat all cases the same unless the masking filter is requested
-							unless Thread.current[:window].haplotypes.include?(Thread.current[:tmp_seq]) # Add new sequences to haplotype list
-								Thread.current[:tmp_seq] = extend_baits(Thread.current[:tmp_seq], Thread.current[:seq].seq, Thread.current[:seqstart], Thread.current[:seqend]) if ($options.gaps == "extend" && $options.haplodef == "haplotype")
-								Thread.current[:window].haplotypes.push(Thread.current[:tmp_seq])
-								Thread.current[:window].bedstarts.push(Thread.current[:seq].bedstart)
-								Thread.current[:window].header.push(Thread.current[:seq].header)
+							unless Thread.current[:window].haplotypes.include?(Thread.current[:tmp_seq]) # Add new sequences to haplotype list. Extra include test prevents some baits from being extended/filled-in multiple times.
+								if $options.haplodef == "haplotype"
+									Thread.current[:tmp_seq] = extend_baits(Thread.current[:tmp_seq], $options.fasta_score, Thread.current[:seq], Thread.current[:seqstart], Thread.current[:seqend])[0] if $options.gaps == "extend"
+									Thread.current[:tmp_seq] = fill_in_baits(Thread.current[:tmp_seq], $options.fasta_score, true)[0] if $options.fillin_switch
+								end
+								unless Thread.current[:window].haplotypes.include?(Thread.current[:tmp_seq]) # Sequence revisions can make redundant baits
+									Thread.current[:window].haplotypes.push(Thread.current[:tmp_seq])
+									Thread.current[:window].bedstarts.push(Thread.current[:seq].bedstart)
+									Thread.current[:window].header.push(Thread.current[:seq].header)
+								end
 							end
 						end
 						Thread.current[:window].var_permutations(aln) if $options.haplodef == "variant" # Call here for code efficiency
@@ -151,17 +157,27 @@ def aln2baits(aln)
 	end
 	threads = []
 	@splits = setup_temp(@windows.size)
-	$options.threads.times do |i|
+	$options.used_threads.times do |i|
 		threads[i] = Thread.new {
 			for Thread.current[:j] in @splits[i] ... @splits[i+1]
 				Thread.current[:filtnum] = 0
 				for Thread.current[:hapno] in 1..@windows[Thread.current[:j]].haplotypes.size
+					Thread.current[:prb] = @windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]
 					Thread.current[:rng] = (@windows[Thread.current[:j]].seqstart+1).to_s+"-"+(@windows[Thread.current[:j]].seqend+1).to_s # Adjust for 1-based indexing
-					@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1] = reversecomp(@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]) if $options.rc  # Output reverse complemented baits if requested
-					@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1].gsub!("T","U") if $options.rna # Will correct both raw and filtered sequences
-					@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1].gsub!("t","u") if $options.rna # Will correct both raw and filtered sequences
+					Thread.current[:prb] = reversecomp(Thread.current[:prb])[0] if $options.rc  # Output reverse complemented baits if requested
+					if $options.collapse_ambiguities
+						Thread.current[:fiveprime] = collapse_ambiguity($options.fiveprime)
+						Thread.current[:threeprime] = collapse_ambiguity($options.threeprime)
+						Thread.current[:prb] = collapse_ambiguity(Thread.current[:prb])
+					end
+					Thread.current[:completeprb] = $options.fiveprime + Thread.current[:prb] + $options.threeprime
+					if $options.rna # Correct RNA
+						Thread.current[:prb] = make_rna(Thread.current[:prb]) 
+						Thread.current[:completeprb] = make_rna(Thread.current[:completeprb])
+					end
+					Thread.current[:prb] = Thread.current[:completeprb] unless $options.noaddenda
 					$options.haplodef == "haplotype" ? Thread.current[:header] = @windows[Thread.current[:j]].header[Thread.current[:hapno]-1] : Thread.current[:header] = "Alignment"
-					Thread.current[:bait] = ">" + Thread.current[:header] +"_locus" + @windows[Thread.current[:j]].locus + "_" + Thread.current[:rng] + "_haplotype" + Thread.current[:hapno].to_s + "\n" + @windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]
+					Thread.current[:bait] = ">" + Thread.current[:header] +"_locus" + @windows[Thread.current[:j]].locus + "_" + Thread.current[:rng] + "_haplotype" + Thread.current[:hapno].to_s + "\n" + Thread.current[:completeprb]
 					Thread.current[:bedstart] = (@windows[Thread.current[:j]].seqstart + @windows[Thread.current[:j]].bedstarts[Thread.current[:hapno]-1]).to_s
 					Thread.current[:bedend] =  (@windows[Thread.current[:j]].seqend+1 + @windows[Thread.current[:j]].bedstarts[Thread.current[:hapno]-1]).to_s
 					Thread.current[:coord] = Thread.current[:header] + "\t" + Thread.current[:bedstart] + "\t" + Thread.current[:bedend]
@@ -170,7 +186,7 @@ def aln2baits(aln)
 					write_file("-baits.bed", Thread.current[:coord], true, i) if $options.coords
 					write_file("-baits-relative.bed", Thread.current[:rbed], true, i) if $options.rbed
 					if $options.filter
-						Thread.current[:flt] = filter_baits(@windows[Thread.current[:j]].haplotypes[Thread.current[:hapno]-1]) # U won't affect filtration
+						Thread.current[:flt] = filter_baits(Thread.current[:prb]) # U won't affect filtration
 						if Thread.current[:flt][0]
 							Thread.current[:filtnum] += 1
 							write_file("-filtered-baits.fa", Thread.current[:bait], true, i)

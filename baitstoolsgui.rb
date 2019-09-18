@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.5.0"
+BAITSTOOLSGUI = "1.6.0"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -76,16 +76,21 @@ def start_baitstools
 	cmdline << " -E" if $options.rbed == 1
 	cmdline << " --shuffle" if $options.shuffle == 1
 	cmdline << " -D" if $options.ncbi == 1
-	cmdline << " -Y" if $options.rna == 1
 	cmdline << " --phred64" if $options.phred64 == 1
+	cmdline << " -C" if $options.collapse_ambiguities == 1
+	cmdline << " -Y" if $options.rna == 1
+	cmdline << " -G " + $options.gaps
+	cmdline << " -5 " + $options.fiveprime if $options.fiveprime != ""
+	cmdline << " -3 " + $options.threeprime if $options.threeprime != ""
+	cmdline << " --fillin " + $options.fillin if $options.fillin != ""
+	cmdline << " -X" + $options.threads + " --rng " + $options.rng
 	cmdline << " --gzip" if $options.gzip == 1
-	cmdline << " -G " + $options.gaps + " -X" + $options.threads + " --rng " + $options.rng
 	# Generate filtration options
 	cmdline << " -w" if $options.params == 1
 	cmdline << " --disable-lc" if $options.no_lc == 1
 	cmdline << " -c" if $options.completebait == 1
 	cmdline << " -N" if $options.no_Ns == 1
-	cmdline << " -C" if $options.collapse_ambiguities == 1
+	cmdline << " --noaddenda" if $options.noaddenda == 1
 	cmdline << " -n" + $options.mingc if $options.mingc_filter == 1
 	cmdline << " -x" + $options.maxgc if $options.maxgc_filter == 1
 	cmdline << " -q" + $options.mint if $options.mint_filter == 1
@@ -709,26 +714,70 @@ def general_window
 		place('x' => 390, 'y' => 360)
 		width 10
 	end
+	fillin = TkLabel.new($root) do
+		text 'Fill-in Motif'
+		font TkFont.new('times 20')
+		place('x' => 520, 'y' => 350)
+		pady 10
+	end
+	fillinentry = TkEntry.new($root) do
+		textvariable $options.fillin
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 640, 'y' => 360)
+		width 10
+	end
+	threeprime = TkLabel.new($root) do
+		text '3\' Sequence'
+		font TkFont.new('times 20')
+		place('x' => 270, 'y' => 400)
+		pady 10
+	end
+	threeprimeentry = TkEntry.new($root) do
+		textvariable $options.threeprime
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 390, 'y' => 410)
+		width 10
+	end
+	fiveprime = TkLabel.new($root) do
+		text '5\' Sequence'
+		font TkFont.new('times 20')
+		place('x' => 50, 'y' => 400)
+		pady 10
+	end
+	fiveprimeentry = TkEntry.new($root) do
+		textvariable $options.fiveprime
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 170, 'y' => 410)
+		width 10
+	end
+	noaddenda = TkCheckButton.new($root) do
+		variable $options.noaddenda
+		text "Exclude addenda from QC"
+		place('x' => 520, 'y' => 400)
+	end
 	rng = TkLabel.new($root) do
 		text 'Random number seed'
 		font TkFont.new('times 20')
-		place('x' => 50, 'y' => 400)
+		place('x' => 50, 'y' => 450)
 		pady 10
 	end
 	rngentry = TkEntry.new($root) do
 		textvariable $options.rng
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 240, 'y' => 410)
+		place('x' => 240, 'y' => 460)
 		width 80
 	end
-	configure_buttons([outdir, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gzip])
+	configure_buttons([outdir, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gzip, noaddenda])
 	bed.state = shuffle.state = "disabled" if $options.algorithm == "checkbaits"
 	ncbi.state = "disabled" if $options.algorithm == "pyrad2baits"
 	rbed.state = "disabled" unless $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "tilebaits" or $options.algorithm == "aln2baits"
-	outdir.width = rbed.width = rc.width = 20
+	outdir.width = rbed.width = rc.width = noaddenda.width = 20
 	ncbi.width = phred64.width = 15
-	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gzip, gaps, gapselect, threads, threadentry, rng, rngentry)
+	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gzip, gaps, gapselect, threads, threadentry, rng, rngentry, threeprime, threeprimeentry, fiveprime, fiveprimeentry, noaddenda, fillin, fillinentry)
 end
 #-----------------------------------------------------------------------------------------------
 def subcommand_window(subcommand)
@@ -1462,6 +1511,7 @@ def set_defaults
 	$options.no_lc = TkVariable.new(0) # Flag to disable linguistic complexity calculation for filtration
 	$options.completebait = TkVariable.new(0) # Flag to filter by complete bait length	
 	$options.no_Ns = TkVariable.new(0) # Flag to omit bait sequences with Ns
+	$options.noaddenda = TkVariable.new(0) # Flag to omit sequence addenda from bait parameter calculations
 	$options.collapse_ambiguities = TkVariable.new(0) # Flag to collapse ambiguities to a single nucleotide
 	$options.maxmask_filter = TkVariable.new(0) # Flag to filter by % masked sequence
 	$options.maxmask = TkVariable.new(25.0) # Max % masked sequence
@@ -1497,6 +1547,9 @@ def set_defaults
 	$options.rna = TkVariable.new(0) # Flag whether baits are output as RNA
 	$options.rc = TkVariable.new(0) # Flag to output reverse complement baits
 	$options.gaps = TkVariable.new("include") # Flag to omit bait sequences with gaps
+	$options.threeprime = TkVariable.new("") # 3' sequence addendum
+	$options.fiveprime = TkVariable.new("") # 5' sequence addendum
+	$options.fillin = TkVariable.new("") # Fill-in sequence motif
 	$options.threads = TkVariable.new(1) # Number of threads
 	$options.rng = TkVariable.new(srand) # RNG seed
 end

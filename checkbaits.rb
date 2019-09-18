@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # checkbaits
-CHECKBAITSVER = "1.1.0"
-# Michael G. Campana, 2017-2018
+CHECKBAITSVER = "1.6.0"
+# Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -18,20 +18,16 @@ def checkbaits
 	@splits = setup_temp(seq_array.size)
 	threads = []
 	@kept = []
-	$options.threads.times do |i|
+	$options.used_threads.times do |i|
 		@kept.push(0)
 		threads[i] = Thread.new {
 			for Thread.current[:j] in @splits[i] ... @splits[i+1]
-				if seq_array[Thread.current[:j]].fasta
-					Thread.current[:flt] = filter_baits(seq_array[Thread.current[:j]].seq, [$options.fasta_score])
-				else
-					Thread.current[:flt] = filter_baits(seq_array[Thread.current[:j]].seq, seq.numeric_quality)
-				end
+				Thread.current[:prb] = seq_array[Thread.current[:j]].seq
+				seq_array[Thread.current[:j]].fasta ? Thread.current[:qual] = [$options.fasta_score] : Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality
+				Thread.current[:prb], Thread.current[:qual], Thread.current[:completeprb] = revise_baits(Thread.current[:prb], Thread.current[:qual], seq_array[Thread.current[:j]],  Thread.current[:seqst], Thread.current[:seqend])
+				Thread.current[:bait] = ">" + seq_array[Thread.current[:j]].header + "\n" + Thread.current[:completeprb]
+				Thread.current[:flt] = filter_baits(Thread.current[:prb], Thread.current[:qual])
 				if Thread.current[:flt][0]
-					seq_array[Thread.current[:j]].seq = reversecomp(seq_array[Thread.current[:j]].seq) if $options.rc # Output reverse complemented baits if requested
-					seq_array[Thread.current[:j]].seq.gsub!("T","U") if $options.rna # RNA output handling
-					seq_array[Thread.current[:j]].seq.gsub!("t","u") if $options.rna # RNA output handling
-					Thread.current[:bait] = ">" + seq_array[Thread.current[:j]].header + "\n" + seq_array[Thread.current[:j]].seq
 					write_file("-filtered-baits.fa", Thread.current[:bait], true, i)
 					@kept[i] += 1
 				end

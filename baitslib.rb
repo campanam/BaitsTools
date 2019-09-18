@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.5.0"
+BAITSLIBVER = "1.6.0"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -147,106 +147,36 @@ def mean(val = [])
 	return mean
 end
 #-----------------------------------------------------------------------------------------------
-def get_ambiguity(base)
-	vars = []
-	case base
-	when "A","a","T","t","G","g","C","c","-"
-		vars.push(base)
-	when "R"
-		vars.push("A","G")
-	when "Y"
-		vars.push("C","T")
-	when "M"
-		vars.push("A","C")
-	when "K"
-		vars.push("G","T")
-	when "S"
-		vars.push("C","G")
-	when "W"
-		vars.push("A","T")
-	when "H"
-		vars.push("A","C","T")
-	when "B"
-		vars.push("C","G","T")
-	when "V"
-		vars.push("A","C","G")
-	when "D"
-		vars.push("A","G","T")
-	when "N"
-		vars.push("A","C","G","T")
-	when "r"
-		vars.push("a","g")
-	when "y"
-		vars.push("c","t")
-	when "m"
-		vars.push("a","c")
-	when "k"
-		vars.push("g","t")
-	when "s"
-		vars.push("c","g")
-	when "w"
-		vars.push("a","t")
-	when "h"
-		vars.push("a","c","t")
-	when "b"
-		vars.push("c","g","t")
-	when "v"
-		vars.push("a","c","g")
-	when "d"
-		vars.push("a","g","t")
-	when "n"
-		vars.push("a","c","g","t")
+def build_ambig_hash
+	$ambig_hash = { "A" => ["A"],"T" => ["T"], "G" => ["G"], "C" => ["C"], "U" => ["U"]}
+	$ambig_hash["R"] = ["A","G"]
+	$ambig_hash["Y"] = ["C","T"]
+	$ambig_hash["M"] = ["A","C"]
+	$ambig_hash["K"] = ["G","T"]
+	$ambig_hash["S"] = ["C","G"]
+	$ambig_hash["W"] = ["A","T"]
+	$ambig_hash["H"] = ["A","C","T"]
+	$ambig_hash["B"] = ["C","G","T"]
+	$ambig_hash["V"] = ["A","C","G"]
+	$ambig_hash["D"] = ["A","G","T"]
+	$ambig_hash["N"] = ["A","C","G","T"]
+	rclc = {}
+	for key in $ambig_hash.keys
+		rclc[key.downcase] = $ambig_hash[key].map { |element| element.downcase }
 	end
-	return vars
+	$ambig_hash.merge!(rclc)
+	$ambig_hash["-"] = ["-"]
 end
 #-----------------------------------------------------------------------------------------------
 def collapse_ambiguity(bait, force = false) # Ambiguity handling, force turns off no_Ns
-	r = ["A","G"]
-	rl = ["a","g"]
-	y = ["C","T"]
-	yl = ["c","t"]
-	m = ["A","C"]
-	ml = ["a","c"]
-	k = ["G","T"]
-	kl = ["g","t"]
-	s = ["C","G"]
-	sl = ["c","g"]
-	w = ["A","T"]
-	wl = ["a","t"]
-	h = ["A","C","T"]
-	hl = ["a","c","t"]
-	b = ["C","G","T"]
-	bl = ["c","g","t"]
-	v = ["A","C","G"]
-	vl = ["a","c","g"]
-	d = ["A","G","T"]
-	dl = ["a","g","t"]
-	n = ["A","C","G","T"]
-	nl = ["a","c","g","t"]
-	bait.gsub!("R",r[rand(2)])
-	bait.gsub!("Y",y[rand(2)])
-	bait.gsub!("M",m[rand(2)])
-	bait.gsub!("K",k[rand(2)])
-	bait.gsub!("S",s[rand(2)])
-	bait.gsub!("W",w[rand(2)])
-	bait.gsub!("H",h[rand(3)])
-	bait.gsub!("B",b[rand(3)])
-	bait.gsub!("V",v[rand(3)])
-	bait.gsub!("D",d[rand(3)])
-	bait.gsub!("N",n[rand(4)]) unless ($options.no_Ns && !force)
-	bait.gsub!("T","U") if $options.rna # Remove any residual Ts after ambiguity collapsing
-	bait.gsub!("r",rl[rand(2)])
-	bait.gsub!("y",yl[rand(2)])
-	bait.gsub!("m",ml[rand(2)])
-	bait.gsub!("k",kl[rand(2)])
-	bait.gsub!("s",sl[rand(2)])
-	bait.gsub!("w",wl[rand(2)])
-	bait.gsub!("h",hl[rand(3)])
-	bait.gsub!("b",bl[rand(3)])
-	bait.gsub!("v",vl[rand(3)])
-	bait.gsub!("d",dl[rand(3)])
-	bait.gsub!("n",nl[rand(4)]) unless ($options.no_Ns && !force)
-	bait.gsub!("t","u") if $options.rna # Remove any residual Ts after ambiguity collapsing
+	for key in $ambig_hash.keys
+		if key.upcase == "N"
+			bait.gsub!(key, $ambig_hash[key][rand($ambig_hash[key].size)]) unless ($options.no_Ns && !force)
+		else
+			bait.gsub!(key, $ambig_hash[key][rand($ambig_hash[key].size)])
+		end
+	end
+	bait = make_rna(bait) if $options.rna # Remove any residual Ts after ambiguity collapsing
 	return bait
 end
 #-----------------------------------------------------------------------------------------------
@@ -267,51 +197,111 @@ def build_fq_hash # method to build fastq quality hash
 	end
 end
 #-----------------------------------------------------------------------------------------------
-def extend_baits(bait, reference, seqst, seqend, circular = false) # Extend baits with gap characters
-	bait.delete!("-")
+def build_rc_hash # method build reverse complementation hash
+	$rc_hash = {"A" => "T","G" => "C", "Y" => "R", "S" => "S", "W" => "W", "K" => "M", "N" => "N", "B" => "V", "D" => "H", "-" => "-"}
+	$rc_hash.merge!($rc_hash.invert)
+	$rc_hash.merge!({ "U" => "A"})
+	rclc = {}
+	for key in $rc_hash.keys
+		rclc[key.downcase] = $rc_hash[key].downcase
+	end
+	$rc_hash.merge!(rclc)
+end
+#-----------------------------------------------------------------------------------------------
+def clean_gaps(bait, qual, fasta)
+	while bait.include?("-") # Remove residual gaps from "include" option
+		qual.delete_at(bait.index("-")) unless fasta
+		bait[bait.index("-")] = ""
+	end
+	return bait, qual
+end
+#-----------------------------------------------------------------------------------------------
+def extend_baits(bait, qual, reference, seqst, seqend, circular = false) # Extend baits with gap characters
+	bait, qual = clean_gaps(bait, qual, reference.fasta)
 	while bait.length < $options.baitlength
 		seqend += 1
-		break if seqend >= reference.length
-		bait << reference[seqend].chr
-		bait.delete!("-")
+		break if seqend >= reference.seq.length
+		bait << reference.seq[seqend].chr
+		qual.push << reference.numeric_quality[seqend] unless reference.fasta
+		bait, qual = clean_gaps(bait, qual, reference.fasta)
 	end
 	if circular
-		tmpref = reference.dup # Generate temporary reference for circular baits
+		tmpref = reference.seq.dup # Generate temporary reference for circular baits
+		tmpqual = reference.numeric_quality.dup unless reference.fasta
 		while tmpref.length < $options.baitlength
-			tmpref << reference.dup
+			tmpref << reference.seq.dup
+			tmpqual << reference.numeric_quality.dup unless reference.fasta
 		end
 		while bait.length < $options.baitlength
 			seqend += 1
 			bait << tmpref[seqend].chr
-			bait.delete!("-")
+			qual << tmpqual[seqend] unless reference.fasta
+			bait, qual = clean_gaps(bait, qual, reference.fasta)
 		end
 	end
 	while bait.length < $options.baitlength
 		seqst -=1
 		break if seqst < 0
-		bait.insert(0,reference[seqst].chr)
-		bait.delete!("-")
+		bait.insert(0,reference.seq[seqst].chr)
+		qual.insert(0,reference.numeric_quality[seqst].qual) unless reference.fasta
+		bait, qual = clean_gaps(bait, qual, reference.fasta)
 	end
-	return bait
+	return bait, qual
 end
 #-----------------------------------------------------------------------------------------------
-def reversecomp(bait)
+def fill_in_baits(bait, qual, fasta)
+	bait, qual = clean_gaps(bait, qual, fasta)
+	diff = $options.baitlength - bait.length
+	if diff > 0
+		diff.times { qual.push($options.fasta_score) } unless fasta
+		bait << $options.fillin * (diff/$options.fillin.length) # Since integer math, diff/$options.fillin.length automatically gets floor function
+		diff = $options.baitlength - bait.length
+		bait << $options.fillin[0...diff] if diff > 0
+	end
+	return bait, qual
+end
+#-----------------------------------------------------------------------------------------------
+def addend_qual(qual)
+	$options.threeprime.length.times { qual.push($options.fasta_score) } 
+	$options.fiveprime.length.times { qual.insert(0, $options.fasta_score) }
+	return qual
+end
+#-----------------------------------------------------------------------------------------------
+def reversecomp(bait, qual = [$options.fasta_score])
 	revcomp = ""
-	rchash = {"A" => "T","G" => "C", "Y" => "R", "S" => "S", "W" => "W", "K" => "M", "N" => "N", "B" => "V", "D" => "H", "-" => "-"}
-	rchash.merge!(rchash.invert)
-	rchash.merge!({ "U" => "A"})
-	rclc = {}
-	for key in rchash.keys
-		rclc[key.downcase] = rchash[key].downcase
-	end
-	rchash.merge!(rclc)
 	for base in 0 ... bait.length
-		revcomp += rchash[bait[base]]
+		revcomp += $rc_hash[bait[base]]
 	end
-	revcomp.gsub!("T", "U") if $options.rna
-	revcomp.gsub!("t", "u") if $options.rna
 	revcomp.reverse!
-	return revcomp
+	qual.reverse!
+	return revcomp, qual
+end
+#-----------------------------------------------------------------------------------------------
+def make_rna(seq)
+	seq.gsub!("T","U")
+	seq.gsub!('t','u')
+	return seq
+end
+#-----------------------------------------------------------------------------------------------
+def revise_baits(prb, qual, reference, seqst, seqend)
+	prb, qual = extend_baits(prb, qual, reference, seqst-1, seqend-1) if $options.gaps == "extend" # Basic gap extension
+	prb, qual = fill_in_baits(prb, qual, reference.fasta) if $options.fillin_switch
+	prb, qual = reversecomp(prb, qual) if $options.rc # Output reverse complemented baits if requested
+	if $options.collapse_ambiguities # Ambiguity handling, separate 5' and 3' so random indexes and other ambiguities could be used
+		prb = collapse_ambiguity(prb)
+		fiveprime = collapse_ambiguity($options.fiveprime)
+		threeprime = collapse_ambiguity($options.threeprime)
+	end
+	completeprb = $options.fiveprime + prb + $options.threeprime
+	if $options.rna # RNA output handling
+		prb = make_rna(prb)
+		completeprb = make_rna(completeprb)
+	end
+	unless $options.noaddenda
+		prb = completeprb
+		qual = addend_qual(qual) unless reference.fasta
+	end
+	return prb, qual, completeprb
 end
 #-----------------------------------------------------------------------------------------------
 def linguistic_complexity(bait)
@@ -345,9 +335,9 @@ def max_homopolymer(testbait)
 		if bases[base].include?(bait[i])
 			homopoly += 1
 		else
-			posbases = get_ambiguity(bait[i])
+			posbases = $ambig_hash[bait[i]]
 			for j in i + 1 ... bait.length # Check if ambiguities allow a possible forward homopolymer
-				nextposbases = get_ambiguity(bait[j])
+				nextposbases = $ambig_hash[bait[j]]
 				for posbase in posbases
 					posbases.delete(posbase) unless nextposbases.include?(posbase)
 				end
@@ -367,9 +357,8 @@ def max_homopolymer(testbait)
 	return max_homopoly
 end
 #-----------------------------------------------------------------------------------------------
-def filter_baits(bait, qual = [0])
+def filter_baits(bait, qual = [$options.fasta_score])
 	# To be implemented: Self-complementarity filter
-	bait = collapse_ambiguity(bait) if $options.collapse_ambiguities # Ambiguity handling
 	keep = true
 	keep = false if (bait.length < $options.baitlength && $options.completebait)
 	keep = false if (bait.include?("N") and $options.no_Ns)
@@ -536,6 +525,7 @@ def read_fasta(file) # Read fasta and fastq files
 					faseq = get_sequence_tags(seq_array, faseq, line, true)
 				elsif qual and faseq.qual.length < faseq.seq.length # Test if quality line is complete
 					faseq.qual << line[0...-1] #Exclude final line break, allow multi-line fastq
+					qual = false if faseq.qual.length >= faseq.seq.length
 			 	elsif line[0].chr == "@" # Start new sequence
 					qual = false
 					faseq = get_sequence_tags(seq_array, faseq, line, false)
@@ -740,7 +730,7 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 		write_file(".log.txt", logtext)
 	end
 	@splits = setup_temp(refseq.size)
-	$options.threads.times do |i|
+	$options.used_threads.times do |i|
 		threads[i] = Thread.new {
 			for Thread.current[:j] in @splits[i] ... @splits[i+1]
 				if selectedsnps.keys.include?(refseq[Thread.current[:j]].header)
@@ -809,11 +799,8 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 										Thread.current[:qual] = Thread.current[:rseq_var].numeric_quality[Thread.current[:be4]-1..Thread.current[:after]-1] unless Thread.current[:rseq_var].fasta
 									end
 								end
-								Thread.current[:prb] = reversecomp(Thread.current[:prb]) if $options.rc # Output reverse complemented baits if requested
-								Thread.current[:prb].gsub!("T","U") if $options.rna # RNA output handling
-								Thread.current[:prb].gsub!("t","u") if $options.rna # RNA output handling
-								Thread.current[:prb] = extend_baits(Thread.current[:prb], Thread.current[:rseq_var].seq, Thread.current[:be4]-1, Thread.current[:after]-1) if $options.gaps == "extend" # Basic gap extension
-								Thread.current[:seq] = ">" + Thread.current[:rseq_var].header + "_site" + Thread.current[:snp].snp.to_s + "\n" + Thread.current[:prb]
+								Thread.current[:prb], Thread.current[:qual], Thread.current[:completeprb] = revise_baits(Thread.current[:prb], Thread.current[:qual],Thread.current[:rseq_var], Thread.current[:be4], Thread.current[:after])
+								Thread.current[:seq] = ">" + Thread.current[:rseq_var].header + "_site" + Thread.current[:snp].snp.to_s + "\n" + Thread.current[:completeprb]
 								Thread.current[:be4] = Thread.current[:rseq_var].seq.length + Thread.current[:be4] if Thread.current[:be4] < 1
 								Thread.current[:coord] = Thread.current[:rseq_var].header + "\t" + (Thread.current[:be4]-1).to_s + "\t" + Thread.current[:after].to_s
 								write_file(filext + "-baits.fa", Thread.current[:seq], true, i)
@@ -1014,18 +1001,23 @@ def get_command_line # Get command line for summary output
 	cmdline << " -E" if $options.rbed
 	cmdline << " --shuffle" if $options.shuffle
 	cmdline << " -D" if $options.ncbi
+	cmdline << " --phred64" if $options.phred64
+	cmdline << " -C" if $options.collapse_ambiguities
 	cmdline << " -Y" if $options.rna
 	cmdline << " -R" if $options.rc
-	cmdline << " --phred64" if $options.phred64
+	cmdline << " -G " + $options.gaps
+	cmdline << " -5 " + $options.fiveprime if $options.fiveprime != ""
+	cmdline << " -3 " + $options.threeprime if $options.threeprime != ""
+	cmdline << " --fillin " + $options.fillin if $options.fillin_switch
+	cmdline << " -X" + $options.threads.to_s + " --rng " + $options.rng.to_s
 	cmdline << " --gzip" if $options.gzip
-	cmdline << " -G " + $options.gaps + " -X" + $options.threads.to_s + " --rng " + $options.rng.to_s
 	# Generate filtration options
 	fltline = ""
 	fltline << " -w" if $options.params
 	fltline << " --disable-lc" if $options.no_lc
 	fltline << " -c" if $options.completebait
 	fltline << " -N" if $options.no_Ns
-	fltline << " -C" if $options.collapse_ambiguities
+	fltline << " --noaddenda" if $options.noaddenda
 	fltline << " -n" + $options.mingc.to_s if $options.mingc_filter
 	fltline << " -x" + $options.maxgc.to_s if $options.maxgc_filter
 	fltline << " -q" + $options.mint.to_s if $options.mint_filter

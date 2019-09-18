@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
-# aln2baits
-BLAST2BAITSVER = "1.5.0"
+# blast2baits
+BLAST2BAITSVER = "1.6.0"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -45,9 +45,8 @@ def blast2baits
 						unless $options.evalue_filter && evalue > $options.evalue
 							seq = get_padded_faseq(refhash, chromo, seqst, seqend, seqcycles)
 							if line_arr[9].to_i < line_arr[8].to_i
-								seq.seq = reversecomp(seq.seq)
+								seq.seq, seq.qual = reversecomp(seq.seq, seq.qual_array)
 								seq.qual.reverse!
-								seq.qual_array.reverse!
 							end
 							regions.push(seq)
 							if $options.log
