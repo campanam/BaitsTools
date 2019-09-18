@@ -110,10 +110,11 @@ A tutorial and example data are available in the example_data subdirectory of th
 `-E, --rbed`: Output BED file listing the coordinates of baits relative to input sequences. For example, if a gene is at neighboring positions 570-900 of a reference genome, a bait at positions 570-689 will have BED coordinates 0-120 rather than 569-689.  
 `--shuffle`: Shuffle the last bait forward to compensate for reaching the end of a contig  
 `-D, --ncbi`: Denotes that FASTA/FASTQ file headers have NCBI-style descriptors after the sample name separated by spaces (e.g. `>{sample_name} {descriptor1} {descriptor2}`).  
-`-G, --gaps [VALUE]`: Strategy to handle baits that include gap characters (-) (one of `include`, `exclude`,  `extend`). `include` keeps all baits sequences with gaps. `exclude` filters out all baits with gaps. `extend` attempts to extend baits to complete length while removing gap characters.  *WARNING: extended baits will have BED coordinates corresponding to the uncorrected bait sequence.* Default is `include`.  
+`--phred64`: Qualities are encoded in phred64 rather than phred33.  
+`-C, --collapse`: Collapse ambiguity codes to a single nucleotide. One nucleotide will be chosen randomly from the possible nucleotides (e.g. either A or G will be selected for a R site). If `-N` is specified, N sites will be treated as missing data and filtered out as specified. Otherwise, N sites will be treated as matching any nucleotide (A, G, C, T(U)).  
 `-Y, --rna`: Output bait sequences as RNA rather than DNA.  
 `-R, --rc`: Output reverse-complemented baits.  
-`--phred64`: Qualities are encoded in phred64 rather than phred33.  
+`-G, --gaps [VALUE]`: Strategy to handle baits that include gap characters (-) (one of `include`, `exclude`,  `extend`). `include` keeps all baits sequences with gaps. `exclude` filters out all baits with gaps. `extend` attempts to extend baits to complete length while removing gap characters.  *WARNING: extended baits will have BED coordinates corresponding to the uncorrected bait sequence.* Default is `include`.  
 `-5, --5prime [VALUE]`: Sequence to addend to 5' end of baits.  
 `-3, --3prime [VALUE]`: Sequence to addend to 3' end of baits.  
 `--fillin [VALUE]`: Fill in baits shorter than requested length with specified sequence repeat motif.
@@ -128,7 +129,6 @@ A tutorial and example data are available in the example_data subdirectory of th
 `--disable-lc`: Disable slow linguistic complexity calculations for parameters table  
 `-c, --complete`: Remove candidate baits that are shorter than the requested bait length.  
 `-N, --noNs`: Exclude candidate baits that include unknown bases (Ns).  
-`-C, --collapse`: Collapse ambiguity codes to a single nucleotide. One nucleotide will be chosen randomly from the possible nucleotides (e.g. either A or G will be selected for a R site). If `-N` is specified, N sites will be treated as missing data and filtered out as specified. Otherwise, N sites will be treated as matching any nucleotide (A, G, C, T(U)).  
 `--noaddenda`: Exclude 5' and 3' addended sequences from bait parameter calculations.  
 `-n, --mingc [VALUE]`: Exclude candidate baits with a GC% less than the specified value. Default is 30.0%.  
 `-x, --maxgc [VALUE]`: Exclude candidate baits with a GC% greater than the specified value. Default is 50.0%.  
