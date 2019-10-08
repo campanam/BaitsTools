@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.6.1"
+BAITSLIBVER = "1.6.2"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -171,7 +171,7 @@ end
 def collapse_ambiguity(bait, force = false) # Ambiguity handling, force turns off no_Ns
 	for key in $ambig_hash.keys
 		if key.upcase == "N"
-			bait.gsub!(key, $ambig_hash[key][rand($ambig_hash[key].size)]) unless ($options.no_Ns && !force)
+			bait.gsub!(key, $ambig_hash[key][rand(4)]) unless ($options.no_Ns && !force)
 		else
 			bait.gsub!(key, $ambig_hash[key][rand($ambig_hash[key].size)])
 		end
@@ -200,7 +200,7 @@ end
 def build_rc_hash # method build reverse complementation hash
 	$rc_hash = {"A" => "T","G" => "C", "Y" => "R", "S" => "S", "W" => "W", "K" => "M", "N" => "N", "B" => "V", "D" => "H", "-" => "-"}
 	$rc_hash.merge!($rc_hash.invert)
-	$rc_hash.merge!({ "U" => "A"})
+	$rc_hash["U"] = "A"
 	rclc = {}
 	for key in $rc_hash.keys
 		rclc[key.downcase] = $rc_hash[key].downcase
@@ -270,7 +270,7 @@ end
 def reversecomp(bait, qual = [$options.fasta_score])
 	revcomp = ""
 	for base in 0 ... bait.length
-		revcomp += $rc_hash[bait[base]]
+		revcomp << $rc_hash[bait[base]]
 	end
 	revcomp.reverse!
 	qual.reverse!
