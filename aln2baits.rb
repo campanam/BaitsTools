@@ -194,7 +194,7 @@ def aln2baits(aln)
 							write_file("-filtered-baits-relative.bed", Thread.current[:rbed], true, i) if $options.rbed
 						end
 						if $options.params
-							Thread.current[:param] = Thread.current[:header] + ":" + @windows[Thread.current[:j]].locus + Thread.current[:rng] + ":" + Thread.current[:hapno].to_s + "\t" + Thread.current[:flt][1]
+							Thread.current[:param] = Thread.current[:header] + ":" + @windows[Thread.current[:j]].locus + ":" + Thread.current[:rng] + ":" + Thread.current[:hapno].to_s + "\t" + Thread.current[:flt][1]
 							write_file("-filtered-params.txt", Thread.current[:param], true, i)
 						end
 					end
