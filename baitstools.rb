@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.6.2"
+BAITSTOOLSVER = "1.6.3"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -385,6 +385,9 @@ class Parser
 						args.ncbi = true
 					end
 				end
+				opts.on("--phred64", "Quality scores are in Phred64") do
+					args.phred64 = true
+				end
 				opts.on("-C", "--collapse", "Collapse ambiguities to a single nucleotide") do
 					args.collapse_ambiguities = true
 				end
@@ -393,9 +396,6 @@ class Parser
 				end
 				opts.on("-R", "--rc", "Output reverse-complemented baits") do
 					args.rc = true
-				end
-				opts.on("--phred64", "Quality scores are in Phred64") do
-					args.phred64 = true
 				end
 				opts.on("-G", "--gaps [VALUE]", String, "Strategy to handle sequence gaps (-) (include, exclude, or extend) (Default = include)") do |gap|
 					args.gaps = gap if gap != nil
@@ -1106,11 +1106,13 @@ begin
 	print "** Starting program with the following options: **\n"
 	print "** Basic command: " + cmdline[0] + " **\n"
 	print "** Filtration options:" + cmdline[1] + " **\n" # filtered line always starts with a space if present
+	versline = "Using BaitsTools v. " + BAITSTOOLSVER + ", " + $options.algorithm + " v. " + eval($options.algorithm.upcase + "VER") + ", and baitslib v. #{BAITSLIBVER}"
+	print "** " + versline + " **\n"
 	setup_output
 	build_fq_hash # Build FASTQ quality translation hash
 	build_rc_hash # Build reverse complementation hash
 	build_ambig_hash # Build ambiguity hash
-	write_file(".log.txt", "Parsed commands: " + cmdline[0] + cmdline[1] + "\n") if $options.log
+	write_file(".log.txt", "Parsed commands: " + cmdline[0] + cmdline[1] + "\n" + versline + "\n") if $options.log
 	case $options.algorithm
 	when "aln2baits"
 		aln2baits($options.infile)

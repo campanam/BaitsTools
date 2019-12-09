@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.6.2"
+BAITSLIBVER = "1.6.3"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -139,10 +139,7 @@ def checkpop # Method to determine whether popcategories input is reasonable
 end
 #-----------------------------------------------------------------------------------------------
 def mean(val = [])
-	mean = 0.0
-	for i in 0.. val.size-1
-		mean += val[i]
-	end
+	mean = val.reduce(:+).to_f
 	mean /= val.size
 	return mean
 end
@@ -851,11 +848,11 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 				vlogs[1].push(logs[i][l][3])
 			end
 		end
-		write_file(".log.txt", "\nTotalBaitCoverage(x)\tFilteredBaitCoverage(x)")
+		write_file(".log.txt", "\nTotalBaits\tTotalBaitCoverage(x)\tFilteredBaits\tFilteredBaitCoverage(x)")
 		if $options.filter
-			write_file(".log.txt", mean(vlogs[0]).to_s + "\t" + mean(vlogs[1]).to_s)
+			write_file(".log.txt", vlogs[0].reduce(:+).to_s + "\t" + mean(vlogs[0]).to_s + "\t" + vlogs[1].reduce(:+).to_s + "\t" + mean(vlogs[1]).to_s)
 		else
-			write_file(".log.txt", mean(vlogs[0]).to_s + "\tNA")
+			write_file(".log.txt", vlogs[0].reduce(:+).to_s + "\t" + mean(vlogs[0]).to_s + "\tNA\tNA")
 		end
 	end
 	return filteredsnps

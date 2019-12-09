@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # tilebaits
-TILEBAITSVER = "1.6.0"
+TILEBAITSVER = "1.6.3"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -17,6 +17,7 @@ def tilebaits(seq_array)
 		seq_array = read_fasta(seq_array)
 	end
 	if $options.log
+		logs = []
 		logtext = "BaitCoverage\nSequence\tLength\tNumberBaits\tRetainedBaits\tExcludedBaits\tTotalBaitCoverage(x)\tFilteredBaitCoverage(x)"
 		write_file(".log.txt", logtext)
 	end
@@ -91,10 +92,26 @@ def tilebaits(seq_array)
 						Thread.current[:log].push(Thread.current[:baitnum], "NA", (Thread.current[:baitnum] * $options.baitlength).to_f/seq_array[Thread.current[:j]].seq.length.to_f, "NA")
 					end
 					write_file(".log.txt", Thread.current[:log].join("\t"), true, i)
+					logs.push(Thread.current[:log])
 				end
 			end
 		}
 	end
 	threads.each { |thr| thr.join }
 	cat_files
+	if $options.log
+		vlogs = [[],[],[],[]]
+		for log in logs
+			vlogs[0].push(log[2])
+			vlogs[1].push(log[3])
+			vlogs[2].push(log[5])
+			vlogs[3].push(log[6])
+		end
+		write_file(".log.txt", "\nTotalBaits\tMeanBaitCoveragePerSequence(x)\tFilteredBaits\tMeanFilteredBaitCoveragePerSequence(x)")
+		if $options.filter
+			write_file(".log.txt", vlogs[0].reduce(:+).to_s + "\t" + mean(vlogs[2]).to_s + "\t" + vlogs[1].reduce(:+).to_s + "\t" + mean(vlogs[3]).to_s)
+		else
+			write_file(".log.txt", vlogs[0].reduce(:+).to_s + "\t" + mean(vlogs[2]).to_s + "\tNA\tNA")
+		end
+	end
 end

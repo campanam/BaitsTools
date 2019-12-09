@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # aln2baits
-ALN2BAITSVER = "1.6.0"
+ALN2BAITSVER = "1.6.3"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -221,11 +221,11 @@ def aln2baits(aln)
 			vlogs[2].push(logs[i][3])
 			vlogs[3].push(logs[i][4])
 		end
-		write_file(".log.txt", "\nAlignmentLength\tTotalBaitCoverage(x)\tFilteredBaitCoverage(x)")
+		write_file(".log.txt", "\nAlignmentLength\tTotalBaits\tTotalBaitCoverage(x)\tFilteredBaits\tFilteredBaitCoverage(x)")
 		if $options.filter
-			write_file(".log.txt", (vlogs[1].max-vlogs[0].min+1).to_s + "\t" + mean(vlogs[2]).to_s + "\t" + mean(vlogs[3]).to_s)
+			write_file(".log.txt", (vlogs[1].max-vlogs[0].min+1).to_s + "\t" + vlogs[2].reduce(:+).to_s + "\t" + mean(vlogs[2]).to_s + "\t" + vlogs[3].reduce(:+).to_s + "\t" + mean(vlogs[3]).to_s)
 		else
-			write_file(".log.txt", (vlogs[1].max-vlogs[0].min+1).to_s + "\t" + mean(vlogs[2]).to_s + "\tNA")
+			write_file(".log.txt", (vlogs[1].max-vlogs[0].min+1).to_s + "\t" + vlogs[2].reduce(:+).to_s + "\t" + mean(vlogs[2]).to_s + "\tNA\tNA")
 		end
 	end
 end
