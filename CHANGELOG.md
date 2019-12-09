@@ -20,6 +20,9 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.6.3  
+Log outputs total numbers of generated/filtered baits in addition to coverage  
+
 ### Version 1.6.0  
 5' and 3' addenda  
 Sequence motif fill-in  
@@ -119,6 +122,10 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.6.3  
+snp_to_baits logs the total numbers of generated/filtered baits in addition to coverage  
+mean uses inject for arraying summing (Array#sum not compatible with Ruby 2.0)  
+
 ### Version 1.6.2  
 Minor code improvements  
 
@@ -239,6 +246,9 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.6.3  
+Program version numbers printed to log and upon final command execution  
+
 ### Version 1.6.0  
 5' and 3' addenda  
 Sequence motif fill-in  
@@ -592,6 +602,9 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
 ## tilebaits  
+### Version 1.6.3  
+Log now notes total numbers of baits generated/filtered and the mean bait coverages across loci (rough mean: does not account for differences in source sequence lengths)  
+
 ### Version 1.6.0  
 5' and 3' addenda  
 Sequence motif fill-in  
