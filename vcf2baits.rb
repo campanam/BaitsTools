@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # vcf2baits
-VCF2BAITSVER = "1.5.0"
+VCF2BAITSVER = "1.6.4"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ def vcf2baits
 	write_file(".log.txt", "Variants") if $options.log
 	@selectsnps = selectsnps(@snps) # Select SNPs
 	# Write VCF & baits
-	vcfout << "##baitstools_vcf2baitsVersion=" + VCF2BAITSVER + "+BaitsTools-" + BAITSTOOLSVER + "\n##baitstools_vcf2baitsCommand="
+	vcfout << "##baitstools_vcf2baitsVersion=" + VCF2BAITSVER + "+BaitsToolsVersion=" + BAITSTOOLSVER + "+baitslibVersion=" + BAITSLIBVER + "\n##baitstools_vcf2baitsCommand="
 	cmdline = get_command_line
 	vcffilt = vcfout + cmdline[0] + cmdline[1] + "\n" + columns
 	if !$options.every
