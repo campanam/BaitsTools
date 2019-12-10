@@ -8,3 +8,6 @@ Please use the provided Bug Report issue template to provide as much information
 
 ## Feature Requests  
 Please use the provided Feature Request issue template or e-mail <campanam@si.edu>. Please note that requested features will be added when time is available to provide them. Also, not all features can be implemented due to limitations of the codebase.  
+
+## Pull Requests  
+Please use the provided Pull Request template. All changes to the primary BaitsTools branch are at the discretion of the author.  
