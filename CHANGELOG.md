@@ -667,6 +667,9 @@ Output now controlled by baitslib write_probes function
 Preliminary script to divide genic/genomic sequences into tiled baits
 
 ## vcf2baits  
+### Version 1.6.4  
+Revised output VCF header to include baitslib version  
+
 ### Version 1.5.0  
 Read/write gzip files  
 
