@@ -546,8 +546,11 @@ Version constant added to header
 Preliminary script to filter predefined baits through quality filters  
 
 ## osx_install  
+### Version 1.6.5  
+Updated Ruby version to latest (2.6.5)    
+
 ### Version 1.5.0  
-Updated Ruby version to latest    
+Updated Ruby version to latest (2.6.4)    
 
 ### Version 1.0.3  
 Changes now recorded in change log.  
