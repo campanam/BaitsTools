@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.6.4"
+BAITSLIBVER = "1.6.5"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -461,7 +461,7 @@ def gz_file_open(file)
 end
 #-----------------------------------------------------------------------------------------------
 def resolve_unix_path(path)
-	reserved = ["\\", ";", "&", "(", ")","*","?","[","]","~",">","<","!","\"","\'", "$", " "] # \ first to prevent repeated gsub issues
+	reserved = ["\\", ";", "&", "(", ")","*","?","[","]","~",">","<","!","\"","\'", "$", " ", "|"] # \ first to prevent repeated gsub issues
 	outpath = path.dup # Avoid rewriting original string
 	for reschar in reserved
 		outpath.gsub!(reschar) {"\\" + reschar} # Use odd syntax because escape character causes issues with backslash in sub
