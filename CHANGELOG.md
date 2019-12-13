@@ -122,6 +122,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.6.5  
+Added pipe character (|) to reserved characters list in resolve_unix_path  
+
 ### Version 1.6.3  
 snp_to_baits logs the total numbers of generated/filtered baits in addition to coverage  
 mean uses inject for arraying summing (Array#sum not compatible with Ruby 2.0)  
