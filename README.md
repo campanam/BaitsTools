@@ -1,6 +1,6 @@
 # BaitsTools: software for hybridization capture bait design
 
-Michael G. Campana, 2017-2019  
+Michael G. Campana, 2017-2020  
 Smithsonian Conservation Biology Institute  
 Contact: <campanam@si.edu>  
 
@@ -278,6 +278,9 @@ vcf2baits selects variants and generates baits from a VCF file and a reference s
 `-O, --offset [VALUE]`: Base pair offset between tiled baits. Default is 60 bp.  
 `-k, --depth [VALUE]`: Requested tiled baits per variant. Default is 1.  
 
+## Formula Notes  
+Bait melting temperatures are calculated according to salt-adjusted formulas for molecules longer than 50 nucleotides (Howley et al. 1979, Sambrook & Russell 2001) as given in [Kibbe et al.] (http://biotools.nubic.northwestern.edu/OligoCalc.html.)
+
 ## Tips and Tricks
 1. The "#" character is reserved for BaitsTools annotations of sequence headers. Do not include this character in sequence identifiers.  
 
@@ -303,3 +306,8 @@ BaitsTools is a complex program under active development. Bugs and technical iss
 ## Citation  
 Please cite:  
 Campana, M.G. 2018. BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources*. 18: 356-361. doi: [10.1111/1755-0998.12721](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract).  
+
+## References  
+Kibbe, W.A. et al. 2015. Oligo Calculator version 3.27. (http://biotools.nubic.northwestern.edu/OligoCalc.html.)  
+Howley et al. 1979. A rapid method for detecting and mapping homology between heterologous DNAs. Evaluation of polyomavirus genomes. J. Biol. Chem. 254, 4876-4883.  
+Sambrook & Russell. 2001. Molecular Cloning: A Laboratory Manual. Cold Spring Harbor Laboratory Press; Cold Spring Harbor, NY.  
