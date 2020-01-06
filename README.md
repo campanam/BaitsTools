@@ -31,9 +31,10 @@ The software is made available under the Smithsonian Institution [terms of use](
 7g. [stacks2baits](#stacks2baits)  
 7h. [tilebaits](#tilebaits)  
 7i. [vcf2baits](#vcf2baits)  
-8. [Tips and Tricks](#tips-and-tricks)  
-9. [Bug Reports and Feature Requests](#bug-reports-and-feature-requests)
-10. [Citation](#citation)  
+8. [Formula Notes](#formula-notes)
+9. [Tips and Tricks](#tips-and-tricks)  
+10. [Bug Reports and Feature Requests](#bug-reports-and-feature-requests)
+11. [Citation](#citation)  
 
 ## Installation  
 ### Basic Installation  
