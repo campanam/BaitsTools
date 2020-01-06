@@ -304,12 +304,12 @@ BaitsTools is a complex program under active development. Bugs and technical iss
 
 ## Citation  
 Please cite:  
-Campana, M.G. 2018. BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources*. 18: 356-361. doi: [10.1111/1755-0998.12721](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract).  
+Campana, M.G. (2018) BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources*, 18, 356-361. doi: [10.1111/1755-0998.12721](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract).  
 
 ## References  
-1. Howley, P.M., Israel, M.A., Law, M.F., Martin, M.A,. 1979. A rapid method for detecting and mapping homology between heterologous DNAs. Evaluation of polyomavirus genomes. *The Journal of Biological Chemistry*, 254, 4876-4883.  
-2. Sambrook, J.F., Russell, D.W. (ed). 2001. Molecular Cloning: A Laboratory Manual. Cold Spring Harbor Laboratory Press: Cold Spring Harbor, NY.  
-3. Kibbe, W.A. 2007. OligoCalc: an online oligonucleotide properties calculator. *Nucleic Acids Res*, 35, W43-W46.  
-4. Kibbe, W.A. 2015. Oligo Calc: Oligonucleotide Properties Calculator. Version 3.27. (http://biotools.nubic.northwestern.edu/OligoCalc.html.)   
+1. Howley, P.M., Israel, M.A., Law, M.F., Martin, M.A,. (1979) A rapid method for detecting and mapping homology between heterologous DNAs. Evaluation of polyomavirus genomes. *The Journal of Biological Chemistry*, 254, 4876-4883.  
+2. Sambrook, J.F., Russell, D.W. (eds). (2001) Molecular Cloning: A Laboratory Manual. Cold Spring Harbor Laboratory Press: Cold Spring Harbor, NY.  
+3. Kibbe, W.A. (2007) OligoCalc: an online oligonucleotide properties calculator. *Nucleic Acids Res*, 35, W43-W46.  
+4. Kibbe, W.A. (2015) Oligo Calc: Oligonucleotide Properties Calculator. Version 3.27. (http://biotools.nubic.northwestern.edu/OligoCalc.html.)   
 
   
