@@ -279,7 +279,7 @@ vcf2baits selects variants and generates baits from a VCF file and a reference s
 `-k, --depth [VALUE]`: Requested tiled baits per variant. Default is 1.  
 
 ## Formula Notes  
-Bait melting temperatures are calculated according to salt-adjusted formulas for molecules longer than 50 nucleotides (Howley et al. 1979, Sambrook & Russell 2001) as given in [Kibbe et al.] (http://biotools.nubic.northwestern.edu/OligoCalc.html.)
+Bait melting temperatures are calculated according to salt-adjusted formulas for molecules longer than 50 nucleotides [1-2] as given in the [Oligo Calc documentation] (http://biotools.nubic.northwestern.edu/OligoCalc.html.) [3-4]  
 
 ## Tips and Tricks
 1. The "#" character is reserved for BaitsTools annotations of sequence headers. Do not include this character in sequence identifiers.  
@@ -302,12 +302,14 @@ Bait melting temperatures are calculated according to salt-adjusted formulas for
 ## Bug Reports and Feature Requests  
 BaitsTools is a complex program under active development. Bugs and technical issues are inevitable. Please report any issues and associated error reports using the issues template and e-mail <campanam@si.edu>. Feature requests can be filed using the appropriate issue template or e-mailed to <campanam@si.edu>. Please see the CONTRIBUTING guidelines.  
 
-
 ## Citation  
 Please cite:  
 Campana, M.G. 2018. BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources*. 18: 356-361. doi: [10.1111/1755-0998.12721](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract).  
 
 ## References  
-Kibbe, W.A. et al. 2015. Oligo Calculator version 3.27. (http://biotools.nubic.northwestern.edu/OligoCalc.html.)  
-Howley et al. 1979. A rapid method for detecting and mapping homology between heterologous DNAs. Evaluation of polyomavirus genomes. J. Biol. Chem. 254, 4876-4883.  
-Sambrook & Russell. 2001. Molecular Cloning: A Laboratory Manual. Cold Spring Harbor Laboratory Press; Cold Spring Harbor, NY.  
+1. Howley, P.M., Israel, M.A., Law, M.F., Martin, M.A,. 1979. A rapid method for detecting and mapping homology between heterologous DNAs. Evaluation of polyomavirus genomes. *The Journal of Biological Chemistry*, 254, 4876-4883.  
+2. Sambrook, J.F., Russell, D.W. (ed). 2001. Molecular Cloning: A Laboratory Manual. Cold Spring Harbor Laboratory Press: Cold Spring Harbor, NY.  
+3. Kibbe, W.A. 2007. OligoCalc: an online oligonucleotide properties calculator. *Nucleic Acids Res*, 35, W43-W46.  
+4. Kibbe, W.A. 2015. Oligo Calc: Oligonucleotide Properties Calculator. Version 3.27. (http://biotools.nubic.northwestern.edu/OligoCalc.html.)   
+
+  
