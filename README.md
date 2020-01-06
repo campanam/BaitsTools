@@ -280,7 +280,7 @@ vcf2baits selects variants and generates baits from a VCF file and a reference s
 `-k, --depth [VALUE]`: Requested tiled baits per variant. Default is 1.  
 
 ## Formula Notes  
-Bait melting temperatures are calculated according to salt-adjusted formulas for molecules longer than 50 nucleotides [1-2] as given in the [Oligo Calc documentation] (http://biotools.nubic.northwestern.edu/OligoCalc.html.) [3-4]  
+Bait melting temperatures are calculated according to salt-adjusted formulas for molecules longer than 50 nucleotides [1-2] as given in [3-4].  
 
 ## Tips and Tricks
 1. The "#" character is reserved for BaitsTools annotations of sequence headers. Do not include this character in sequence identifiers.  
@@ -305,12 +305,12 @@ BaitsTools is a complex program under active development. Bugs and technical iss
 
 ## Citation  
 Please cite:  
-Campana, M.G. (2018) BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources*, 18, 356-361. doi: [10.1111/1755-0998.12721](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract).  
+Campana, M.G. (2018) BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources*, __18__, 356-361. doi: [10.1111/1755-0998.12721](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract).  
 
 ## References  
-1. Howley, P.M., Israel, M.A., Law, M.F., Martin, M.A,. (1979) A rapid method for detecting and mapping homology between heterologous DNAs. Evaluation of polyomavirus genomes. *The Journal of Biological Chemistry*, 254, 4876-4883.  
+1. Howley, P.M., Israel, M.A., Law, M.F., Martin, M.A,. (1979) A rapid method for detecting and mapping homology between heterologous DNAs. Evaluation of polyomavirus genomes. *The Journal of Biological Chemistry*, __254__, 4876-4883.  
 2. Sambrook, J.F., Russell, D.W. (eds). (2001) Molecular Cloning: A Laboratory Manual. Cold Spring Harbor Laboratory Press: Cold Spring Harbor, NY.  
-3. Kibbe, W.A. (2007) OligoCalc: an online oligonucleotide properties calculator. *Nucleic Acids Res*, 35, W43-W46.  
+3. Kibbe, W.A. (2007) OligoCalc: an online oligonucleotide properties calculator. *Nucleic Acids Res*, __35__, W43-W46.  
 4. Kibbe, W.A. (2015) Oligo Calc: Oligonucleotide Properties Calculator. Version 3.27. (http://biotools.nubic.northwestern.edu/OligoCalc.html.)   
 
   
