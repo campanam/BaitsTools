@@ -373,6 +373,13 @@ def filter_baits(bait, qual = [$options.fasta_score])
 	keep = false if (maskcont * 100.0 > $options.maxmask && $options.maxmask_filter)
 	meanqual = melt = minqual = maxhomopoly = seqcomp = "" # Default values if not calculated
 	if $options.mint_filter or $options.maxt_filter or $options.params
+		# Melting temperatures are calculated according to formulas reported by:
+		# Kibbe, W.A. et al. 2015. Oligo Calculator version 3.27. http://biotools.nubic.northwestern.edu/OligoCalc.html.
+		# Original citations are:
+		# Howley et al. 1979. A rapid method for detecting and mapping homology between heterologous DNAs. Evaluation of 
+		# polyomavirus genomes. J. Biol. Chem. 254, 4876-4883.
+		# Sambrook & Russell. 2001. Molecular Cloning: A Laboratory Manual. Cold Spring Harbor Laboratory Press; Cold
+		# Spring Harbor, NY.
 		case $options.bait_type
 		when "RNA-RNA"
 			melt = 79.8 + (58.4 * gccont) + (11.8 * (gccont**2.0)) - 820.0/bait.length.to_f + 18.5 * Math.log($options.na) - 0.35 * $options.formamide
