@@ -1,5 +1,5 @@
 # BaitsTools Change Log  
-Michael G. Campana, 2017-2019  
+Michael G. Campana, 2017-2020  
 Smithsonian Conservation Biology Institute  
 Contact: campanam@si.edu  
 
@@ -89,6 +89,9 @@ Corrected double-tabbed output in parameters output
 Preliminary script to generate weighted bait set from a fasta alignment  
 
 ## annot2baits  
+### Version 1.6.6  
+Removed eval statement from gz_file_open call  
+
 ### Version 1.5.0  
 Read/write gzip files  
 
@@ -122,6 +125,10 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.6.6  
+Removed eval statement from gz_file_open call  
+Revised gz_file_open to return reader class rather than a string  
+
 ### Version 1.6.5  
 Added pipe character (|) to reserved characters list in resolve_unix_path  
 
@@ -443,6 +450,9 @@ pyrad2baits added
 Basic GUI compatible with baitstools 0.8  
 
 ## bed2baits  
+### Version 1.6.6  
+Removed eval statement from gz_file_open call  
+
 ### Version 1.5.0  
 Read/write gzip files  
 
@@ -488,6 +498,9 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## blast2baits  
+### Version 1.6.6  
+Removed eval statement from gz_file_open call  
+
 ### Version 1.6.0  
 Correction of bugs/improvement of reversecomp/RNA qualities and ordering  
 
@@ -560,6 +573,9 @@ Versioning added to header of script
 RVM default bug fixed  
 
 ## pyrad2baits  
+### Version 1.6.6  
+Removed eval statement from gz_file_open call  
+
 ### Version 1.6.0  
 Diplotype sequence bug fix  
 Removal of unused get_variants method from Pyrad_Locus  
@@ -580,6 +596,9 @@ pyrad2baits can produce an uncollapsed reference sequence
 Preliminary script to generate baits from PyRAD/ipyrad loci files  
 
 ## stacks2baits  
+### Version 1.6.6  
+Removed eval statement from gz_file_open call  
+
 ### Version 1.5.0  
 Read/write gzip files  
 
@@ -673,6 +692,9 @@ Output now controlled by baitslib write_probes function
 Preliminary script to divide genic/genomic sequences into tiled baits
 
 ## vcf2baits  
+### Version 1.6.6  
+Removed eval statement from gz_file_open call  
+
 ### Version 1.6.4  
 Revised output VCF header to include baitslib version  
 
