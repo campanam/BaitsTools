@@ -460,6 +460,7 @@ Basic GUI compatible with baitstools 0.8
 ## bed2baits  
 ### Version 1.6.7  
 Headed BEDs are now readable  
+Fixed bug in bed2baits that did not process whitespace separated values correctly  
 Revision of list options to account for capitalization  
 
 ### Version 1.6.6  
