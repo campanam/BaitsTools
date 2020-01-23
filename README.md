@@ -186,7 +186,7 @@ annot2baits generates baits from an annotation file in GTF or GFF and a correspo
 `-U, --features [FEATURE]`: Comma-separated list of features to extract (e.g. `exon,intron,tRNA`).  
 
 ### bed2baits  
-bed2baits generates baits from a track file in headerless BED or GATK/Picard interval list format and a a corresponding DNA sequence in FASTA or FASTQ format.  
+bed2baits generates baits from a track file in BED or GATK/Picard interval list format and a a corresponding DNA sequence in FASTA or FASTQ format.  
 
 `-i, --input [FILE]`: Input BED or interval list file name. Include the path to the file if not in the current directory.  
 `--list [VALUE]`: BED or interval list file format (bed, GATK, or Picard). Default is BED.  
