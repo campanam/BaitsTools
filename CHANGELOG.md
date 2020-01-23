@@ -256,6 +256,11 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.6.7  
+Capitalization of options that select between choices no longer matters  
+blast2baits description updated to include interval lists  
+blast2baits list option capitalized to BED for consistency  
+
 ### Version 1.6.3  
 Program version numbers printed to log and upon final command execution  
 
@@ -399,6 +404,9 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.6.7  
+blast2baits list option capitalized to BED for consistency  
+
 ### Version 1.6.0  
 Sequence addenda/fill-in handling added  
 
@@ -450,6 +458,10 @@ pyrad2baits added
 Basic GUI compatible with baitstools 0.8  
 
 ## bed2baits  
+### Version 1.6.7  
+Headed BEDs are now readable  
+Revision of list options to account for capitalization  
+
 ### Version 1.6.6  
 Removed eval statement from gz_file_open call  
 
