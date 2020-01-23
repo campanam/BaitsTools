@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.6.0"
+BAITSTOOLSGUI = "1.6.7"
 # Michael G. Campana, 2017-2019
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -394,7 +394,7 @@ def list_format_window
 	end
 	$listselect = Tk::Tile::Combobox.new($root) do
 		textvariable $options.list_format
-		values ["bed", "GATK", "Picard"]
+		values ["BED", "GATK", "Picard"]
 		state "readonly"
 		width 10
 		height 2
@@ -1484,7 +1484,7 @@ def set_defaults
 	$options.tileoffset = TkVariable.new(60) # Offset between tiled baits
 	$options.bait_type = TkVariable.new("RNA-DNA") # Hybridization type
 	$options.haplodef = TkVariable.new("haplotype") # Haplotype definition for aln2baits
-	$options.list_format = TkVariable.new("bed") # Interval list file format
+	$options.list_format = TkVariable.new("BED") # Interval list file format
 	$options.features = TkVariable.new("") # Desired features in comma-separated list
 	$options.pad = TkVariable.new(0) # BP to pad ends of extracted regions
 	$options.totalsnps = TkVariable.new(30000) # Maximum requested SNPs
@@ -1585,7 +1585,7 @@ $next_btn = TkButton.new($root) do
 	place('x' => 660, 'y' => 520)
 end
 credit = TkLabel.new($root) do
-	text "Michael G. Campana, 2017-2019\nSmithsonian Conservation Biology Institute"
+	text "Michael G. Campana, 2017-2020\nSmithsonian Conservation Biology Institute"
 	borderwidth 5
 	font TkFont.new('times 12')
 	pack("side" => "bottom",  "padx"=> "50", "pady"=> "10")

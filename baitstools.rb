@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.6.6"
+BAITSTOOLSVER = "1.6.7"
 # Michael G. Campana, 2017-2020
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -174,10 +174,10 @@ class Parser
 						args.minind = mind if mind != nil
 					end
 					opts.on("-W", "--strategy [VALUE]", String, "Strategy to generate baits from loci (alignment, SNPs, or informative) (Default = alignment)") do |strat|
-						args.strategy = strat if strat != nil
+						args.strategy = strat.downcase if strat != nil
 					end
 					opts.on("-H","--haplo [VALUE]", String, "If using alignment strategy, window haplotype definition (haplotype or variant) (Default = haplotype)") do |fa|
-						args.haplodef = fa if fa != nil
+						args.haplodef = fa.downcase if fa != nil
 					end
 					opts.on("--uncollapsedref","Keep ambiguities in pyrad2baits reference sequence") do
 						args.uncollapsed_ref = true
@@ -212,8 +212,8 @@ class Parser
 						args.infile = fa
 					end
 					if args.algorithm == "bed2baits" or args.algorithm == "annot2baits" or args.algorithm == "blast2baits"
-						opts.on("--list [VALUE]", String, "Interval list file format (bed, GATK, Picard) (Default = bed)") do |strat|
-							args.list_format = strat if strat != nil
+						opts.on("--list [VALUE]", String, "Interval list file format (BED, GATK, Picard) (Default = BED)") do |strat|
+							args.list_format = strat.downcase if strat != nil
 						end
 						opts.on("-r","--refseq [FILE]", String, "Reference FASTA/FASTQ sequence file") do |ref|
 							args.refseq = ref
@@ -236,7 +236,7 @@ class Parser
 						end
 					elsif args.algorithm == "aln2baits"
 						opts.on("-H","--haplo [VALUE]", String, "Window haplotype definition (haplotype or variant) (Default = haplotype)") do |fa|
-							args.haplodef = fa if fa != nil
+							args.haplodef = fa if fa.downcase != nil
 						end
 					end
 					if args.algorithm == "blast2baits"
@@ -322,7 +322,7 @@ class Parser
 					args.maxt_filter = true # Force bait filtration if called
 				end
 				opts.on("-T", "--type [VALUE]", String, "Melting temperature for DNA-DNA, RNA-RNA, or RNA-DNA hybridization (Default = RNA-DNA)") do |hyb|
-					args.bait_type = hyb if hyb != nil
+					args.bait_type = hyb.upcase if hyb != nil
 				end
 				opts.on("-s","--na [VALUE]", Float, "Melting temperature sodium concentration in M (Default = 0.9)") do |na|
 					args.na = na if na != nil
@@ -398,7 +398,7 @@ class Parser
 					args.rc = true
 				end
 				opts.on("-G", "--gaps [VALUE]", String, "Strategy to handle sequence gaps (-) (include, exclude, or extend) (Default = include)") do |gap|
-					args.gaps = gap if gap != nil
+					args.gaps = gap.downcase if gap != nil
 				end
 				opts.on("-5", "--5prime [VALUE]", String, "Sequence to addend to 5' end of baits") do |fivepr|
 					args.fiveprime = fivepr if fivepr != nil
@@ -456,7 +456,7 @@ class Parser
 				print "\nAdd '-h' or '--help' to subcommands (without other options) to see their relevant options.\n\nAvailable subcommands:\n\n"
 				print "    aln2baits\t\t\t\tGenerate weighted baits from a FASTA/FASTQ alignment\n"
 				print "    annot2baits\t\t\t\tGenerate tiled baits from a GFF/GTF file and a reference sequence\n"
-				print "    bed2baits\t\t\t\tGenerate tiled baits from BED file and a reference sequence\n"
+				print "    bed2baits\t\t\t\tGenerate tiled baits from BED/interval list file and a reference sequence\n"
 				print "    blast2baits\t\t\t\tGenerate tiled baits from a BLAST hit table and a reference sequence\n"
 				print "    checkbaits\t\t\t\tFilter a FASTA/FASTQ of candidate baits by quality\n"
 				print "    pyrad2baits\t\t\t\tSelect variants and generate baits from a PyRAD/ipyrad LOCI file\n"
@@ -485,12 +485,12 @@ begin
 	end
 	if $options.algorithm == "bed2baits"
 			if $options.interact
-				print "File format (bed, GATK, or Picard)?\n"
-				$options.list_format = gets.chomp
+				print "File format (BED, GATK, or Picard)?\n"
+				$options.list_format = gets.chomp.downcase
 			end
-			while $options.list_format != 'bed' and $options.list_format != 'GATK' and $options.list_format != 'Picard'
-				print "Please choose a recognized file format (bed, GATK, or Picard)?\n"
-				$options.list_format = gets.chomp
+			while $options.list_format != 'bed' and $options.list_format != 'gatk' and $options.list_format != 'picard'
+				print "Please choose a recognized file format (BED, GATK, or Picard)?\n"
+				$options.list_format = gets.chomp.downcase
 			end
 		end
 	if $options.interact
@@ -746,11 +746,11 @@ begin
 			end
 			if $options.interact
 				print "Strategy? (alignment, SNPs, or informative)\n"
-				$options.strategy = gets.chomp
+				$options.strategy = gets.chomp.downcase
 			end
-			while $options.strategy != 'alignment' and $options.strategy != 'SNPs' and $options.strategy != 'informative'
+			while $options.strategy != 'alignment' and $options.strategy != 'snps' and $options.strategy != 'informative'
 				print "Please choose a strategy (alignment, SNPs, or informative)\n"
-				$options.strategy = gets.chomp
+				$options.strategy = gets.chomp.downcase
 			end
 			if $options.strategy != "alignment"
 				if $options.interact
@@ -806,11 +806,11 @@ begin
 		if $options.algorithm == "aln2baits" or ($options.algorithm == "pyrad2baits" && $options.strategy == "alignment")
 			if $options.interact
 				print "Haplotype definition? (haplotype or variant)\n"
-				$options.haplodef = gets.chomp
+				$options.haplodef = gets.chomp.downcase
 			end
 			while $options.haplodef != 'haplotype' and $options.haplodef != 'variant'
 				print "Please choose a haplotype definition (haplotype or variant)\n"
-				$options.haplodef = gets.chomp
+				$options.haplodef = gets.chomp.downcase
 			end
 		end
 		if $options.algorithm == "blast2baits"
@@ -1007,7 +1007,7 @@ begin
 		end
 		while $options.bait_type != 'RNA-RNA' and $options.bait_type != 'DNA-DNA' and $options.bait_type != 'RNA-DNA'
 			print "Please choose a hybridization type ('DNA-DNA', 'RNA-RNA', or 'RNA-DNA')\n"
-			$options.bait_type = gets.chomp
+			$options.bait_type = gets.chomp.upcase
 		end
 	end
 	if $options.interact and !$options.no_baits
