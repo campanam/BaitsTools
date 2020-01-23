@@ -258,8 +258,8 @@ filter_probes definition removed into separate script for access by other script
 ## baitstools  
 ### Version 1.6.7  
 Capitalization of options that select between choices no longer matters  
-blast2baits description updated to include interval lists  
-blast2baits list option capitalized to BED for consistency  
+bed2baits description updated to include interval lists  
+bed2baits list option capitalized to BED for consistency  
 
 ### Version 1.6.3  
 Program version numbers printed to log and upon final command execution  
@@ -405,7 +405,7 @@ Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_
 
 ## baitstoolsgui  
 ### Version 1.6.7  
-blast2baits list option capitalized to BED for consistency  
+bed2baits list option capitalized to BED for consistency  
 
 ### Version 1.6.0  
 Sequence addenda/fill-in handling added  
@@ -460,7 +460,7 @@ Basic GUI compatible with baitstools 0.8
 ## bed2baits  
 ### Version 1.6.7  
 Headed BEDs are now readable  
-Fixed bug in bed2baits that did not process whitespace separated values correctly  
+Fixed bug that did not process whitespace separated values correctly  
 Revision of list options to account for capitalization  
 
 ### Version 1.6.6  
