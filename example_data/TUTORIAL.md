@@ -2,7 +2,6 @@
 
 Michael G. Campana, 2017  
 Smithsonian Conservation Biology Institute  
-Contact: campanam@si.edu  
 
 This series of tutorials covers basic operation of BaitsTools. Each tutorial covers a subcommand and any relevant methods specific to that subcommand. The first two tutorials also demonstrate the basics of bait quality control and filtration. Each tutorial assumes that the previous tutorial has been completed. Expected results files of each tutorial step are included in the archive "tutorials.tgz".  
 
