@@ -7,17 +7,17 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Describe the bug**  
+A clear and concise description of what the bug is.  
 
-**To Reproduce**
-Steps to reproduce the behavior.
+**To Reproduce**  
+Steps to reproduce the behavior.  
 
-**OS and Version**
-OS and BaitsTools version.
+**OS and Version**  
+OS and BaitsTools version.  
 
-**Error Messages and Logs**
-Transcribe error messages and logs.
+**Error Messages and Logs**  
+Transcribe error messages and logs.  
 
-**Additional context**
-Add any other context about the problem here.
+**Additional context**  
+Add any other context about the problem here.  
