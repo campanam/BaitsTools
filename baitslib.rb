@@ -800,7 +800,7 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 									end
 								end
 								Thread.current[:prb], Thread.current[:qual], Thread.current[:completeprb] = revise_baits(Thread.current[:prb], Thread.current[:qual],Thread.current[:rseq_var], Thread.current[:be4], Thread.current[:after])
-								Thread.current[:seq] = ">" + Thread.current[:rseq_var].header + "_site" + Thread.current[:snp].snp.to_s + "\n" + Thread.current[:completeprb]
+								Thread.current[:seq] = ">" + Thread.current[:rseq_var].header + "_site" + Thread.current[:snp].snp.to_s + "_" + Thread.current[:tile].to_s + "\n" + Thread.current[:completeprb]
 								Thread.current[:be4] = Thread.current[:rseq_var].seq.length + Thread.current[:be4] if Thread.current[:be4] < 1
 								Thread.current[:coord] = Thread.current[:rseq_var].header + "\t" + (Thread.current[:be4]-1).to_s + "\t" + Thread.current[:after].to_s
 								write_file(filext + "-baits.fa", Thread.current[:seq], true, i)
