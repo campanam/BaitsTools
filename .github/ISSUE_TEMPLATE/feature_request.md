@@ -7,5 +7,5 @@ assignees: ''
 
 ---
 
-**Feature request description**
-Describe the feature(s) requested.
+**Feature request description**  
+Describe the feature(s) requested.  
