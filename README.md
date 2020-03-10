@@ -117,7 +117,7 @@ A tutorial and example data are available in the example_data subdirectory of th
 `-G, --gaps [VALUE]`: Strategy to handle baits that include gap characters (-) (one of `include`, `exclude`,  `extend`). `include` keeps all baits sequences with gaps. `exclude` filters out all baits with gaps. `extend` attempts to extend baits to complete length while removing gap characters.  *WARNING: extended baits will have BED coordinates corresponding to the uncorrected bait sequence.* Default is `include`.  
 `-5, --5prime [VALUE]`: Sequence to addend to 5' end of baits.  
 `-3, --3prime [VALUE]`: Sequence to addend to 3' end of baits.  
-`--fillin [VALUE]`: Fill in baits shorter than requested length with specified sequence repeat motif.
+`--fillin [VALUE]`: Fill in baits shorter than requested length with specified sequence repeat motif.  
 `-X, --threads [VALUE]`: Number of threads. Default is 1.  
 `--rng [VALUE]`: Random number seed. Default uses system entropy.  
 `--gzip`: Gzip output files.  
