@@ -160,7 +160,7 @@ The parameter file is a tab-separated file giving bait-specific filtration infor
 * Kept: Whether the bait was retained in the final filtered set. 
 
 ### Sequence Annotations  
-BaitsTools reserves the the "#" character for program-specific FASTA/FASTQ annotations. Append these annotations to end of sequence headers. The following annotations are currently available:  
+BaitsTools reserves the "#" character for program-specific FASTA/FASTQ annotations. Append these annotations to end of sequence headers. The following annotations are currently available:  
 `#circ`: Appending this annotation denotes that a sequence is circular. Otherwise the sequence is assumed to be linear.  
 `#bed`: Appending this annotation changes the absolute BED starting coordinate from the default of 0 to the specified coordinate (e.g. "#bed80" changes the starting coordinate to 80). This annotation only affects the [tilebaits](#tilebaits) and [aln2baits](#aln2baits) subcommands. If the `variant` definition is used in aln2baits, the absolute BED coordinates will be given relative to the first sequence in the alignment.  
 `#loc`: Appending this annotation determines the locus alignment to which a sequence belongs (e.g. "#locSLCA42" assigns the sequence to locus SLCA42). This annotation allows [aln2baits](#aln2baits) to process alignments from multiple loci simultaneously.  
