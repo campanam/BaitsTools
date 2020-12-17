@@ -34,6 +34,7 @@ The software is made available under the Smithsonian Institution [terms of use](
 9. [Tips and Tricks](#tips-and-tricks)  
 10. [Bug Reports and Feature Requests](#bug-reports-and-feature-requests)
 11. [Citation](#citation)  
+12. [References](#References)
 
 ## Installation  
 ### Basic Installation  
