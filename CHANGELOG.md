@@ -587,6 +587,7 @@ Preliminary script to filter predefined baits through quality filters
 ### Version 1.6.8  
 Updated Ruby version to latest (2.7.2)  
 Installs 'shell' gem due to removal from bundle in Ruby 2.7  
+Update for zsh as macOS default shell  
 
 ### Version 1.6.5  
 Updated Ruby version to latest (2.6.5)  
