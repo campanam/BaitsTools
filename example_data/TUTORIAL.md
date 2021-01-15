@@ -47,6 +47,8 @@ tilebaits generates baits from a list of DNA sequences in FASTA or FASTQ format.
 * GC%: Bait GC content in percent  
 * Tm: Bait melting temperature  
 * Masked%: Percent of bait masked  
+* MaxHomopolymer: Maximum homopolymer length within generated bait  
+* SeqComplexity: Linguistic complexity of generated bait  
 * MeanQuality: Mean Phred-like base quality of the generated bait  
 * MinQuality: Minimum Phred-like base quality of the generated bait  
 * Ns: Whether the bait included Ns  
