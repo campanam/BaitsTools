@@ -68,9 +68,10 @@ Enter the following commands (step annotations are provided after the highlighte
 
 `curl -sSL https://get.rvm.io | bash -s stable`:  Install the Ruby Version Manager.  
 `source ~/.rvm/scripts/rvm`: Source the RVM scripts.  
-`rvm install 2.4.1`: Install RVM Ruby 2.4.1.  
-`rvm --default use 2.4.1`: Set Ruby 2.4.1 as default.  
+`rvm install 2.7.2`: Install RVM Ruby 2.7.2.  
+`rvm --default use 2.7.2`: Set Ruby 2.7.2 as default.  
 `gem install tk`: Install the latest 'tk' version.  
+`gem install shell`: Install the 'shell' gem. *NOTE: 'shell' was bundled with Ruby versions < 2.7. This step is not required for Ruby versions < 2.7*.
 `git clone "https://github.com/campanam/BaitsTools/"`: Download BaitsTools.  
 `cd BaitsTools`  
 `chmod +x *.rb`: Make BaitsTools' scripts executable.  
