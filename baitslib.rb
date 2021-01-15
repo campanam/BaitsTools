@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.6.6"
+BAITSLIBVER = "1.6.8"
 # Michael G. Campana, 2017-2020
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -460,9 +460,9 @@ end
 #-----------------------------------------------------------------------------------------------
 def gz_file_open(file)
 	if file[-3..-1] == ".gz"
-		return Zlib::GzipReader
+		yield Zlib::GzipReader.open(file)
 	else
-		return File
+		yield File.open(file)
 	end
 end
 #-----------------------------------------------------------------------------------------------
@@ -521,7 +521,7 @@ def read_fasta(file) # Read fasta and fastq files
 	seq_array = []
 	faseq = nil # Dummy value
 	qual = false # Denotes whether sequence or quality string
-	gz_file_open(file).open(file) do |seq|
+	gz_file_open(file) do |seq|
 		while line = seq.gets
 			unless line == "\n" # Remove extraneous line breaks
 				if line[0].chr == ">" and qual == false

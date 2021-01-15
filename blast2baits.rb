@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # blast2baits
-BLAST2BAITSVER = "1.6.6"
+BLAST2BAITSVER = "1.6.8"
 # Michael G. Campana, 2017-2020
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -19,7 +19,7 @@ def blast2baits
 	regions = [] #Array to hold generated fasta sequences
 	write_file(".log.txt", "ExtractedRegions\nRegion\tChromosome\tStart\tEnd\tLength\tStrand") if $options.log
 	totallength = 0
-	gz_file_open($options.infile).open($options.infile) do |blast|
+	gz_file_open($options.infile) do |blast|
 		while line = blast.gets
 			if line[0].chr != "#"
 				line_arr = line.split("\t")
