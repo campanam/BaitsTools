@@ -71,7 +71,7 @@ Enter the following commands (step annotations are provided after the highlighte
 `rvm install 2.7.2`: Install RVM Ruby 2.7.2.  
 `rvm --default use 2.7.2`: Set Ruby 2.7.2 as default.  
 `gem install tk`: Install the latest 'tk' version.  
-`gem install shell`: Install the 'shell' gem. *NOTE: 'shell' was bundled with Ruby versions < 2.7. This step is not required for Ruby versions < 2.7*.
+`gem install shell`: Install the 'shell' gem. *NOTE: 'shell' was bundled with Ruby versions < 2.7. This step is not required for Ruby versions < 2.7*.  
 `git clone "https://github.com/campanam/BaitsTools/"`: Download BaitsTools.  
 `cd BaitsTools`  
 `chmod +x *.rb`: Make BaitsTools' scripts executable.  
