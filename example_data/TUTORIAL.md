@@ -134,7 +134,7 @@ vcf2baits selects variants from a vcf file and then generates baits from a refer
 
 6. Use `-e` to generate baits from every variant within a VCF file. For instance, to generate 120 bp baits from the variants selected in the previous step, enter the following command:  
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`ruby baitstools.rb vcf2baits -i out-selected.vcf -r canfamX.fa -e -D`  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`ruby baitstools.rb vcf2baits -i out-selected.vcf -r sequence.fasta -e -D`  
 
 7. Use `-j` to scale the maximum number of selected variants per contig by individual contig length. This argument overrides `-m`. Enter the following command:  
 
