@@ -89,6 +89,9 @@ Corrected double-tabbed output in parameters output
 Preliminary script to generate weighted bait set from a fasta alignment  
 
 ## annot2baits  
+### Version 1.6.8  
+improved gz_file_open takes block  
+
 ### Version 1.6.6  
 Removed eval statement from gz_file_open call  
 
@@ -125,6 +128,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.6.8  
+improved gz_file_open takes block  
+
 ### Version 1.6.6  
 Removed eval statement from gz_file_open call  
 Revised gz_file_open to return reader class rather than a string  
@@ -458,6 +464,9 @@ pyrad2baits added
 Basic GUI compatible with baitstools 0.8  
 
 ## bed2baits  
+### Version 1.6.8  
+improved gz_file_open takes block  
+
 ### Version 1.6.7  
 Headed BEDs are now readable  
 Fixed bug that did not process whitespace separated values correctly  
@@ -511,6 +520,9 @@ Popvar @alleles replaces @pnuc and @qnuc, which were otherwise unused
 Preliminary script to turn a coordinates table and a reference sequence into baits  
 
 ## blast2baits  
+### Version 1.6.8  
+improved gz_file_open takes block  
+
 ### Version 1.6.6  
 Removed eval statement from gz_file_open call  
 
@@ -586,6 +598,9 @@ Versioning added to header of script
 RVM default bug fixed  
 
 ## pyrad2baits  
+### Version 1.6.8  
+improved gz_file_open takes block  
+
 ### Version 1.6.6  
 Removed eval statement from gz_file_open call  
 
@@ -609,6 +624,9 @@ pyrad2baits can produce an uncollapsed reference sequence
 Preliminary script to generate baits from PyRAD/ipyrad loci files  
 
 ## stacks2baits  
+### Version 1.6.8  
+improved gz_file_open takes block  
+
 ### Version 1.6.6  
 Removed eval statement from gz_file_open call  
 
@@ -705,6 +723,9 @@ Output now controlled by baitslib write_probes function
 Preliminary script to divide genic/genomic sequences into tiled baits
 
 ## vcf2baits  
+### Version 1.6.8  
+improved gz_file_open takes block  
+
 ### Version 1.6.6  
 Removed eval statement from gz_file_open call  
 
