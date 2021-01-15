@@ -14,4 +14,6 @@ mkdir $HOME/baitstools
 chmod +x *.rb
 mv *.rb $HOME/baitstools/
 echo 'export PATH="$PATH:$HOME/baitstools"' >> $HOME/.bash_profile
-exec bash
+echo 'export PATH="$PATH:$HOME/baitstools"' >> $HOME/.zshrc
+source $HOME/.zshrc
+source $HOME/.bash_profile
