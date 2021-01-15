@@ -130,6 +130,7 @@ Preliminary script to generate baits from an annotation file and a reference seq
 ## baitslib  
 ### Version 1.6.8  
 improved gz_file_open takes block  
+Fa_Seq#make_DNA converts '?' bases to 'N' to prevent downstream bugs  
 
 ### Version 1.6.6  
 Removed eval statement from gz_file_open call  
