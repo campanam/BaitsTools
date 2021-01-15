@@ -4,16 +4,15 @@
 # Michael G. Campana, 2017-2020
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
+mkdir $HOME/baitstools
+chmod +x *.rb
+mv *.rb $HOME/baitstools/
+echo 'export PATH="$PATH:$HOME/baitstools"' >> $HOME/.bash_profile
+echo 'export PATH="$PATH:$HOME/baitstools"' >> $HOME/.zshrc
 curl -sSL https://get.rvm.io | bash -s stable
 source ~/.rvm/scripts/rvm
 rvm install 2.7.2
 rvm --default use 2.7.2
 gem install tk
 gem install shell
-mkdir $HOME/baitstools
-chmod +x *.rb
-mv *.rb $HOME/baitstools/
-echo 'export PATH="$PATH:$HOME/baitstools"' >> $HOME/.bash_profile
-echo 'export PATH="$PATH:$HOME/baitstools"' >> $HOME/.zshrc
-source $HOME/.zshrc
-source $HOME/.bash_profile
+exec zsh
