@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # bed2baits
-BED2BAITSVER = "1.6.7"
+BED2BAITSVER = "1.6.8"
 # Michael G. Campana, 2017-2020
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ def bed2baits
 	write_file(".log.txt", "ExtractedRegions\nRegion\tChromosome\tStart\tEnd\tLength") if $options.log
 	totallength = 0
 	bed_header = true
-	gz_file_open($options.infile).open($options.infile) do |coord|
+	gz_file_open($options.infile) do |coord|
 		while line = coord.gets
 			case $options.list_format
 			when "bed"
