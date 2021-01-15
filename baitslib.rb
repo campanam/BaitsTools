@@ -21,9 +21,10 @@ class Fa_Seq #container for fasta/fastq sexquences
 		@locus = locus # locus id for alignment
 		@bedheader = header.dup # Default is header, change for region extraction
 	end
-	def make_dna # Replace uracils with thymines for internal consistency
+	def make_dna # Replace uracils with thymines for internal consistency// Convert ? to N
 		@seq.gsub!("u", "t")
 		@seq.gsub!("U", "T")
+		@seq.gsub!("?","N") # Unknown base handling
 	end
 	def calc_quality # Convert quality scores to numeric values so only needed once
 		for i in 0...@qual.length
