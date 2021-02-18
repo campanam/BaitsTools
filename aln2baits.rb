@@ -177,7 +177,7 @@ def aln2baits(aln)
 					end
 					Thread.current[:prb] = Thread.current[:completeprb] unless $options.noaddenda
 					$options.haplodef == "haplotype" ? Thread.current[:header] = @windows[Thread.current[:j]].header[Thread.current[:hapno]-1] : Thread.current[:header] = "Alignment"
-					Thread.current[:bait] = ">" + Thread.current[:header] +"_locus" + @windows[Thread.current[:j]].locus + "_" + Thread.current[:rng] + "_haplotype" + Thread.current[:hapno].to_s + "\n" + Thread.current[:completeprb]
+					Thread.current[:bait] = ">" + Thread.current[:header] + "_locus" + @windows[Thread.current[:j]].locus + "_" + Thread.current[:rng] + "_haplotype" + Thread.current[:hapno].to_s + "\n" + Thread.current[:completeprb]
 					Thread.current[:bedstart] = (@windows[Thread.current[:j]].seqstart + @windows[Thread.current[:j]].bedstarts[Thread.current[:hapno]-1]).to_s
 					Thread.current[:bedend] =  (@windows[Thread.current[:j]].seqend+1 + @windows[Thread.current[:j]].bedstarts[Thread.current[:hapno]-1]).to_s
 					Thread.current[:coord] = Thread.current[:header] + "\t" + Thread.current[:bedstart] + "\t" + Thread.current[:bedend]
@@ -194,7 +194,7 @@ def aln2baits(aln)
 							write_file("-filtered-baits-relative.bed", Thread.current[:rbed], true, i) if $options.rbed
 						end
 						if $options.params
-							Thread.current[:param] = Thread.current[:header] + ":" + @windows[Thread.current[:j]].locus + Thread.current[:rng] + ":" + Thread.current[:hapno].to_s + "\t" + Thread.current[:flt][1]
+							Thread.current[:param] = Thread.current[:header] + ":" + @windows[Thread.current[:j]].locus + ":" + Thread.current[:rng] + ":" + Thread.current[:hapno].to_s + "\t" + Thread.current[:flt][1]
 							write_file("-filtered-params.txt", Thread.current[:param], true, i)
 						end
 					end
