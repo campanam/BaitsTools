@@ -268,6 +268,9 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.7.0  
+Complement previous baits option  
+
 ### Version 1.6.7  
 Capitalization of options that select between choices no longer matters  
 bed2baits description updated to include interval lists  
