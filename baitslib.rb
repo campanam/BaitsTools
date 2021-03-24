@@ -589,6 +589,21 @@ end
 #-----------------------------------------------------------------------------------------------
 def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	if !$options.every
+		# Remove SNPs within minimum distance of previously generated baits
+		unless $options.previousbaits.nil?
+			print "** Reading previous baits file and masking variants **\n"
+			gz_file_open($options.previousbaits) do |coord| # Read in BED of previous baits
+				while line = coord.gets
+					line_arr = line.split
+					chromo = line_arr[0]
+					seqst = line_arr[1].to_i + 1 # Convert to 1-based indexing to compare with VCF
+					seqend = line_arr[2].to_i
+					snp_hash[chromo].delete_if { |snp| (snp.snp - seqst).abs < $options.distance }
+					snp_hash[chromo].delete_if { |snp| (snp.snp - seqend).abs < $options.distance }
+					snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+				end
+			end
+		end
 		# Sort chromosomal SNPs in case unsorted
 		totalvar = 0
 		selectvar = 0
@@ -616,21 +631,6 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 			popcategories = $options.popcategories.dup
 			for key in popcategories.keys
 				popcategories[key] = 0
-			end
-		end
-		# Remove SNPs within minimum distance of previously generated baits
-		unless $options.previousbaits.nil?
-			print "** Reading previous baits file and masking variants **\n"
-			gz_file_open($options.previousbaits) do |coord| # Read in BED of previous baits
-				while line = coord.gets
-					line_arr = line.split
-					chromo = line_arr[0]
-					seqst = line_arr[1].to_i + 1 # Convert to 1-based indexing to compare with VCF
-					seqend = line_arr[2].to_i
-					snp_hash[chromo].delete_if { |snp| (snp.snp - seqst).abs < $options.distance }
-					snp_hash[chromo].delete_if { |snp| (snp.snp - seqend).abs < $options.distance }
-					snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
-				end
 			end
 		end
 		for i in 1..$options.totalsnps
