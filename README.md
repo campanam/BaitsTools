@@ -280,7 +280,7 @@ vcf2baits selects variants and generates baits from a VCF file and a reference s
 `-m, --maxsnps [VALUE]`: Maximum number of variants per contig. Default is 2.  
 `-d, --distance [VALUE]`: Minimum distance (in bp) between variants within a contig. The default is 10,000 bp.  
 `-p, --nobaits`: Do not output baits, simply subselect variants. A reference sequence is not required for this analysis.  
-`-e, --every`: Output baits for every variant in the input file, skipping subselection.  
+`-e, --every`: Output baits for every variant in the input file, skipping subselection. Overrides -t, -j, -d, -m , -p, --taxafile, --popcategories, --previousbaits.  
 `-a, --alt`: Generate baits for alternate alleles. Overrides `-p`.  
 `-r, --refseq [FILE]`: Input reference sequence file name. Include the path to the file if not in the current directory.  
 `-L, --length [VALUE]`: Requested bait length. Default is 120 bp.  
