@@ -955,21 +955,22 @@ def get_command_line # Get command line for summary output
 			else
 				cmdline << " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
 			end
+			if $options.taxafile != nil
+				cmdline << " --taxafile " + resolve_unix_path($options.taxafile)
+				cmdline << " --taxacount " + $options.taxacount.join(",")
+				if $options.popcategories != nil
+					if $options.popcategories.is_a?(Hash) # Not converted to hash until later in vcf2baits
+						cmdline << " --popcategories " + $options.popcategories.values.join(",")
+					else
+						cmdline << " --popcategories " + $options.popcategories.join(",")
+					end
+				end
+			end
+			cmdline << " --previousbaits " + resolve_unix_path($options.previousbaits) unless $options.previousbaits.nil?
 		end
 		cmdline << " -r " + resolve_unix_path($options.refseq) unless $options.no_baits
 		cmdline << " -a" if $options.alt_alleles
 		cmdline << " -V" + $options.varqual.to_s if $options.varqual_filter
-		if $options.taxafile != nil
-			cmdline << " --taxafile " + resolve_unix_path($options.taxafile)
-			cmdline << " --taxacount " + $options.taxacount.join(",")
-			if $options.popcategories != nil
-				if $options.popcategories.is_a?(Hash) # Not converted to hash until later in vcf2baits
-					cmdline << " --popcategories " + $options.popcategories.values.join(",")
-				else
-					cmdline << " --popcategories " + $options.popcategories.join(",")
-				end
-			end
-		end
 		cmdline << " -S" if $options.sort
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe
 	else
