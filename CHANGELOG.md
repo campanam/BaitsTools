@@ -128,6 +128,10 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.7.0  
+Improved selectsnps distance-based SNP deletion  
+Previously generated bait complementation in selectsnps  
+
 ### Version 1.6.8  
 improved gz_file_open takes block  
 Fa_Seq#make_DNA converts '?' bases to 'N' to prevent downstream bugs  
