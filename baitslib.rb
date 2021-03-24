@@ -588,49 +588,50 @@ def read_fasta(file) # Read fasta and fastq files
 end
 #-----------------------------------------------------------------------------------------------
 def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
-	# Sort chromosomal SNPs in case unsorted
-	totalvar = 0
-	selectvar = 0
-	for chromo in snp_hash.keys
-		totalvar += snp_hash[chromo].size
-		snp_hash[chromo].sort_by! { |snp| snp.snp }
-		if $options.taxafile != nil
-			snp_hash[chromo].delete_if { |snp| snp.category == "MissingData" || snp.category == "Invariant" }
-			snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" } if $options.taxacount[0] == 0
-			snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" } if $options.taxacount[1] == 0
-			snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations"} if $options.taxacount[2] == 0
-			unless $options.popcategories.nil? # Remove unwanted population-specific SNPs
-				for popcat in $options.popcategories.keys
-					snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) } if $options.popcategories[popcat] == 0
+	if !$options.every
+		# Sort chromosomal SNPs in case unsorted
+		totalvar = 0
+		selectvar = 0
+		for chromo in snp_hash.keys
+			totalvar += snp_hash[chromo].size
+			snp_hash[chromo].sort_by! { |snp| snp.snp }
+			if $options.taxafile != nil
+				snp_hash[chromo].delete_if { |snp| snp.category == "MissingData" || snp.category == "Invariant" }
+				snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" } if $options.taxacount[0] == 0
+				snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" } if $options.taxacount[1] == 0
+				snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations"} if $options.taxacount[2] == 0
+				unless $options.popcategories.nil? # Remove unwanted population-specific SNPs
+					for popcat in $options.popcategories.keys
+						snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) } if $options.popcategories[popcat] == 0
+					end
+				end
+				snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+			end
+		end
+		selectsnps = {}
+		all_populations = 0
+		between_populations = 0
+		within_populations = 0
+		unless $options.popcategories.nil? # Set count of selected popcategories to 0
+			popcategories = $options.popcategories.dup
+			for key in popcategories.keys
+				popcategories[key] = 0
+			end
+		end
+		# Remove SNPs within minimum distance of previously generated baits
+		unless $options.previousbaits.nil?
+			print "** Reading previous baits file and masking variants **\n"
+			gz_file_open($options.previousbaits) do |coord| # Read in BED of previous baits
+				while line = coord.gets
+					chromo = line_arr[0]
+					seqst = line_arr[1].to_i + 1 # Convert to 1-based indexing to compare with VCF
+					seqend = line_arr[2].to_i
+					snp_hash[chromo].delete_if { |snp| (snp.snp - seqst).abs < $options.distance }
+					snp_hash[chromo].delete_if { |snp| (snp.snp - seqend).abs < $options.distance }
+					snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
 				end
 			end
-			snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
 		end
-	end
-	# Remove SNPs within minimum distance of previously generated baits
-	unless $options.previousbaits.nil?
-		print "** Reading previous baits file and masking variants **\n"
-		gz_file_open($options.previousbaits) do |coord| # Read in BED of previous baits
-			while line = coord.gets
-				chromo = line_arr[0]
-				seqst = line_arr[1].to_i + 1 # Convert to 1-based indexing to compare with VCF
-				seqend = line_arr[2].to_i
-				snp_hash[chromo].delete_if { |snp| (snp.snp - seqst).abs < $options.distance }
-				snp_hash[chromo].delete_if { |snp| (snp.snp - seqend).abs < $options.distance }
-			end
-		end
-	end
-	selectsnps = {}
-	all_populations = 0
-	between_populations = 0
-	within_populations = 0
-	unless $options.popcategories.nil? # Set count of selected popcategories to 0
-		popcategories = $options.popcategories.dup
-		for key in popcategories.keys
-			popcategories[key] = 0
-		end
-	end
-	if !$options.every
 		for i in 1..$options.totalsnps
 			selected_contig = snp_hash.keys[rand(snp_hash.size)] # Get name of contig
 			snpindex = rand(snp_hash[selected_contig].size)
