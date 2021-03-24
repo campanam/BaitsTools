@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.6.7"
-# Michael G. Campana, 2017-2019
+BAITSTOOLSGUI = "1.7.0"
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -33,15 +33,16 @@ def start_baitstools
 			else
 				cmdline << " -L" + $options.baitlength + " -O" + $options.tileoffset + " -b" + $options.lenbef + " -k" + $options.tiledepth
 			end
+			if $options.taxafile != ""
+				cmdline << " --taxafile " + resolve_unix_path($options.taxafile.to_s)
+				cmdline << " --taxacount " + $options.taxacount
+				cmdline << " --popcategories " + $options.popcategories if $options.popcategories != ""
+			end
+			cmdline << " --previousbaits " + resolve_unix_path($options.previousbaits.to_s) if $options.previousbaits != ""
 		end
 		cmdline << " -r " + resolve_unix_path($options.refseq.to_s) unless $options.no_baits == 1
 		cmdline << " -a" if $options.alt_alleles == 1
 		cmdline << " -V " + $options.varqual if $options.varqual_filter == 1
-		if $options.taxafile != ""
-			cmdline << " --taxafile " + resolve_unix_path($options.taxafile.to_s)
-			cmdline << " --taxacount " + $options.taxacount
-			cmdline << " --popcategories " + $options.popcategories if $options.popcategories != ""
-		end
 		cmdline << " -S" if $options.sort == 1
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe == 1
 	else
@@ -916,7 +917,7 @@ end
 #-----------------------------------------------------------------------------------------------
 def taxa_window
 	clear_widgets
-	$labelVar.value = "vcf2baits Taxa Options"
+	$labelVar.value = "vcf2baits Taxa Options and Previous Baits"
 	taxafile = TkButton.new($root) do
 		text 'Taxa file (optional)'
 		command '$options.taxafile.value = Tk.getOpenFile'
@@ -953,10 +954,21 @@ def taxa_window
 		font TkFont.new('times 12')
 		place('x' => 50, 'y' => 310)
 		width 50
-	end	
-	configure_buttons([taxafile])
-	taxafile.width = 20
-	$widgets.push(taxafile, taxalabel, taxacount, popcat, taxacountentry, popcatentry)
+	end
+	previousbaits = TkButton.new($root) do
+		text 'Baits BED (optional)'
+		command '$options.previousbaits.value = Tk.getOpenFile'
+		place('x' => 50, 'y' => 360)
+	end
+	baitslabel = TkLabel.new($root) do
+		textvariable $options.previousbaits
+		font TkFont.new('times 12')
+		place('x' => 300, 'y' => 360)
+		pady 10
+	end
+	configure_buttons([taxafile, previousbaits])
+	previousbaits.width = taxafile.width = 20
+	$widgets.push(taxafile, taxalabel, taxacount, popcat, taxacountentry, popcatentry, previousbaits, baitslabel)
 end
 #-----------------------------------------------------------------------------------------------
 def qc_window
@@ -1231,12 +1243,12 @@ end
 def go_back
 	case $labelVar.value
 	when "Filtration Options"
-		if $options.algorithm == "vcf2baits"
+		if $options.algorithm == "vcf2baits" && $options.every != 1
 			taxa_window
 		else
 			subcommand_window($options.algorithm)
 		end
-	when "vcf2baits Taxa Options"
+	when "vcf2baits Taxa Options and Previous Baits"
 		subcommand_window($options.algorithm)
 	when "General Options"
 		qc_window
@@ -1327,12 +1339,12 @@ def go_forward
 			Tk::messageBox :message => 'Tiling depth cannot be less than 1.'
 		elsif ($options.alpha.to_f < 0.0 or $options.alpha.to_f > 1.0) && $options.hwe == 1
 			Tk::messageBox :message => 'Alpha must be between 0.0 and 1.0.'
-		elsif $labelVar.value == "vcf2baits Options"
+		elsif $labelVar.value == "vcf2baits Options" and $options.every != 1
 			taxa_window
 		else
 			qc_window
 		end
-	when "vcf2baits Taxa Options"
+	when "vcf2baits Taxa Options and Previous Baits"
 		data_fails = false
 		if $options.taxafile != ""
 			taxacnt = $options.taxacount.value.split(",").map { |x| x.to_i }
@@ -1480,6 +1492,7 @@ def set_defaults
 	$options.taxafile = TkVariable.new("") # Taxa assignment file
 	$options.taxacount = TkVariable.new("") # Variant category counts
 	$options.popcategories = TkVariable.new("") # Population-specific variant counts
+	$options.previousbaits = TkVariable.new("") # Previous baits BED file
 	$options.baitlength = TkVariable.new(120) # Bait length
 	$options.tileoffset = TkVariable.new(60) # Offset between tiled baits
 	$options.bait_type = TkVariable.new("RNA-DNA") # Hybridization type
@@ -1585,7 +1598,7 @@ $next_btn = TkButton.new($root) do
 	place('x' => 660, 'y' => 520)
 end
 credit = TkLabel.new($root) do
-	text "Michael G. Campana, 2017-2020\nSmithsonian Conservation Biology Institute"
+	text "Michael G. Campana, 2017-2021\nSmithsonian Conservation Biology Institute"
 	borderwidth 5
 	font TkFont.new('times 12')
 	pack("side" => "bottom",  "padx"=> "50", "pady"=> "10")
