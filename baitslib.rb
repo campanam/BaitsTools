@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.6.8"
-# Michael G. Campana, 2017-2020
+BAITSLIBVER = "1.7.0"
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -607,6 +607,19 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 			snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
 		end
 	end
+	# Remove SNPs within minimum distance of previously generated baits
+	unless $options.previousbaits.nil?
+		gz_file_open($options.previousbaits) do |coord| # Read in BED of previous baits
+			while line = coord.gets
+				chromo = line_arr[0]
+				seqst = line_arr[1].to_i + 1 # Convert to 1-based indexing to compare with VCF
+				seqend = line_arr[2].to_i
+				snp_hash[chromo].delete_if { |snp| (snp.snp - seqst).abs < $options.distance }
+				snp_hash[chromo].delete_if { |snp| (snp.snp - seqend).abs < $options.distance }
+			end
+		end
+	end
+	
 	selectsnps = {}
 	all_populations = 0
 	between_populations = 0
@@ -623,19 +636,7 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 			snpindex = rand(snp_hash[selected_contig].size)
 			selected_snp = snp_hash[selected_contig][snpindex]
 			# Delete SNPs that are too close
-			if snpindex + 1 < snp_hash[selected_contig].size
-				while (snp_hash[selected_contig][snpindex + 1].snp - selected_snp.snp).abs < $options.distance
-					snp_hash[selected_contig].delete(snp_hash[selected_contig][snpindex + 1])
-					break if snpindex + 1 >= snp_hash[selected_contig].size
-				end
-			end
-			if snpindex > 0
-				while (snp_hash[selected_contig][snpindex - 1].snp - selected_snp.snp).abs < $options.distance
-					snp_hash[selected_contig].delete(snp_hash[selected_contig][snpindex - 1])
-					snpindex -= 1
-					break if snpindex < 1
-				end
-			end
+			snp_hash[selected_contig].delete_if { |snp| (snp.snp - selected_snp.snp).abs < $options.distance }
 			# Add SNP to selected pool and delete contigs if maximum number of SNPs reached or no remaining SNPs on contig
 			selectsnps[selected_contig] = [] if selectsnps[selected_contig].nil?
 			selectsnps[selected_contig].push(selected_snp)
