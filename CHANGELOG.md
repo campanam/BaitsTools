@@ -131,6 +131,7 @@ Preliminary script to generate baits from an annotation file and a reference seq
 ### Version 1.7.0  
 Improved selectsnps distance-based SNP deletion  
 Previously generated bait complementation in selectsnps  
+taxafile/popcategories no longer erroneously overrides every option  
 
 ### Version 1.6.8  
 improved gz_file_open takes block  
