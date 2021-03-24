@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.6.8"
-# Michael G. Campana, 2017-2020
+BAITSTOOLSVER = "1.7.0"
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -104,6 +104,7 @@ class Parser
 		args.taxa = {} # Taxa hash
 		args.taxacount = [0,0,0] # Array of values for taxa balancing
 		args.popcategories = nil # Maximum numbers of population-specific variants
+		args.previousbaits = nil # Previously generated baits BED file
 		args.outdir = File.expand_path("./") # Output directory
 		args.outprefix = "out" # Output prefix
 		args.log = false # Flag to output detailed log
@@ -135,6 +136,9 @@ class Parser
 					end
 					opts.on("--popcategories [VALUES]", String, "Comma-separated list of maximum number of population-specific variants in order of appearance in taxa TSV file") do |popcat|
 						args.popcategories = popcat.split(",").map! { |value| value.to_i } if popcat != nil
+					end
+					opts.on("--previousbaits [FILE]", String, "Complement previously generated baits in BED file") do |previousbaits|
+						args.previousbaits = previousbaits
 					end
 					opts.on("-V", "--varqual [VALUE]", Integer, "Minimum variant QUAL score (Default = 30)") do |varf|
 						args.varqual = varf if varf != nil
@@ -265,7 +269,7 @@ class Parser
 					opts.on("-p","--nobaits", "Do not output bait sequences") do
 						args.no_baits = true
 					end
-					 opts.on("-e","--every", "Output bait sequences for every variant in the input file (Overrides -t, -j, -d, -m , -p)") do
+					 opts.on("-e","--every", "Output bait sequences for every variant in the input file") do
 						args.every = true
 					end
 					 opts.on("-a", "--alt", "Generate baits for alternate alleles (Overrides -p)") do
@@ -542,7 +546,17 @@ begin
 			end
 		end
 		if $options.algorithm == "vcf2baits" and !$options.every
-			if $options.interact 
+			if $options.interact
+				print "Complement previously generated baits?\n"
+				t = gets.chomp.upcase
+				if t == "Y" or t == "YES"
+					print "Enter baits BED file name.\n"
+					$options.previousbaits = gets.chomp
+				end
+				while !FileTest.exist?($options.previousbaits)
+					print "BED file not found. Please re-enter.\n"
+					$options.prevousbaits = gets.chomp
+				end
 				print "Sort variants by variation within, between and among taxa?\n"
 				t = gets.chomp.upcase
 				if t == "Y" or t == "YES"
