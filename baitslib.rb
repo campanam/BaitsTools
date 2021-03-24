@@ -609,6 +609,7 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	end
 	# Remove SNPs within minimum distance of previously generated baits
 	unless $options.previousbaits.nil?
+		print "** Reading previous baits file and masking variants **\n"
 		gz_file_open($options.previousbaits) do |coord| # Read in BED of previous baits
 			while line = coord.gets
 				chromo = line_arr[0]
@@ -619,7 +620,6 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 			end
 		end
 	end
-	
 	selectsnps = {}
 	all_populations = 0
 	between_populations = 0
