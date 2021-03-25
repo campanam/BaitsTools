@@ -2,20 +2,15 @@
 #-----------------------------------------------------------------------------------------------
 # tilebaits
 TILEBAITSVER = "1.7.0"
-# Michael G. Campana, 2017-2019
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
 def multi_tilebaits(seq_array, altbait = nil) # Method to permit tiling baits with multiple sequence length parameters
-	if altbait.nil? 
-		infix = logtext_infix = ''
-	else
-		infix = '-' + altbait.to_s
-		logtext_infix = altbait.to_s + "bp baits\n"
-	end
+	logtext_infix = altbaits_infix(altbait)
 	if $options.params
 		paramline = "Chromosome:Coordinates\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept"
-		write_file(infix + "-filtered-params.txt", paramline)
+		write_file("-filtered-params.txt", paramline)
 	end
 	if $options.log
 		logs = []
@@ -67,20 +62,20 @@ def multi_tilebaits(seq_array, altbait = nil) # Method to permit tiling baits wi
 						Thread.current[:coord] = seq_array[Thread.current[:j]].header + "\t" + (Thread.current[:seqst]-1).to_s + "\t" + Thread.current[:seqend].to_s
 					end
 					Thread.current[:baitnum] += 1
-					write_file(infix + "-baits.fa", Thread.current[:bait], true, i)
-					write_file(infix + "-baits.bed", Thread.current[:coord], true, i) if $options.coords
-					write_file(infix + "-baits-relative.bed", Thread.current[:rbed], true, i) if $options.rbed
+					write_file("-baits.fa", Thread.current[:bait], true, i)
+					write_file("-baits.bed", Thread.current[:coord], true, i) if $options.coords
+					write_file("-baits-relative.bed", Thread.current[:rbed], true, i) if $options.rbed
 					if $options.filter
 						Thread.current[:flt] = filter_baits(Thread.current[:prb], Thread.current[:qual]) # U should not affection filtration
 						if Thread.current[:flt][0]
 							Thread.current[:filtnum] += 1
-							write_file(infix + "-filtered-baits.fa", Thread.current[:bait], true, i)
-							write_file(infix + "-filtered-baits.bed", Thread.current[:coord], true, i) if $options.coords
-							write_file(infix + "-filtered-baits-relative.bed", Thread.current[:rbed], true, i) if $options.rbed
+							write_file("-filtered-baits.fa", Thread.current[:bait], true, i)
+							write_file("-filtered-baits.bed", Thread.current[:coord], true, i) if $options.coords
+							write_file("-filtered-baits-relative.bed", Thread.current[:rbed], true, i) if $options.rbed
 						end
 						if $options.params
 							Thread.current[:param] = seq_array[Thread.current[:j]].header + ":" + Thread.current[:seqst].to_s + "-" + Thread.current[:seqend].to_s + "\t" + Thread.current[:flt][1]
-							write_file(infix + "-filtered-params.txt", Thread.current[:param], true, i)
+							write_file("-filtered-params.txt", Thread.current[:param], true, i)
 						end
 					end
 					Thread.current[:seqst] += $options.tileoffset

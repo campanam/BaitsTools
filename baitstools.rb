@@ -109,6 +109,7 @@ class Parser
 		args.outprefix = "out" # Output prefix
 		args.log = false # Flag to output detailed log
 		args.altbaits = nil # Array of alternative bait lengths. nil turns off flag
+		args.infix = '' # Infix for filestems with multiple bait lengths.
 		args.filestem = args.outdir + args.outprefix # File stem for output
 		args.default_files = [] # Default files to be written
 		args.rng = srand # Random number seed
@@ -573,8 +574,8 @@ begin
 					print "Taxa file not found. Please re-enter.\n"
 					$options.taxafile = gets.chomp
 				end
-				$options.totalsnps = $options.taxacount[0] + $options.taxacount[1] + $options.taxacount[2] # Ruby 2.0 does not have Array#sum method
-				while $options.totalsnps < 1 or $options.taxacount[0] < 0 or $options.taxacount[1] < 0 or $options.taxacount[2] < 0
+				$options.totalsnps = $options.taxacount.sum
+				while $options.totalsnps < 1 or $options.taxacount.any? { |x| x < 0 }
 					if $options.interact
 						print "Enter requested number of variants variable across populations.\n"
 						$options.taxacount[0] = gets.chomp.to_i
@@ -936,6 +937,16 @@ begin
 		if t == "Y" or t == "YES"
 			$options.rc = true
 		end
+		print "Generate alternate length baits? (y/n)\n"
+		t = gets.chomp.upcase
+		if t == "Y" or t == "YES"
+			print "Enter alternate lengths requested separated by commas.\n"
+			$options.altbaits = gets.chomp.split(",").map! { |val| val.to_i }
+			while $option.altbaits.any? { |x| x < 1 }
+				print "Baits must be longer than 1 bp. Re-enter.\n"
+				$options.altbaits = gets.chomp.split(",").map! { |val| val.to_i }
+			end
+		end
 		print "Addend a sequence to 5' end of baits? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
@@ -1150,6 +1161,9 @@ begin
 		tilebaits($options.infile)
 	when "vcf2baits"
 		vcf2baits
+	end
+	if $options.gzip && $options.log # Gzip log after program complete
+		system("gzip #{resolve_unix_path($options.filestem + '.log.txt')}")
 	end
 	print "** Program complete **\n"
 end

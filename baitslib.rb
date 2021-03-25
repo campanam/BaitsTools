@@ -453,7 +453,8 @@ def setup_temp(datasize)
 end
 #-----------------------------------------------------------------------------------------------
 def write_file(fileid, message, tmp = false, tmpfile = 0)
-	(tmp && tmpfile != 0) ? file = $options.filestem + ".tmp" + tmpfile.to_s + fileid : file = $options.filestem + fileid 
+	fileid == '.log.txt' ? infix = '' : infix = $options.infix # Add in infixes for multi-length sets, except for log file
+	(tmp && tmpfile != 0) ? file = $options.filestem + infix + ".tmp" + tmpfile.to_s + fileid : file = $options.filestem + infix + fileid 
 	File.open(file, 'a') do |write|
 		write << message + "\n"
 	end
@@ -478,14 +479,17 @@ end
 #-----------------------------------------------------------------------------------------------
 def cat_files(files = $options.default_files)
 	for file in files
+		file[-8..-1] == '.log.txt' ? infix = '' : infix = $options.infix # log doesn't have multifile infix
 		for i in 1 ... $options.used_threads
-			tmpfile = $options.filestem + '.tmp' + i.to_s + file
+			tmpfile = $options.filestem + infix + '.tmp' + i.to_s + file
 			if File.exist?(tmpfile)
-				system("cat #{resolve_unix_path(tmpfile)} >> #{resolve_unix_path($options.filestem + file)}")
+				system("cat #{resolve_unix_path(tmpfile)} >> #{resolve_unix_path($options.filestem + infix + file)}")
 				system("rm", tmpfile)
 			end
 		end
-		system("gzip #{resolve_unix_path($options.filestem + file)}") if $options.gzip
+		unless file[-8..-1] == '.log.txt' # Do not gzip active log file
+			system("gzip #{resolve_unix_path($options.filestem + infix + file)}") if $options.gzip
+		end
 	end
 end
 #-----------------------------------------------------------------------------------------------
@@ -934,6 +938,16 @@ def tile_regions(regions, totallength)
 	end
 end
 #-----------------------------------------------------------------------------------------------
+def altbaits_infix(altbait) # Get file name infixes and log infixes for multiple lengths of baits
+	if altbait.nil? 
+		$options.infix = logtext_infix = ''
+	else
+		$options.infix = '-' + altbait.to_s
+		logtext_infix = altbait.to_s + "bp baits\n"
+	end
+	return logtext_infix
+end
+#-----------------------------------------------------------------------------------------------
 def get_command_line # Get command line for summary output
 	# Generate basic command line
 	cmdline = $options.algorithm + " -i " + resolve_unix_path($options.infile)
@@ -1014,6 +1028,7 @@ def get_command_line # Get command line for summary output
 	cmdline << " -Y" if $options.rna
 	cmdline << " -R" if $options.rc
 	cmdline << " -G " + $options.gaps
+	cmdline << " --altbaits " + $options.altbaits.join(",") unless $options.altbaits.nil?
 	cmdline << " -5 " + $options.fiveprime if $options.fiveprime != ""
 	cmdline << " -3 " + $options.threeprime if $options.threeprime != ""
 	cmdline << " --fillin " + $options.fillin if $options.fillin_switch
