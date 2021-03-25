@@ -280,6 +280,7 @@ vcf2baits/pyrad2baits/stacks2baits tiles per SNP can now be greater than length 
 altbaits option  
 gzip of log moved to end of baitstools script  
 Use of sum and any? methods for array requires Ruby >= 2.4.1  
+blast2baits and annot2baits no longer have erroneous --list option  
 
 ### Version 1.6.7  
 Capitalization of options that select between choices no longer matters  
