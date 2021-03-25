@@ -218,8 +218,10 @@ class Parser
 						args.infile = fa
 					end
 					if args.algorithm == "bed2baits" or args.algorithm == "annot2baits" or args.algorithm == "blast2baits"
-						opts.on("--list [VALUE]", String, "Interval list file format (BED, GATK, Picard) (Default = BED)") do |strat|
-							args.list_format = strat.downcase if strat != nil
+						if args.algorithm == 'bed2baits'
+							opts.on("--list [VALUE]", String, "Interval list file format (BED, GATK, Picard) (Default = BED)") do |strat|
+								args.list_format = strat.downcase if strat != nil
+							end
 						end
 						opts.on("-r","--refseq [FILE]", String, "Reference FASTA/FASTQ sequence file") do |ref|
 							args.refseq = ref
