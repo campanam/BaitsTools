@@ -287,7 +287,7 @@ class Parser
 					opts.on("-O", "--offset [VALUE]", Integer, "Base pair offset between tiled baits (Default = 60)") do |toff|
 						args.tileoffset = toff if toff != nil
 					end
-					opts.on("-k", "--depth [VALUE]", Integer, "Requested baits per variant (Default = 1)") do |tdep|
+					opts.on("-k", "--depth [VALUE]", Integer, "Requested tiles per variant (Default = 1)") do |tdep|
 						args.tiledepth = tdep if tdep != nil
 					end
 				end
@@ -697,16 +697,16 @@ begin
 				print "Enter tiling bp offset.\n"
 				$options.tileoffset = gets.chomp.to_i
 			end
-			while $options.tileoffset > $options.baitlength or $options.tileoffset < 1
-				print "Tiling offset cannot be less than 1 or greater than bait length. Please re-enter.\n"
+			while  $options.tileoffset < 1
+				print "Tiling offset cannot be less than 1. Please re-enter.\n"
 				$options.tileoffset = gets.chomp.to_i
 			end
 			if $options.interact
 				print "Enter number of baits per SNP.\n"
 				$options.tiledepth = gets.chomp.to_i
 			end
-			while $options.tiledepth > $options.baitlength/$options.tileoffset or $options.tiledepth < 1
-				print "Tiling depth cannot be less than 1 or greater than bait length/tiling offset ratio. Re-enter.\n"
+			while $options.tiledepth < 1
+				print "Tiles per SNP cannot be less than 1. Re-enter.\n"
 				$options.tiledepth = gets.chomp.to_i
 			end
 		end

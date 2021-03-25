@@ -205,7 +205,7 @@ def pyrad_windows
 		width 10
 	end
 	$tiledepth = TkLabel.new($root) do
-		text 'Tile depth'
+		text 'Tiles per SNP'
 		font TkFont.new('times 20')
 		place('x' => 280, 'y' => 350)
 		pady 10
@@ -325,7 +325,7 @@ def snp_windows
 	length_window(350)
 	offset_window(350, 290)
 	$tiledepth = TkLabel.new($root) do
-		text 'Tile depth'
+		text 'Tiles per SNP'
 		font TkFont.new('times 20')
 		place('x' => 50, 'y' => 400)
 		pady 10
@@ -1300,14 +1300,10 @@ def go_forward
 				Tk::messageBox :message => 'The minimum distance between variants must be greater than 0.'
 			elsif $options.lenbef < 0
 				Tk::messageBox :message => 'The number of bait bases before the variant must be at least 0.'
-			elsif $options.tileoffset.to_i > $options.baitlength.to_i
-				Tk::messageBox :message => 'Tiling offset cannot be greater than bait length.'
 			elsif $options.tileoffset < 1
 				Tk::messageBox :message => 'Tiling offset cannot be less than 1.'
-			elsif $options.tiledepth.to_f > $options.baitlength/$options.tileoffset.to_f
-					Tk::messageBox :message => 'Tiling depth cannot be greater than bait length/tiling offset ratio.'
 			elsif $options.tiledepth < 1
-				Tk::messageBox :message => 'Tiling depth cannot be less than 1.'
+				Tk::messageBox :message => 'Tiles per SNP cannot be less than 1.'
 			else
 				qc_window
 			end
@@ -1329,14 +1325,10 @@ def go_forward
 			Tk::messageBox :message => 'Bait length must be greater than 0.'
 		elsif $options.lenbef.to_i < 0
 			Tk::messageBox :message => 'The number of bait bases before the variant must be at least 0.'
-		elsif $options.tileoffset.to_i > $options.baitlength.to_i
-			Tk::messageBox :message => 'Tiling offset cannot be greater than bait length.'
 		elsif $options.tileoffset.to_i < 1
 			Tk::messageBox :message => 'Tiling offset cannot be less than 1.'
-		elsif $options.tiledepth.to_f > $options.baitlength/$options.tileoffset.to_f
-			Tk::messageBox :message => 'Tiling depth cannot be greater than bait length/tiling offset ratio.'
 		elsif $options.tiledepth.to_i < 1
-			Tk::messageBox :message => 'Tiling depth cannot be less than 1.'
+			Tk::messageBox :message => 'Tiles per SNP cannot be less than 1.'
 		elsif ($options.alpha.to_f < 0.0 or $options.alpha.to_f > 1.0) && $options.hwe == 1
 			Tk::messageBox :message => 'Alpha must be between 0.0 and 1.0.'
 		elsif $labelVar.value == "vcf2baits Options" and $options.every != 1
