@@ -271,8 +271,8 @@ filter_probes definition removed into separate script for access by other script
 ### Version 1.7.0  
 Complement previous baits option  
 Interactive mode no longer prompts you to enter linguistic complexity if LC calculation disabled  
-vcf2baits/pyrad2baits tiling offset can now be longer than bait length  
-vcf2baits/pyrad2baits tiles per SNP can now be greater than length of bait/offset  
+vcf2baits/pyrad2baits/stacks2baits tiling offset can now be longer than bait length  
+vcf2baits/pyrad2baits/stacks2baits tiles per SNP can now be greater than length of bait/offset  
 
 ### Version 1.6.7  
 Capitalization of options that select between choices no longer matters  
@@ -425,8 +425,8 @@ Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_
 ### Version 1.7.0  
 Handling for previousbaits option  
 Every option for vcf2baits now bypasses taxafile/previousbaits screen  
-vcf2baits/pyrad2baits tiling offset can now be longer than bait length  
-vcf2baits/pyrad2baits tiles per SNP can now be greater than length of bait/offset  
+vcf2baits/pyrad2baits/stacks2baits tiling offset can now be longer than bait length  
+vcf2baits/pyrad2baits/stacks2baits tiles per SNP can now be greater than length of bait/offset  
 
 ### Version 1.6.7  
 bed2baits list option capitalized to BED for consistency  
