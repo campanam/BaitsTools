@@ -555,7 +555,7 @@ begin
 				end
 				while !FileTest.exist?($options.previousbaits)
 					print "BED file not found. Please re-enter.\n"
-					$options.prevousbaits = gets.chomp
+					$options.previousbaits = gets.chomp
 				end
 				print "Sort variants by variation within, between and among taxa?\n"
 				t = gets.chomp.upcase
