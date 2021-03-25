@@ -273,6 +273,7 @@ Complement previous baits option
 Interactive mode no longer prompts you to enter linguistic complexity if LC calculation disabled  
 vcf2baits/pyrad2baits/stacks2baits tiling offset can now be longer than bait length  
 vcf2baits/pyrad2baits/stacks2baits tiles per SNP can now be greater than length of bait/offset  
+altbaits option  
 
 ### Version 1.6.7  
 Capitalization of options that select between choices no longer matters  
@@ -681,6 +682,9 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
 ## tilebaits  
+### Version 1.7.0  
+altbaits option  
+
 ### Version 1.6.3  
 Log now notes total numbers of baits generated/filtered and the mean bait coverages across loci (rough mean: does not account for differences in source sequence lengths)  
 
