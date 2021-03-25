@@ -678,7 +678,7 @@ begin
 		end
 		if $options.interact and !$options.every
 			print "Output baits? (y/n)\n"
-			$options.no_baits = ynq
+			ynq ? $options.no_baits = false : $options.no_baits = true
 		end
 		unless $options.no_baits
 			if $options.interact
