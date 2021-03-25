@@ -619,7 +619,7 @@ begin
 			end
 			unless $options.popcategories.nil? # Check that population values are ok
 				if !$options.taxafile.nil? # Only check the values if a taxafile exists
-					while checkpop
+					while $options.popcategories.any? { |x| x < 0 or x > $options.taxacount[2] }
 						print "Population-specific variant numbers must be between 0 and the total number of within-population variants. Re-enter.\n"
 						$options.popcategories = gets.chomp.split(",").map! { |val| val.to_i }
 					end
