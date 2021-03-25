@@ -419,6 +419,10 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.7.0  
+Handling for previousbaits option  
+Every option for vcf2baits now bypasses taxafile/previousbaits screen  
+
 ### Version 1.6.7  
 bed2baits list option capitalized to BED for consistency  
 
