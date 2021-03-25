@@ -751,8 +751,8 @@ begin
 			print "Baits must be at least 1 bp long. Please re-enter.\n"
 			$options.baitlength = gets.chomp.to_i
 		end
-		if $options.interact
-			print "Enter tiling bp offset.\n" unless $options.algorithm == "checkbaits"
+		if $options.interact && !$options.algorithm == "checkbaits"
+			print "Enter tiling bp offset.\n" 
 			$options.tileoffset = gets.chomp.to_i
 		end
 		while $options.tileoffset < 1

@@ -414,7 +414,7 @@ def setup_output
 	if $options.filter
 		$options.default_files.push("-filtered-baits.fa")
 		$options.default_files.push("-filtered-params.txt") if $options.params
-		$options.default_files.push("-filtered-baits.bed") if $options.coords
+		$options.default_files.push("-filtered-baits.bed") if ($options.coords or $options.inbed != nil)
 		$options.default_files.push("-filtered-baits-relative.bed") if $options.rbed
 	end
 	if $options.algorithm == "stacks2baits"
