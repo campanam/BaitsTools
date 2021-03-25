@@ -911,11 +911,17 @@ begin
 		if ynq
 			print "Enter alternate lengths requested separated by commas.\n"
 			$options.altbaits = gets.chomp.split(",").map! { |val| val.to_i }
-			while $options.altbaits.any? { |x| x < 1 }
-				print "Baits must be longer than 1 bp. Re-enter.\n"
-				$options.altbaits = gets.chomp.split(",").map! { |val| val.to_i }
-			end
 		end
+	end
+	while $options.altbaits.any? { |x| x < 1 or ($options.algorithm == 'checkbaits' && x > $options.baitlength)}
+		if $options.altbaits.any? { |x| x < 1 }
+			print "Baits must at least 1 bp. Re-enter.\n"
+		else
+			print "Alternate baits cannot be longer than previously generated baits. Re-enter.\n"
+		end
+		$options.altbaits = gets.chomp.split(",").map! { |val| val.to_i }
+	end
+	if $options.interact and !$options.no_baits
 		print "Addend a sequence to 5' end of baits? (y/n)\n"
 		if ynq
 			print "Enter 5' sequence.\n"
