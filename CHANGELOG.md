@@ -617,7 +617,7 @@ Versioning added to header of script
 RVM default bug fixed  
 
 ## pyrad2baits  
-### Version 1.6.8  
+### Version 1.7.0  
 improved gz_file_open takes block  
 
 ### Version 1.6.6  
