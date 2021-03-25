@@ -136,6 +136,7 @@ Improved selectsnps distance-based SNP deletion
 Previously generated bait complementation in selectsnps  
 taxafile/popcategories no longer erroneously overrides every option  
 altbaits option required edits of write_files, cat_files  
+method checkpop removed  
 
 ### Version 1.6.8  
 improved gz_file_open takes block  
