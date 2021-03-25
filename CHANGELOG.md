@@ -270,6 +270,7 @@ filter_probes definition removed into separate script for access by other script
 ## baitstools  
 ### Version 1.7.0  
 Complement previous baits option  
+Interactive mode no longer prompts you to enter linguistic complexity if LC calculation disabled  
 
 ### Version 1.6.7  
 Capitalization of options that select between choices no longer matters  
