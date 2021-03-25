@@ -944,7 +944,7 @@ begin
 		if t == "Y" or t == "YES"
 			print "Enter alternate lengths requested separated by commas.\n"
 			$options.altbaits = gets.chomp.split(",").map! { |val| val.to_i }
-			while $option.altbaits.any? { |x| x < 1 }
+			while $options.altbaits.any? { |x| x < 1 }
 				print "Baits must be longer than 1 bp. Re-enter.\n"
 				$options.altbaits = gets.chomp.split(",").map! { |val| val.to_i }
 			end
