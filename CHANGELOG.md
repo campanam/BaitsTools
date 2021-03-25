@@ -284,6 +284,7 @@ Use of sum and any? methods for array requires Ruby >= 2.4.1
 blast2baits and annot2baits no longer have erroneous --list option  
 method ynq to clean up yes/no questions in interactive prompt  
 checkbaits previously made BED filtering  
+fixed bug that caused infinite loop in checkbaits interactive mode  
 
 ### Version 1.6.7  
 Capitalization of options that select between choices no longer matters  
