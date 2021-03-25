@@ -119,6 +119,7 @@ class Parser
 		args.fillin = "" # Motif to fill-in short baits
 		args.fillin_switch = false # Switch to turn off if filling in
 		args.noaddenda = false # Exclude 5' and 3' addended sequences from QC calculations
+		args.inbed = nil # Input BED for checkbaits for revised filtering
 		opt_parser = OptionParser.new do |opts|
 			if algorithms.include?(args.algorithm) # Process correct commands
 				opts.banner = "Command-line usage: ruby baitstools.rb "+args.algorithm+" [options]"
@@ -228,6 +229,11 @@ class Parser
 						end
 						opts.on("-P", "--pad [VALUE]", Integer, "Length in bp to pad beginning and ending of extracted regions (Default = 0)") do |pad|
 							args.pad = pad if pad != nil
+						end
+					end
+					if args.algorithm == 'checkbaits'
+						opts.on("--inbed [FILE]", String, "Optional BED file to be filtered with baits") do |inbed|
+							args.inbed = inbed
 						end
 					end
 					opts.on("-L", "--length [VALUE]", Integer, "Requested bait length (Default = 120)") do |prblength|
@@ -482,6 +488,12 @@ class Parser
 	end
 end
 #-----------------------------------------------------------------------------------------------
+def ynq # Yes-No question handling
+	t = gets.chomp.upcase
+	(t == "Y" || t == "YES" ) ? val = true : val = false
+	return val
+end
+#-----------------------------------------------------------------------------------------------
 begin
 	$options = Parser.parse(ARGV)
 	exit if $options.kill
@@ -493,6 +505,21 @@ begin
 	while !FileTest.exist?($options.infile)
 		print "Input file not found. Please re-enter.\n"
 		$options.infile = gets.chomp
+	end
+	if $options.algorithm == 'checkbaits'
+		if $options.interact
+			print "Filter corresponding BED file? (y/n)\n"
+			if ynq
+				print "Enter BED file.\n"
+				$options.inbed = gets.chomp
+			end
+		end
+		unless $options.inbed.nil?
+			while !FileTest.exist?($options.inbed)
+				print "BED file not found. Please re-enter.\n"
+				$options.inbed = gets.chomp
+			end
+		end
 	end
 	if $options.algorithm == "bed2baits"
 			if $options.interact
@@ -510,10 +537,7 @@ begin
 		print "Enter output file directory.\n"
 		$options.outdir = File.expand_path(gets.chomp)
 		print "Output detailed log? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
-			$options.log = true
-		end
+		$options.log = ynq
 	end
 	Dir.mkdir ($options.outdir) if !FileTest.directory?($options.outdir)
 	if $options.interact
@@ -527,18 +551,13 @@ begin
 	if $options.algorithm ==  "vcf2baits" or $options.algorithm == "stacks2baits" #algorithm-specific options
 		if $options.interact
 			print "Output baits for all variants in input file? (y/n)\n"
-			t = gets.chomp.upcase
-			if t == "Y" or t == "YES"
-				$options.every = true
-			end
+			$options.every = ynq
 			if $options.algorithm == "stacks2baits"
 				print "Sort variants according to variation between/within populations? (y/n)\n"
-				t = gets.chomp.upcase
-				if t == "Y" or t == "YES"
+				if ynq
 					$options.sort = true
 					print "Sort variants within populations according to Hardy-Weinberg Equilibrium? (y/n)\n"
-					t = gets.chomp.upcase
-					if t == "Y" or t == "YES"
+					if ynq
 						$options.hwe = true
 						print "Alpha value for HWE?\n"
 						$options.alpha = gets.chomp.to_f
@@ -555,8 +574,7 @@ begin
 		if $options.algorithm == "vcf2baits" and !$options.every
 			if $options.interact
 				print "Complement previously generated baits?\n"
-				t = gets.chomp.upcase
-				if t == "Y" or t == "YES"
+				if ynq
 					print "Enter baits BED file name.\n"
 					$options.previousbaits = gets.chomp
 					while !FileTest.exist?($options.previousbaits)
@@ -565,8 +583,7 @@ begin
 					end
 				end
 				print "Sort variants by variation within, between and among taxa?\n"
-				t = gets.chomp.upcase
-				if t == "Y" or t == "YES"
+				if ynq
 					print "Enter taxa file name.\n"
 					$options.taxafile = gets.chomp
 				end
@@ -611,8 +628,7 @@ begin
 			end
 			if $options.interact and !$options.taxafile.nil?
 				print "Control population-specific variants by quantity?\n"
-				t = gets.chomp.upcase
-				if t == "Y" or t == "YES"
+				if ynq
 					print "Enter comma-separated list of population-specific variants in order of appearance in taxa TSV file\n"
 					$options.popcategories = gets.chomp.split(",").map! { |val| val.to_i }
 				end
@@ -642,10 +658,7 @@ begin
 		end
 		if $options.interact and !$options.every
 			print "Scale maximum number of variants per contig by contig length? (y/n)\n"
-			t = gets.chomp.upcase
-			if t == "Y" or t == "YES"
-				$options.scale = true
-			end
+			$options.scale = ynq
 		end
 		if $options.interact and !$options.every and !$options.scale
 			print "Enter maximum number of variants per contig.\n"
@@ -665,10 +678,7 @@ begin
 		end
 		if $options.interact and !$options.every
 			print "Output baits? (y/n)\n"
-			t = gets.chomp.upcase
-			if t == "N" or t == "NO"
-				$options.no_baits = true
-			end
+			$options.no_baits = ynq
 		end
 		unless $options.no_baits
 			if $options.interact
@@ -681,10 +691,7 @@ begin
 			end
 			if $options.interact
 				print "Generate baits for alternate alleles? (y/n)\n"
-				t = gets.chomp.upcase
-				if t == "Y" or t == "YES"
-					$options.alt_alleles = true
-				end
+				$options.alt_alleles = ynq
 				print "Enter bait length.\n"
 				$options.baitlength = gets.chomp.to_i
 			end
@@ -776,10 +783,7 @@ begin
 			if $options.strategy != "alignment"
 				if $options.interact
 					print "Keep ambiguities in pyrad2baits reference sequence? (y/n)\n"
-					t = gets.chomp.upcase
-					if t == "Y" or t == "YES"
-						$options.uncollapsed_ref = true
-					end
+					$options.uncollapsed_ref = ynq
 					print "Enter total number of requested variants.\n"
 					$options.totalsnps = gets.chomp.to_i
 				end
@@ -853,10 +857,7 @@ begin
 			end
 			if $options.interact
 				print "Filter BLAST hits by E-value?\n"
-				t = gets.chomp.upcase
-				if t == "Y" or t == "YES"
-					$options.evalue_filter = true
-				end
+				$options.evalue_filter = ynq
 				if $options.evalue_filter
 					print "Enter maximum E-value to include BLAST hit.\n"
 					$options.evalue = gets.chomp.to_f
@@ -871,47 +872,26 @@ begin
 	if $options.interact and !$options.no_baits
 		if $options.algorithm != "pyrad2baits"
 			print "Do FASTA/FASTQ sequence headers include NCBI-style descriptions? (y/n)\n"
-			t = gets.chomp.upcase
-			if t == "Y" or t == "YES"
-				$options.ncbi = true
-			end
+			$options.ncbi = ynq
 		end
 		if $options.algorithm != "checkbaits"
 			print "Output BED file(s) for candidate baits? (y/n)\n"
-			t = gets.chomp.upcase
-			if t == "Y" or t == "YES"
-				$options.coords = true
-			end
+			$options.coords = ynq
 			if $options.algorithm == "aln2baits" or $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "tilebaits" or $options.algorithm == "blast2baits"
 				print "Output BED file(s) for the baits relative to extracted sequences? (y/n)\n"
-				t = gets.chomp.upcase
-				if t == "Y" or t == "YES"
-					$options.rbed = true
-				end
+				$options.rbed = ynq
 			end
 			print "Shuffle baits to compensate for extending beyond contig ends? (y/n)\n"
-			t = gets.chomp.upcase
-			if t == "Y" or t == "YES"
-				$options.shuffle = true
-			end
+			$options.shuffle = ynq
 		end
 		print "Output bait statistics table? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
-			$options.params = true
-		end
+		$options.params = ynq
 		if $options.params
 			print "Disable linguistic complexity calculations to improve program speed? (y/n)\n"
-			t = gets.chomp.upcase
-			if t == "Y" or t == "YES"
-				$options.no_lc = true
-			end
+			$options.no_lc = ynq
 		end
 		print "Require complete length bait? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
-			$options.completebait = true
-		end
+		$options.completebait = ynq
 		$options.gaps = "" # Turn off default to allow value entry entry
 	end
 	while $options.gaps != 'include' and $options.gaps != 'exclude' and $options.gaps != 'extend'
@@ -920,28 +900,15 @@ begin
 	end
 	if $options.interact and !$options.no_baits
 		print "Exclude baits with Ns? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
-			$options.no_Ns = true
-		end
+		$options.no_Ns = ynq
 		print "Collapse ambiguity codes to a single nucleotide? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
-			$options.collapse_ambiguities = true
-		end
+		$options.collapse_ambiguities = ynq
 		print "Output baits as RNA rather than DNA? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
-			$options.rna = true
-		end
+		$options.rna = ynq
 		print "Generate reverse complement baits? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
-			$options.rc = true
-		end
+		$options.rc = ynq
 		print "Generate alternate length baits? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			print "Enter alternate lengths requested separated by commas.\n"
 			$options.altbaits = gets.chomp.split(",").map! { |val| val.to_i }
 			while $options.altbaits.any? { |x| x < 1 }
@@ -950,34 +917,27 @@ begin
 			end
 		end
 		print "Addend a sequence to 5' end of baits? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			print "Enter 5' sequence.\n"
 			$options.fiveprime = gets.chomp
 		end
 		print "Addend a sequence to 3' end of baits? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			print "Enter 3' sequence.\n"
 			$options.threeprime = gets.chomp
 		end
 		unless $options.fiveprime == "" && $options.threeprime == ""
 			print "Exclude sequence addenda from bait filtration parameter calculations? (y/n)\n"
-			t = gets.chomp.upcase
-			if t == "Y" or t == "YES"
-				$options.noaddenda = true
-			end
+			$options.noaddenda = ynq
 		end
 		print "Fill in incomplete baits with a specified sequence repeat motif? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			print "Enter sequence motif.\n"
 			$options.fillin = gets.chomp
 			$options.fillin_switch = true unless $options.fillin == ""
 		end
 		print "Filter by minimum GC content? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			$options.mingc_filter = true
 			print "Enter minimum GC content.\n"
 			$options.mingc = gets.chomp.to_f
@@ -987,8 +947,7 @@ begin
 			end
 		end
 		print "Filter by maximum GC content? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			$options.maxgc_filter = true
 			print "Enter maximum GC content.\n"
 			$options.maxgc = gets.chomp.to_f
@@ -998,15 +957,13 @@ begin
 			end
 		end
 		print "Filter by minimum melting temperature? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			$options.mint_filter = true
 			print "Enter minimum melting temperature.\n"
 			$options.mint = gets.chomp.to_f
 		end
 		print "Filter by maximum melting temperature? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			$options.maxt_filter = true
 			print "Enter maximum melting temperature.\n"
 			$options.maxt = gets.chomp.to_f
@@ -1043,8 +1000,7 @@ begin
 	end
 	if $options.interact and !$options.no_baits
 		print "Filter by maximum percent masked sequence? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			$options.maxmask_filter = true
 			print "Enter maximum percent masked sequence\n"
 			$options.maxmask = gets.chomp.to_f
@@ -1056,8 +1012,7 @@ begin
 	end
 	if $options.interact and !$options.no_baits
 		print "Filter by maximum homopolymer length? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			$options.maxhomopolymer_filter = true
 			print "Enter maximum homopolymer length\n"
 			$options.maxhomopoly = gets.chomp.to_i
@@ -1069,8 +1024,7 @@ begin
 	end
 	if $options.interact and !$options.no_baits and !$options.no_lc
 		print "Filter by minimum sequence linguistic complexity? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			$options.lc_filter = true
 			print "Enter minimum linguistic complexity\n"
 			$options.lc = gets.chomp.to_f
@@ -1082,8 +1036,7 @@ begin
 	end			
 	if $options.interact and $options.algorithm != "aln2baits" and !$options.no_baits
 		print "Filter by minimum mean base quality? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			$options.meanqual_filter = true
 			print "Enter minimum mean base quality.\n"
 			$options.meanqual = gets.chomp.to_f
@@ -1095,8 +1048,7 @@ begin
 	end
 	if $options.interact and $options.algorithm != "aln2baits" and !$options.no_baits
 		print "Filter by minimum base quality? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			$options.minqual_filter = true
 			print "Enter minimum mean base quality.\n"
 			$options.minqual = gets.chomp.to_i
@@ -1118,17 +1070,14 @@ begin
 	end	
 	if $options.interact
 		print "Are FASTQ qualities in Phred64? (y/n)\n"
-		t = gets.chomp.upcase
-		$options.phred64 = true if (t == "Y" or t == "YES")
+		$options.phred64 = ynq
 		print "Set random number seed (otherwise uses system entropy)? (y/n)\n"
-		t = gets.chomp.upcase
-		if t == "Y" or t == "YES"
+		if ynq
 			print "Enter random number seed.\n"
 			$options.rng = gets.chomp.to_i
 		end
 		print "Gzip output files? (y/n)\n"
-		t = gets.chomp.upcase
-		$options.gzip = true if (t == "Y" or t == "YES")
+		$options.gzip = ynq
 	end	
 	$options.no_baits = false if ($options.every or $options.alt_alleles) # Override -p when needed
 	$options.filter = true if ($options.completebait or $options.params or $options.algorithm == "checkbaits" or $options.lc_filter or $options.mingc_filter or $options.maxgc_filter or $options.mint_filter or $options.maxt_filter or $options.maxmask_filter or $options.maxhomopoly_filter or $options.meanqual_filter or $options.minqual_filter or $options.gaps == "exclude" or $options.no_Ns or $options.collapse_ambiguities) # Force filtration as necessary
