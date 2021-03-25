@@ -552,10 +552,10 @@ begin
 				if t == "Y" or t == "YES"
 					print "Enter baits BED file name.\n"
 					$options.previousbaits = gets.chomp
-				end
-				while !FileTest.exist?($options.previousbaits)
-					print "BED file not found. Please re-enter.\n"
-					$options.previousbaits = gets.chomp
+					while !FileTest.exist?($options.previousbaits)
+						print "BED file not found. Please re-enter.\n"
+						$options.previousbaits = gets.chomp
+					end
 				end
 				print "Sort variants by variation within, between and among taxa?\n"
 				t = gets.chomp.upcase
@@ -1050,7 +1050,7 @@ begin
 		print "Maximum homopolymer length must be greater than 0. Re-enter.\n"
 		$options.maxhomopoly = gets.chomp.to_i
 	end
-	if $options.interact and !$options.no_baits
+	if $options.interact and !$options.no_baits and !$options.no_lc
 		print "Filter by minimum sequence linguistic complexity? (y/n)\n"
 		t = gets.chomp.upcase
 		if t == "Y" or t == "YES"
