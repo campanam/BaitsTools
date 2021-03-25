@@ -108,6 +108,7 @@ class Parser
 		args.outdir = File.expand_path("./") # Output directory
 		args.outprefix = "out" # Output prefix
 		args.log = false # Flag to output detailed log
+		args.altbaits = nil # Array of alternative bait lengths. nil turns off flag
 		args.filestem = args.outdir + args.outprefix # File stem for output
 		args.default_files = [] # Default files to be written
 		args.rng = srand # Random number seed
@@ -403,6 +404,9 @@ class Parser
 				end
 				opts.on("-G", "--gaps [VALUE]", String, "Strategy to handle sequence gaps (-) (include, exclude, or extend) (Default = include)") do |gap|
 					args.gaps = gap.downcase if gap != nil
+				end
+				opts.on("--altbaits [VALUES]", String, "Comma-separated list of alternative bait lengths") do |altbaits|
+					args.altbaits = altbaits.split(",").map! { |value| value.to_i } if altbaits != nil
 				end
 				opts.on("-5", "--5prime [VALUE]", String, "Sequence to addend to 5' end of baits") do |fivepr|
 					args.fiveprime = fivepr if fivepr != nil
