@@ -20,6 +20,9 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.7.0  
+altbaits option  
+
 ### Version 1.6.3  
 Log outputs total numbers of generated/filtered baits in addition to coverage  
 
@@ -132,6 +135,7 @@ Preliminary script to generate baits from an annotation file and a reference seq
 Improved selectsnps distance-based SNP deletion  
 Previously generated bait complementation in selectsnps  
 taxafile/popcategories no longer erroneously overrides every option  
+altbaits option required edits of write_files, cat_files  
 
 ### Version 1.6.8  
 improved gz_file_open takes block  
@@ -274,6 +278,8 @@ Interactive mode no longer prompts you to enter linguistic complexity if LC calc
 vcf2baits/pyrad2baits/stacks2baits tiling offset can now be longer than bait length  
 vcf2baits/pyrad2baits/stacks2baits tiles per SNP can now be greater than length of bait/offset  
 altbaits option  
+gzip of log moved to end of baitstools script  
+Use of sum and any? methods for array requires Ruby >= 2.4.1  
 
 ### Version 1.6.7  
 Capitalization of options that select between choices no longer matters  
