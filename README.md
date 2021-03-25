@@ -38,7 +38,7 @@ The software is made available under the Smithsonian Institution [terms of use](
 
 ## Installation  
 ### Basic Installation  
-*Ruby >= 2.4.1 is required as of BaitsTools version 1.7.0. BaitsTools versions <= 1.6.8 are compatible with Ruby >= 2.0.0.*  
+*Ruby >= 2.4.1 is required as of BaitsTools version 1.7.0. BaitsTools versions <= 1.6.8.1 are compatible with Ruby >= 2.0.0.*  
 
 In a terminal window, execute the following commands:  
 
