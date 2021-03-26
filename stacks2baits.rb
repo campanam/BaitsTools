@@ -51,6 +51,7 @@ def write_stacks(header, snps, tag) # Method to write stacks output since repeat
 			write_file(tag + ".tsv", ssnp.line)
 		end
 	end
+	system("gzip #{resolve_unix_path($options.filestem + $options.infix + tag + '.tsv')}") if $options.gzip # Gzip filtered stacks tsv
 end
 #-----------------------------------------------------------------------------------------------
 def stacks_altbaits(stacksheader, snpset, refseq, infix, logheader = "") # Reduce redundant programming for multiple baits
@@ -58,18 +59,17 @@ def stacks_altbaits(stacksheader, snpset, refseq, infix, logheader = "") # Reduc
 	unless $options.altbaits.nil?
 		baits = snp_to_baits(snpset, refseq, $options.baitlength, infix)
 		write_stacks(stacksheader, baits, infix + "-filtered") if $options.filter
+		tmp_baitlength = $options.baitlength # Save original baitlength to restore when needed
 		for altbait in $options.altbaits
 			$options.baitlength = altbait
 			write_file(".log.txt", "") if $options.log # Add a linebreak between subsequent entries
 			baits = snp_to_baits(snpset, refseq, altbait, infix)
 			write_stacks(stacksheader, baits, infix + "-filtered") if $options.filter
 		end
+		$options.baitlength = tmp_baitlength
 	else
 		baits = snp_to_baits(snpset, refseq, nil, infix)
 		write_stacks(stacksheader, baits, infix + "-filtered") if $options.filter
-		if $options.gzip # Gzip filtered stacks tsv
-			system("gzip #{resolve_unix_path($options.filestem + infix + '-filtered.tsv')}")
-		end
 	end
 end
 #-----------------------------------------------------------------------------------------------
