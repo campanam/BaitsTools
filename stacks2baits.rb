@@ -61,7 +61,7 @@ def stacks_altbaits(stacksheader, snpset, refseq, infix, logheader = "") # Reduc
 		for altbait in $options.altbaits
 			$options.baitlength = altbait
 			write_file(".log.txt", "") if $options.log # Add a linebreak between subsequent entries
-			baits = snp_to_baits(snpset, refseq, altbaits, infix)
+			baits = snp_to_baits(snpset, refseq, altbait, infix)
 			write_stacks(stacksheader, baits, altbait.to_s + "-" + infix + "-filtered") if $options.filter
 		end
 	else
