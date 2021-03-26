@@ -418,12 +418,16 @@ def setup_output
 		$options.default_files.push("-filtered-baits-relative.bed") if $options.rbed
 	end
 	if $options.algorithm == "stacks2baits"
-		$options.default_files.push("-betweenpops.tsv")
-		if $options.sort and $options.hwe
-			$options.default_files.push("-inhwe.tsv")
-			$options.default_files.push("-outhwe.tsv")	
-		elsif $options.sort
-			$options.default_files.push("-withinpops.tsv")
+		if $options.sort
+			$options.default_files.push("-betweenpops.tsv")
+			if $options.hwe
+				$options.default_files.push("-inhwe.tsv")
+				$options.default_files.push("-outhwe.tsv")
+			else
+				$options.default_files.push("-withinpops.tsv")
+			end
+		else
+			$options.default_files.push("-all.tsv")
 		end
 	end
 end

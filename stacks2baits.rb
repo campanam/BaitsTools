@@ -157,20 +157,20 @@ def stacks2baits
 	selected_between = selectsnps(between_pops)
 	if $options.sort
 		write_stacks(stacksheader, selected_between, "-betweenpops")
+		if $options.hwe
+			write_file(".log.txt", "InHWEVariants") if $options.log
+			selected_inhwe = selectsnps(in_hwe)
+			write_file(".log.txt", "OutHWEVariants") if $options.log
+			selected_outhwe = selectsnps(out_hwe)
+			write_stacks(stacksheader, selected_inhwe, "-inhwe")
+			write_stacks(stacksheader, selected_outhwe, "-outhwe")
+		else
+			write_file(".log.txt", "WithinPopsVariants") if $options.log
+			selected_within = selectsnps(within_pops)
+			write_stacks(stacksheader, selected_within, "-withinpops")
+		end
 	else
 		write_stacks(stacksheader, selected_between, "-all")
-	end
-	if $options.sort and $options.hwe
-		write_file(".log.txt", "InHWEVariants") if $options.log
-		selected_inhwe = selectsnps(in_hwe)
-		write_file(".log.txt", "OutHWEVariants") if $options.log
-		selected_outhwe = selectsnps(out_hwe)
-		write_stacks(stacksheader, selected_inhwe, "-inhwe")
-		write_stacks(stacksheader, selected_outhwe, "-outhwe")	
-	elsif $options.sort
-		write_file(".log.txt", "WithinPopsVariants") if $options.log
-		selected_within = selectsnps(within_pops)
-		write_stacks(stacksheader, selected_within, "-withinpops")
 	end
 	# Output baits unless -p
 	if !$options.no_baits
@@ -178,14 +178,14 @@ def stacks2baits
 		refseq = read_fasta($options.refseq)
 		if $options.sort
 			stacks_altbaits(stacksheader, selected_between, refseq, "-betweenpops", "BetweenPopsVariantBaits")
+			if $options.hwe
+				stacks_altbaits(stacksheader, selected_inhwe, refseq, "-inhwe", "InHWEVariantBaits")
+				stacks_altbaits(stacksheader, selected_outhwe, refseq, "-outhwe", "OutHWEVariantBaits")
+			else
+				stacks_altbaits(stacksheader, selected_within, refseq, "-withinpops", "WithinPopsVariantBaits")
+			end
 		else
 			stacks_altbaits(stacksheader, selected_between, refseq, "-all", "AllVariantBaits")
-		end
-		if $options.sort and $options.hwe
-			stacks_altbaits(stacksheader, selected_inhwe, refseq, "-inhwe", "InHWEVariantBaits")
-			stacks_altbaits(stacksheader, selected_outhwe, refseq, "-outhwe", "OutHWEVariantBaits")
-		elsif $options.sort
-			stacks_altbaits(stacksheader, selected_within, refseq, "-withinpops", "WithinPopsVariantBaits")
 		end
 	end
 end
