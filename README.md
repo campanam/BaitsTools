@@ -119,6 +119,7 @@ A tutorial and example data are available in the example_data subdirectory of th
 `-Y, --rna`: Output bait sequences as RNA rather than DNA.  
 `-R, --rc`: Output reverse-complemented baits.  
 `-G, --gaps [VALUE]`: Strategy to handle baits that include gap characters (-) (one of `include`, `exclude`,  `extend`). `include` keeps all baits sequences with gaps. `exclude` filters out all baits with gaps. `extend` attempts to extend baits to complete length while removing gap characters.  *WARNING: extended baits will have BED coordinates corresponding to the uncorrected bait sequence.* Default is `include`.  
+`--altbaits [VALUES]`: Comma-separated list of additional lengths of baits to generate for same targets. If using checkbaits, this option will truncate previously generated baits by removing bases from 3' end. All alternate bait lengths will be filtered under the same parameters specified for the primary bait length.  
 `-5, --5prime [VALUE]`: Sequence to addend to 5' end of baits.  
 `-3, --3prime [VALUE]`: Sequence to addend to 3' end of baits.  
 `--fillin [VALUE]`: Fill in baits shorter than requested length with specified sequence repeat motif.  
@@ -214,6 +215,7 @@ blast2baits generates baits from a BLAST hit tabular file and a corresponding DN
 checkbaits quality-controls and filters previously generated baits in FASTA or FASTQ format.
 
 `-i, --input [FILE]`: Input sequence file name. Include the path to the file if not in the current directory.  
+`--inbed [FILE]`: Optional BED file corresponding to baits in the sequence file. BED file will be filtered alongside baits sequence file.  
 `-L, --length [VALUE]`: Requested bait length. Default is 120 bp.  
 
 ### pyrad2baits  
