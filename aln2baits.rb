@@ -236,7 +236,7 @@ def aln2baits(aln)
 		multi_aln2baits(aln_hash, $options.baitlength)
 		for altbait in $options.altbaits
 			$options.baitlength = altbait
-			write_file(".log.txt", "") # Add a linebreak between subsequent entries
+			write_file(".log.txt", "") if $options.log # Add a linebreak between subsequent entries
 			multi_aln2baits(aln_hash, altbait)
 		end
 	else
