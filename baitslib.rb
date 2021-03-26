@@ -725,7 +725,7 @@ def snp_to_baits(selectedsnps, refseq, altbait = nil, filext = "")
 	baitline = ''
 	case filext
 	when "-all"
-		baitline = "(all variants)"
+		baitline = "(all variants) "
 	when "-betweenpops"
 		baitline = "(between population variants) "
 	when "-inhwe"
@@ -738,7 +738,7 @@ def snp_to_baits(selectedsnps, refseq, altbait = nil, filext = "")
 	print "** Generating and filtering " + $options.baitlength.to_s + " bp baits " + baitline + "**\n"
 	if $options.params
 		paramline = "Chromosome:Coordinates\tSNP\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept"
-		write_file("-filtered-params.txt", paramline)
+		write_file(filext + "-filtered-params.txt", paramline)
 	end
 	filteredsnps = {}
 	threads = []
@@ -862,10 +862,12 @@ def snp_to_baits(selectedsnps, refseq, altbait = nil, filext = "")
 	threads.each { |thr| thr.join }
 	files_to_concat = [filext + "-baits.fa"]
 	files_to_concat.push(filext + "-baits.bed") if $options.coords
+	files_to_concat.push(filext + ".tsv") if $options.algorithm = "stacks2baits"
 	if $options.filter
 		files_to_concat.push(filext + "-filtered-baits.fa")
 		files_to_concat.push(filext + "-filtered-params.txt") if $options.params
 		files_to_concat.push(filext + "-filtered-baits.bed") if $options.coords
+		files_to_concat.push(filext + "-filtered.tsv") if $options.algorithm = "stacks2baits"
 	end
 	cat_files(files_to_concat)
 	if $options.log
