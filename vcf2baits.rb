@@ -6,7 +6,7 @@ VCF2BAITSVER = "1.7.0"
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
-def write_filtered_vcf(baits)
+def write_filtered_vcf(baits, vcffilt)
 	if $options.filter
 		write_file( "-filtered.vcf", vcffilt)
 		for i in 0 ... baits.size # Filtered snps
@@ -105,16 +105,16 @@ def vcf2baits
 		write_file(".log.txt", "VariantBaits") if $options.log
 		unless $options.altbaits.nil? # Tile baits under alternate lengths
 			baits = snp_to_baits(@selectsnps, refseq, $options.baitlength)
-			write_filtered_vcf(baits)
+			write_filtered_vcf(baits, vcffilt)
 			for altbait in $options.altbaits
 				$options.baitlength = altbait
 				write_file(".log.txt", "") if $options.log # Add a linebreak between subsequent entries
 				baits = snp_to_baits(@selectsnps, refseq, $options.baitlength)
-				write_filtered_vcf(baits)
+				write_filtered_vcf(baits, vcffilt)
 			end
 		else
 			baits = snp_to_baits(@selectsnps, refseq) # Baits without multibaits infix
-			write_filtered_vcf(baits)
+			write_filtered_vcf(baits, vcffilt)
 		end
 		
 	end
