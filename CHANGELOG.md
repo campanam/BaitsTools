@@ -666,6 +666,10 @@ pyrad2baits can produce an uncollapsed reference sequence
 Preliminary script to generate baits from PyRAD/ipyrad loci files  
 
 ## stacks2baits  
+### Version 1.7.0  
+--altbaits option  
+Fixed bug in which filtered TSV printed even if not filtering  
+
 ### Version 1.6.8  
 improved gz_file_open takes block  
 
