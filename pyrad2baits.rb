@@ -117,6 +117,15 @@ def pyrad2baits
 		print "** Selecting variants **\n"
 		snp_hash = pyrad_to_selectsnps(@pyrad_loci)
 		@selectsnps = selectsnps(snp_hash)
-		snp_to_baits(@selectsnps, refseq)
+		unless $options.altbaits.nil?
+			snp_to_baits(@selectsnps, refseq, $options.baitlength)
+			for altbait in $options.altbaits
+				$options.baitlength = altbait
+				write_file(".log.txt", "") if $options.log # Add a linebreak between subsequent entries
+				snp_to_baits(@selectsnps, refseq, altbait)
+			end
+		else
+			snp_to_baits(@selectsnps, refseq)
+		end
 	end
 end
