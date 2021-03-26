@@ -867,7 +867,6 @@ def snp_to_baits(selectedsnps, refseq, altbait = nil, filext = "")
 		files_to_concat.push(filext + "-filtered-baits.fa")
 		files_to_concat.push(filext + "-filtered-params.txt") if $options.params
 		files_to_concat.push(filext + "-filtered-baits.bed") if $options.coords
-		files_to_concat.push(filext + "-filtered.tsv") if $options.algorithm = "stacks2baits"
 	end
 	cat_files(files_to_concat)
 	if $options.log
