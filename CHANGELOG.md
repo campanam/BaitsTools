@@ -442,6 +442,7 @@ Every option for vcf2baits now bypasses taxafile/previousbaits screen
 vcf2baits/pyrad2baits/stacks2baits tiling offset can now be longer than bait length  
 vcf2baits/pyrad2baits/stacks2baits tiles per SNP can now be greater than length of bait/offset  
 --inbed option handling for checkbaits  
+--altbaits option handling  
 
 ### Version 1.6.7  
 bed2baits list option capitalized to BED for consistency  
