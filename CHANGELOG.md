@@ -138,6 +138,7 @@ taxafile/popcategories no longer erroneously overrides every option
 altbaits option required edits of write_files, cat_files  
 method checkpop removed  
 Fixed cat_files bug in snp_to_baits   
+Fixed file output bugs with stacks2baits  
 
 ### Version 1.6.8  
 improved gz_file_open takes block  
@@ -670,6 +671,7 @@ Preliminary script to generate baits from PyRAD/ipyrad loci files
 --altbaits option  
 Fixed bug in which filtered TSV printed even if not filtering  
 Files labelled 'all' rather than 'betweenpops' when not sorting  
+Fixed file output bugs  
 
 ### Version 1.6.8  
 improved gz_file_open takes block  
