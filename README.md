@@ -1,6 +1,6 @@
 # BaitsTools: software for hybridization capture bait design
 
-Michael G. Campana, 2017-2020  
+Michael G. Campana, 2017-2021  
 Smithsonian Conservation Biology Institute  
 
 BaitsTools is an open-source package to facilitate the design of nucleic acid bait sets for hybridization capture experiments. It can generate RNA and DNA baits from a wide variety of input formats including FASTA/FASTQ sequences and alignments, [Stacks](http://catchenlab.life.illinois.edu/stacks/) population summary statistics files, [PyRAD](http://dereneaton.com/software/pyrad/) and [ipyrad](http://ipyrad.readthedocs.io/) loci files, genome annotations and features (BED/GTF/GFF) and VCF files. BaitsTools provides both a traditional command-line interface with arguments and an interactive interface using text prompts. Please read and cite the accompanying [manuscript](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract) when using this software.  
@@ -38,6 +38,8 @@ The software is made available under the Smithsonian Institution [terms of use](
 
 ## Installation  
 ### Basic Installation  
+*Ruby >= 2.4.1 is required as of BaitsTools version 1.7.0. BaitsTools versions <= 1.6.8.1 are compatible with Ruby >= 2.0.0.*  
+
 In a terminal window, execute the following commands:  
 
 `git clone "https://github.com/campanam/BaitsTools/"`  
@@ -102,7 +104,7 @@ Enter the command:
 `baitstoolsgui.rb`  
 
 ## Tutorial and Example Data  
-A tutorial and example data are available in the example_data subdirectory of the BaitsTools repository.  
+A tutorial and example data are available in the example_data subdirectory of the BaitsTools repository. The ipyrad.loci file is from the [ipyrad tutorial documentation](https://ipyrad.readthedocs.io/en/latest/tutorial_intro_cli.html) [1].  
 
 ## Common Options  
 `-o, --outprefix [VALUE]`: Output file prefix. Default is `out`.  
@@ -117,6 +119,7 @@ A tutorial and example data are available in the example_data subdirectory of th
 `-Y, --rna`: Output bait sequences as RNA rather than DNA.  
 `-R, --rc`: Output reverse-complemented baits.  
 `-G, --gaps [VALUE]`: Strategy to handle baits that include gap characters (-) (one of `include`, `exclude`,  `extend`). `include` keeps all baits sequences with gaps. `exclude` filters out all baits with gaps. `extend` attempts to extend baits to complete length while removing gap characters.  *WARNING: extended baits will have BED coordinates corresponding to the uncorrected bait sequence.* Default is `include`.  
+`--altbaits [VALUES]`: Comma-separated list of additional lengths of baits to generate for same targets. If using checkbaits, this option will truncate previously generated baits by removing bases from 3' end. All alternate bait lengths will be filtered under the same parameters specified for the primary bait length.  
 `-5, --5prime [VALUE]`: Sequence to addend to 5' end of baits.  
 `-3, --3prime [VALUE]`: Sequence to addend to 3' end of baits.  
 `--fillin [VALUE]`: Fill in baits shorter than requested length with specified sequence repeat motif.  
@@ -212,6 +215,7 @@ blast2baits generates baits from a BLAST hit tabular file and a corresponding DN
 checkbaits quality-controls and filters previously generated baits in FASTA or FASTQ format.
 
 `-i, --input [FILE]`: Input sequence file name. Include the path to the file if not in the current directory.  
+`--inbed [FILE]`: Optional BED file corresponding to baits in the sequence file. BED file will be filtered alongside baits sequence file.  
 `-L, --length [VALUE]`: Requested bait length. Default is 120 bp.  
 
 ### pyrad2baits  
@@ -273,13 +277,14 @@ vcf2baits selects variants and generates baits from a VCF file and a reference s
 
 `--taxacount [VALUES]`: Comma-separated list of values for balancing variants by variation category (Order: AllPopulations,BetweenPopulations,WithinPopulations). AllPopulations are those variants for that are variable across all taxa. BetweenPopulations are variants that are homozygous within taxa, but variable across taxa. WithinPopulations are variable within a subset of the taxa (but not across all taxa).  
 `--popcategories [VALUES]`: Comma-separated list of maximum number of population-specific variants in order of appearance in taxa TSV file.  
+`--previousbaits [FILE]:` Generate baits that complement previously generated baits specified in BED file.  
 `-V, --varqual [VALUE]`: Minimum variant QUAL score to be included in subselected variants. Default is 30.  
 `-t, --totalvars [VALUE]`: Total requested variants. Default is 30,000.  
 `-j, --scale`: Scale the maximum number of variants per contig by that contig's length. Overrides the `-m` argument.  
 `-m, --maxsnps [VALUE]`: Maximum number of variants per contig. Default is 2.  
 `-d, --distance [VALUE]`: Minimum distance (in bp) between variants within a contig. The default is 10,000 bp.  
 `-p, --nobaits`: Do not output baits, simply subselect variants. A reference sequence is not required for this analysis.  
-`-e, --every`: Output baits for every variant in the input file, skipping subselection.  
+`-e, --every`: Output baits for every variant in the input file, skipping subselection. Overrides -t, -j, -d, -m , -p, --taxafile, --popcategories, --previousbaits.  
 `-a, --alt`: Generate baits for alternate alleles. Overrides `-p`.  
 `-r, --refseq [FILE]`: Input reference sequence file name. Include the path to the file if not in the current directory.  
 `-L, --length [VALUE]`: Requested bait length. Default is 120 bp.  
@@ -288,14 +293,14 @@ vcf2baits selects variants and generates baits from a VCF file and a reference s
 `-k, --depth [VALUE]`: Requested tiled baits per variant. Default is 1.  
 
 ## Formula Notes  
-Bait melting temperatures are calculated according to salt-adjusted formulas for molecules longer than 50 nucleotides [1-2] as given in [3-4].  
+Bait melting temperatures are calculated according to salt-adjusted formulas for molecules longer than 50 nucleotides [2-3] as given in [4-5].  
 
 ## Tips and Tricks
 1. The "#" character is reserved for BaitsTools annotations of sequence headers. Do not include this character in sequence identifiers.  
 
 2. Sequence characters in lowercase are considered masked by BaitsTools. This only impacts the optional `--maxmask` filter.  
 
-3. While BaitsTools can read wrapped FASTA and FASTQ files, this will slow the program down tremendously. Remove extraneous line breaks in reference sequences before running bait generation. A simple way is using the awk command [5]:  
+3. While BaitsTools can read wrapped FASTA and FASTQ files, this will slow the program down tremendously. Remove extraneous line breaks in reference sequences before running bait generation. A simple way is using the awk command [6]:  
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`awk '!/^>/ { printf "%s", $0; n = "\n" } /^>/ { print n $0; n = "" } END { printf "%s", n }' \`  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<input.fasta> > <output.fasta>`  
@@ -316,10 +321,11 @@ Please cite:
 Campana, M.G. (2018) BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources*, __18__, 356-361. doi: [10.1111/1755-0998.12721](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract).  
 
 ## References  
-1. Howley, P.M., Israel, M.A., Law, M.F., Martin, M.A. (1979) A rapid method for detecting and mapping homology between heterologous DNAs. Evaluation of polyomavirus genomes. *The Journal of Biological Chemistry*, __254__, 4876-4883.  
-2. Sambrook, J.F., Russell, D.W. (eds). (2001) Molecular Cloning: A Laboratory Manual. Cold Spring Harbor Laboratory Press: Cold Spring Harbor, NY.  
-3. Kibbe, W.A. (2007) OligoCalc: an online oligonucleotide properties calculator. *Nucleic Acids Res*, __35__, W43-W46.  
-4. Kibbe, W.A. (2015) Oligo Calc: Oligonucleotide Properties Calculator. Version 3.27. (http://biotools.nubic.northwestern.edu/OligoCalc.html.)   
-5. User 'Johnsyweb' (6 April 2013) Stack Overflow. Remove line breaks in a FASTA file. (https://stackoverflow.com/questions/15857088/remove-line-breaks-in-a-fasta-file.)  
+1. Eaton, D., Overcast, I. (2019) Introductory tutorial - CLI. (https://ipyrad.readthedocs.io/en/latest/tutorial_intro_cli.html).
+2. Howley, P.M., Israel, M.A., Law, M.F., Martin, M.A. (1979) A rapid method for detecting and mapping homology between heterologous DNAs. Evaluation of polyomavirus genomes. *The Journal of Biological Chemistry*, __254__, 4876-4883.  
+3. Sambrook, J.F., Russell, D.W. (eds). (2001) Molecular Cloning: A Laboratory Manual. Cold Spring Harbor Laboratory Press: Cold Spring Harbor, NY.  
+4. Kibbe, W.A. (2007) OligoCalc: an online oligonucleotide properties calculator. *Nucleic Acids Res*, __35__, W43-W46.  
+5. Kibbe, W.A. (2015) Oligo Calc: Oligonucleotide Properties Calculator. Version 3.27. (http://biotools.nubic.northwestern.edu/OligoCalc.html.)   
+6. User 'Johnsyweb' (6 April 2013) Stack Overflow. Remove line breaks in a FASTA file. (https://stackoverflow.com/questions/15857088/remove-line-breaks-in-a-fasta-file.)  
 
   

@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.6.8"
-# Michael G. Campana, 2017-2020
+BAITSLIBVER = "1.7.0"
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -126,17 +126,6 @@ class Chromo_SNP # Container for SNPs
 		end
 		return @alt
 	end
-end
-#-----------------------------------------------------------------------------------------------
-def checkpop # Method to determine whether popcategories input is reasonable
-	popbad = false
-	for pop in $options.popcategories
-		if pop < 0 or pop > $options.taxacount[2]
-			popbad = true
-			break
-		end
-	end
-	return popbad
 end
 #-----------------------------------------------------------------------------------------------
 def mean(val = [])
@@ -425,17 +414,8 @@ def setup_output
 	if $options.filter
 		$options.default_files.push("-filtered-baits.fa")
 		$options.default_files.push("-filtered-params.txt") if $options.params
-		$options.default_files.push("-filtered-baits.bed") if $options.coords
+		$options.default_files.push("-filtered-baits.bed") if ($options.coords or $options.inbed != nil)
 		$options.default_files.push("-filtered-baits-relative.bed") if $options.rbed
-	end
-	if $options.algorithm == "stacks2baits"
-		$options.default_files.push("-betweenpops.tsv")
-		if $options.sort and $options.hwe
-			$options.default_files.push("-inhwe.tsv")
-			$options.default_files.push("-outhwe.tsv")	
-		elsif $options.sort
-			$options.default_files.push("-withinpops.tsv")
-		end
 	end
 end
 #-----------------------------------------------------------------------------------------------
@@ -453,7 +433,8 @@ def setup_temp(datasize)
 end
 #-----------------------------------------------------------------------------------------------
 def write_file(fileid, message, tmp = false, tmpfile = 0)
-	(tmp && tmpfile != 0) ? file = $options.filestem + ".tmp" + tmpfile.to_s + fileid : file = $options.filestem + fileid 
+	fileid == '.log.txt' ? infix = '' : infix = $options.infix # Add in infixes for multi-length sets, except for log file
+	(tmp && tmpfile != 0) ? file = $options.filestem + infix + ".tmp" + tmpfile.to_s + fileid : file = $options.filestem + infix + fileid 
 	File.open(file, 'a') do |write|
 		write << message + "\n"
 	end
@@ -478,14 +459,17 @@ end
 #-----------------------------------------------------------------------------------------------
 def cat_files(files = $options.default_files)
 	for file in files
+		file[-8..-1] == '.log.txt' ? infix = '' : infix = $options.infix # log doesn't have multifile infix
 		for i in 1 ... $options.used_threads
-			tmpfile = $options.filestem + '.tmp' + i.to_s + file
+			tmpfile = $options.filestem + infix + '.tmp' + i.to_s + file
 			if File.exist?(tmpfile)
-				system("cat #{resolve_unix_path(tmpfile)} >> #{resolve_unix_path($options.filestem + file)}")
+				system("cat #{resolve_unix_path(tmpfile)} >> #{resolve_unix_path($options.filestem + infix + file)}")
 				system("rm", tmpfile)
 			end
 		end
-		system("gzip #{resolve_unix_path($options.filestem + file)}") if $options.gzip
+		unless file[-8..-1] == '.log.txt' # Do not gzip active log file
+			system("gzip #{resolve_unix_path($options.filestem + infix + file)}") if $options.gzip
+		end
 	end
 end
 #-----------------------------------------------------------------------------------------------
@@ -588,54 +572,57 @@ def read_fasta(file) # Read fasta and fastq files
 end
 #-----------------------------------------------------------------------------------------------
 def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
-	# Sort chromosomal SNPs in case unsorted
-	totalvar = 0
-	selectvar = 0
-	for chromo in snp_hash.keys
-		totalvar += snp_hash[chromo].size
-		snp_hash[chromo].sort_by! { |snp| snp.snp }
-		if $options.taxafile != nil
-			snp_hash[chromo].delete_if { |snp| snp.category == "MissingData" || snp.category == "Invariant" }
-			snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" } if $options.taxacount[0] == 0
-			snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" } if $options.taxacount[1] == 0
-			snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations"} if $options.taxacount[2] == 0
-			unless $options.popcategories.nil? # Remove unwanted population-specific SNPs
-				for popcat in $options.popcategories.keys
-					snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) } if $options.popcategories[popcat] == 0
+	if !$options.every
+		# Remove SNPs within minimum distance of previously generated baits
+		unless $options.previousbaits.nil?
+			print "** Reading previous baits file and masking variants **\n"
+			gz_file_open($options.previousbaits) do |coord| # Read in BED of previous baits
+				while line = coord.gets
+					line_arr = line.split
+					chromo = line_arr[0]
+					seqst = line_arr[1].to_i + 1 # Convert to 1-based indexing to compare with VCF
+					seqend = line_arr[2].to_i
+					snp_hash[chromo].delete_if { |snp| (snp.snp - seqst).abs < $options.distance }
+					snp_hash[chromo].delete_if { |snp| (snp.snp - seqend).abs < $options.distance }
+					snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
 				end
 			end
-			snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
 		end
-	end
-	selectsnps = {}
-	all_populations = 0
-	between_populations = 0
-	within_populations = 0
-	unless $options.popcategories.nil? # Set count of selected popcategories to 0
-		popcategories = $options.popcategories.dup
-		for key in popcategories.keys
-			popcategories[key] = 0
+		# Sort chromosomal SNPs in case unsorted
+		totalvar = 0
+		selectvar = 0
+		for chromo in snp_hash.keys
+			totalvar += snp_hash[chromo].size
+			snp_hash[chromo].sort_by! { |snp| snp.snp }
+			if $options.taxafile != nil
+				snp_hash[chromo].delete_if { |snp| snp.category == "MissingData" || snp.category == "Invariant" }
+				snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" } if $options.taxacount[0] == 0
+				snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" } if $options.taxacount[1] == 0
+				snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations"} if $options.taxacount[2] == 0
+				unless $options.popcategories.nil? # Remove unwanted population-specific SNPs
+					for popcat in $options.popcategories.keys
+						snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) } if $options.popcategories[popcat] == 0
+					end
+				end
+				snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+			end
 		end
-	end
-	if !$options.every
+		selectsnps = {}
+		all_populations = 0
+		between_populations = 0
+		within_populations = 0
+		unless $options.popcategories.nil? # Set count of selected popcategories to 0
+			popcategories = $options.popcategories.dup
+			for key in popcategories.keys
+				popcategories[key] = 0
+			end
+		end
 		for i in 1..$options.totalsnps
 			selected_contig = snp_hash.keys[rand(snp_hash.size)] # Get name of contig
 			snpindex = rand(snp_hash[selected_contig].size)
 			selected_snp = snp_hash[selected_contig][snpindex]
 			# Delete SNPs that are too close
-			if snpindex + 1 < snp_hash[selected_contig].size
-				while (snp_hash[selected_contig][snpindex + 1].snp - selected_snp.snp).abs < $options.distance
-					snp_hash[selected_contig].delete(snp_hash[selected_contig][snpindex + 1])
-					break if snpindex + 1 >= snp_hash[selected_contig].size
-				end
-			end
-			if snpindex > 0
-				while (snp_hash[selected_contig][snpindex - 1].snp - selected_snp.snp).abs < $options.distance
-					snp_hash[selected_contig].delete(snp_hash[selected_contig][snpindex - 1])
-					snpindex -= 1
-					break if snpindex < 1
-				end
-			end
+			snp_hash[selected_contig].delete_if { |snp| (snp.snp - selected_snp.snp).abs < $options.distance }
 			# Add SNP to selected pool and delete contigs if maximum number of SNPs reached or no remaining SNPs on contig
 			selectsnps[selected_contig] = [] if selectsnps[selected_contig].nil?
 			selectsnps[selected_contig].push(selected_snp)
@@ -720,17 +707,32 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	return selectsnps
 end
 #-----------------------------------------------------------------------------------------------
-def snp_to_baits(selectedsnps, refseq, filext = "")
+def snp_to_baits(selectedsnps, refseq, altbait = nil, filext = "")
+	logtext_infix = altbaits_infix(altbait)
+	baitline = ''
+	case filext
+	when "-all"
+		baitline = "(all variants) "
+	when "-betweenpops"
+		baitline = "(between population variants) "
+	when "-inhwe"
+		baitline = "(variants in HWE) "
+	when "-outhwe"
+		baitline = "(variants out of HWE) "
+	when "-withinpops"
+		baitline = "(within population variants) "
+	end
+	print "** Generating and filtering " + $options.baitlength.to_s + " bp baits " + baitline + "**\n"
 	if $options.params
 		paramline = "Chromosome:Coordinates\tSNP\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept"
-		write_file("-filtered-params.txt", paramline)
+		write_file(filext + "-filtered-params.txt", paramline)
 	end
 	filteredsnps = {}
 	threads = []
 	if $options.log
 		logs = []
 		refseq.size.times { logs.push([]) }
-		logtext = "Chromosome\tVariant\tNumberBaits\tRetainedBaits\tExcludedBaits"
+		logtext = logtext_infix + "Chromosome\tVariant\tNumberBaits\tRetainedBaits\tExcludedBaits"
 		write_file(".log.txt", logtext)
 	end
 	@splits = setup_temp(refseq.size)
@@ -845,7 +847,14 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 		}
 	end
 	threads.each { |thr| thr.join }
-	cat_files([filext + "-baits.fa", filext + "-baits.bed", filext + "-filtered-baits.fa", filext + "-filtered-baits.bed", filext + "-filtered-params.txt"])
+	files_to_concat = [filext + "-baits.fa"]
+	files_to_concat.push(filext + "-baits.bed") if $options.coords
+	if $options.filter
+		files_to_concat.push(filext + "-filtered-baits.fa")
+		files_to_concat.push(filext + "-filtered-params.txt") if $options.params
+		files_to_concat.push(filext + "-filtered-baits.bed") if $options.coords
+	end
+	cat_files(files_to_concat)
 	if $options.log
 		vlogs = [[],[]]
 		for i in 0 ... logs.size
@@ -931,6 +940,16 @@ def tile_regions(regions, totallength)
 	end
 end
 #-----------------------------------------------------------------------------------------------
+def altbaits_infix(altbait) # Get file name infixes and log infixes for multiple lengths of baits
+	if altbait.nil? 
+		$options.infix = logtext_infix = ''
+	else
+		$options.infix = '-' + altbait.to_s
+		logtext_infix = altbait.to_s + "bp baits\n"
+	end
+	return logtext_infix
+end
+#-----------------------------------------------------------------------------------------------
 def get_command_line # Get command line for summary output
 	# Generate basic command line
 	cmdline = $options.algorithm + " -i " + resolve_unix_path($options.infile)
@@ -952,21 +971,22 @@ def get_command_line # Get command line for summary output
 			else
 				cmdline << " -L" + $options.baitlength.to_s + " -O" + $options.tileoffset.to_s + " -b" + $options.lenbef.to_s + " -k" + $options.tiledepth.to_s
 			end
+			if $options.taxafile != nil
+				cmdline << " --taxafile " + resolve_unix_path($options.taxafile)
+				cmdline << " --taxacount " + $options.taxacount.join(",")
+				if $options.popcategories != nil
+					if $options.popcategories.is_a?(Hash) # Not converted to hash until later in vcf2baits
+						cmdline << " --popcategories " + $options.popcategories.values.join(",")
+					else
+						cmdline << " --popcategories " + $options.popcategories.join(",")
+					end
+				end
+			end
+			cmdline << " --previousbaits " + resolve_unix_path($options.previousbaits) unless $options.previousbaits.nil?
 		end
 		cmdline << " -r " + resolve_unix_path($options.refseq) unless $options.no_baits
 		cmdline << " -a" if $options.alt_alleles
 		cmdline << " -V" + $options.varqual.to_s if $options.varqual_filter
-		if $options.taxafile != nil
-			cmdline << " --taxafile " + resolve_unix_path($options.taxafile)
-			cmdline << " --taxacount " + $options.taxacount.join(",")
-			if $options.popcategories != nil
-				if $options.popcategories.is_a?(Hash) # Not converted to hash until later in vcf2baits
-					cmdline << " --popcategories " + $options.popcategories.values.join(",")
-				else
-					cmdline << " --popcategories " + $options.popcategories.join(",")
-				end
-			end
-		end
 		cmdline << " -S" if $options.sort
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe
 	else
@@ -998,6 +1018,7 @@ def get_command_line # Get command line for summary output
 			cmdline << " -a" if $options.alt_alleles
 		end
 	end
+	cmdline << " --inbed " + resolve_unix_path($options.inbed) unless $options.inbed.nil?
 	cmdline << " -o " + resolve_unix_path($options.outprefix)
 	cmdline << " -Z " + resolve_unix_path($options.outdir)
 	cmdline << " -l" if $options.log
@@ -1010,6 +1031,7 @@ def get_command_line # Get command line for summary output
 	cmdline << " -Y" if $options.rna
 	cmdline << " -R" if $options.rc
 	cmdline << " -G " + $options.gaps
+	cmdline << " --altbaits " + $options.altbaits.join(",") unless $options.altbaits.nil?
 	cmdline << " -5 " + $options.fiveprime if $options.fiveprime != ""
 	cmdline << " -3 " + $options.threeprime if $options.threeprime != ""
 	cmdline << " --fillin " + $options.fillin if $options.fillin_switch

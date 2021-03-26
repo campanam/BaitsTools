@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # aln2baits
-ALN2BAITSVER = "1.6.3"
-# Michael G. Campana, 2017-2019
+ALN2BAITSVER = "1.7.0"
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -71,22 +71,10 @@ class Hap_Window # Object defining a haplotype window
 	end
 end
 #-----------------------------------------------------------------------------------------------
-def aln2baits(aln)
-	if aln.is_a?(String) #Read FASTA file if external file
-		print "** Reading alignment **\n"
-		aln = read_fasta(aln)
-	end
-	print "** Sorting sequences by locus ** \n"
-	aln_hash = {}
-	for seq in aln
-		if aln_hash[seq.locus].nil?
-			aln_hash[seq.locus] = [seq]
-		else
-			aln_hash[seq.locus].push(seq)
-		end
-	end
+def multi_aln2baits(aln_hash, altbait = nil)
+	logtext_infix = altbaits_infix(altbait)
 	threads = []
-	print "** Identifying haplotypes **\n"
+	print "** Identifying " + $options.baitlength.to_s + " bp haplotypes **\n"
 	@windows = [] # Array to hold windows regardless of locus
 	# Get haplotypes
 	$options.threads.times do |i|
@@ -146,14 +134,14 @@ def aln2baits(aln)
 	threads.each { |thr| thr.join }
 	@windows.flatten!
 	# Get bait candidates
-	print "** Generating and filtering baits **\n"
+	print "** Generating and filtering " + $options.baitlength.to_s + " bp baits **\n"
 	if $options.params
 		paramline = "Sequence:Locus:Coordinates:Haplotype\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept"
 		write_file("-filtered-params.txt", paramline)
 	end
 	if $options.log
 		logs = []
-		write_file(".log.txt", "Windows\nLocus\tWindowStart\tWindowEnd\tNumberHaplotypes\tRetainedBaits\tExcludedBaits") 
+		write_file(".log.txt", logtext_infix + "Windows\nLocus\tWindowStart\tWindowEnd\tNumberHaplotypes\tRetainedBaits\tExcludedBaits") 
 	end
 	threads = []
 	@splits = setup_temp(@windows.size)
@@ -227,5 +215,31 @@ def aln2baits(aln)
 		else
 			write_file(".log.txt", (vlogs[1].max-vlogs[0].min+1).to_s + "\t" + vlogs[2].reduce(:+).to_s + "\t" + mean(vlogs[2]).to_s + "\tNA\tNA")
 		end
+	end
+end
+#-----------------------------------------------------------------------------------------------
+def aln2baits(aln)
+	if aln.is_a?(String) #Read FASTA file if external file
+		print "** Reading alignment **\n"
+		aln = read_fasta(aln)
+	end
+	print "** Sorting sequences by locus ** \n"
+	aln_hash = {}
+	for seq in aln
+		if aln_hash[seq.locus].nil?
+			aln_hash[seq.locus] = [seq]
+		else
+			aln_hash[seq.locus].push(seq)
+		end
+	end
+	unless $options.altbaits.nil? # Tile baits under alternate lengths
+		multi_aln2baits(aln_hash, $options.baitlength)
+		for altbait in $options.altbaits
+			$options.baitlength = altbait
+			write_file(".log.txt", "") if $options.log # Add a linebreak between subsequent entries
+			multi_aln2baits(aln_hash, altbait)
+		end
+	else
+		multi_aln2baits(aln_hash) # Tile baits under original settings without infix
 	end
 end

@@ -1,28 +1,24 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # tilebaits
-TILEBAITSVER = "1.6.3"
-# Michael G. Campana, 2017-2019
+TILEBAITSVER = "1.7.0"
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
-def tilebaits(seq_array)
-	# Process FASTA file
+def multi_tilebaits(seq_array, altbait = nil) # Method to permit tiling baits with multiple sequence length parameters
+	logtext_infix = altbaits_infix(altbait)
 	if $options.params
 		paramline = "Chromosome:Coordinates\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept"
 		write_file("-filtered-params.txt", paramline)
 	end
-	if seq_array.is_a?(String) #Read FASTA file if external file
-		print "** Reading FASTA/FASTQ **\n"
-		seq_array = read_fasta(seq_array)
-	end
 	if $options.log
 		logs = []
-		logtext = "BaitCoverage\nSequence\tLength\tNumberBaits\tRetainedBaits\tExcludedBaits\tTotalBaitCoverage(x)\tFilteredBaitCoverage(x)"
+		logtext = logtext_infix + "BaitCoverage\nSequence\tLength\tNumberBaits\tRetainedBaits\tExcludedBaits\tTotalBaitCoverage(x)\tFilteredBaitCoverage(x)"
 		write_file(".log.txt", logtext)
 	end
 	@splits = setup_temp(seq_array.size)
-	print "** Generating and filtering baits **\n"
+	print "** Generating and filtering " + $options.baitlength.to_s + " bp baits **\n"
 	threads = [] # Array to hold threading
 	$options.used_threads.times do |i|
 		threads[i] = Thread.new {
@@ -113,5 +109,23 @@ def tilebaits(seq_array)
 		else
 			write_file(".log.txt", vlogs[0].reduce(:+).to_s + "\t" + mean(vlogs[2]).to_s + "\tNA\tNA")
 		end
+	end
+end
+#-----------------------------------------------------------------------------------------------
+def tilebaits(seq_array)
+	# Process FASTA file
+	if seq_array.is_a?(String) #Read FASTA file if external file
+		print "** Reading FASTA/FASTQ **\n"
+		seq_array = read_fasta(seq_array)
+	end
+	unless $options.altbaits.nil? # Tile baits under alternate lengths
+		multi_tilebaits(seq_array, $options.baitlength)
+		for altbait in $options.altbaits
+			$options.baitlength = altbait
+			write_file(".log.txt", "") if $options.log # Add a linebreak between subsequent entries
+			multi_tilebaits(seq_array, altbait)
+		end
+	else
+		multi_tilebaits(seq_array) # Tile baits under original settings without infix
 	end
 end

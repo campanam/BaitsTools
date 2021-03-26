@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.6.7"
-# Michael G. Campana, 2017-2019
+BAITSTOOLSGUI = "1.7.0"
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -33,15 +33,16 @@ def start_baitstools
 			else
 				cmdline << " -L" + $options.baitlength + " -O" + $options.tileoffset + " -b" + $options.lenbef + " -k" + $options.tiledepth
 			end
+			if $options.taxafile != ""
+				cmdline << " --taxafile " + resolve_unix_path($options.taxafile.to_s)
+				cmdline << " --taxacount " + $options.taxacount
+				cmdline << " --popcategories " + $options.popcategories if $options.popcategories != ""
+			end
+			cmdline << " --previousbaits " + resolve_unix_path($options.previousbaits.to_s) if $options.previousbaits != ""
 		end
 		cmdline << " -r " + resolve_unix_path($options.refseq.to_s) unless $options.no_baits == 1
 		cmdline << " -a" if $options.alt_alleles == 1
 		cmdline << " -V " + $options.varqual if $options.varqual_filter == 1
-		if $options.taxafile != ""
-			cmdline << " --taxafile " + resolve_unix_path($options.taxafile.to_s)
-			cmdline << " --taxacount " + $options.taxacount
-			cmdline << " --popcategories " + $options.popcategories if $options.popcategories != ""
-		end
 		cmdline << " -S" if $options.sort == 1
 		cmdline << " -H -A" + $options.alpha.to_s if $options.hwe == 1
 	else
@@ -69,6 +70,7 @@ def start_baitstools
 			cmdline << " -a" if $options.alt_alleles
 		end
 	end
+	cmdline << " --inbed " + resolve_unix_path($options.inbed.to_s) if $options.inbed != ""
 	cmdline << " -o " + resolve_unix_path($options.outprefix.to_s)
 	cmdline << " -Z " + resolve_unix_path($options.outdir.to_s)
 	cmdline << " -l" if $options.log == 1
@@ -80,6 +82,7 @@ def start_baitstools
 	cmdline << " -C" if $options.collapse_ambiguities == 1
 	cmdline << " -Y" if $options.rna == 1
 	cmdline << " -G " + $options.gaps
+	cmdline << " --altbaits " + $options.altbaits if $options.altbaits != ""
 	cmdline << " -5 " + $options.fiveprime if $options.fiveprime != ""
 	cmdline << " -3 " + $options.threeprime if $options.threeprime != ""
 	cmdline << " --fillin " + $options.fillin if $options.fillin != ""
@@ -204,7 +207,7 @@ def pyrad_windows
 		width 10
 	end
 	$tiledepth = TkLabel.new($root) do
-		text 'Tile depth'
+		text 'Tiles per SNP'
 		font TkFont.new('times 20')
 		place('x' => 280, 'y' => 350)
 		pady 10
@@ -324,7 +327,7 @@ def snp_windows
 	length_window(350)
 	offset_window(350, 290)
 	$tiledepth = TkLabel.new($root) do
-		text 'Tile depth'
+		text 'Tiles per SNP'
 		font TkFont.new('times 20')
 		place('x' => 50, 'y' => 400)
 		pady 10
@@ -436,6 +439,23 @@ def reference_window(winy = 150)
 		pady 10
 	end
 	$widgets.push($reffile, $reflabel)
+end
+#-----------------------------------------------------------------------------------------------
+def inbed_window(winy = 150)
+	$inbedfile = TkButton.new($root) do
+		text 'BED file (optional)'
+		command '$options.inbed.value = Tk.getOpenFile'
+		place('x' => 50, 'y' => winy)
+	end
+	configure_buttons([$inbedfile])
+	$inbedfile.width = 20
+	$inbedlabel = TkLabel.new($root) do
+		textvariable $options.inbed
+		font TkFont.new('times 12')
+		place('x' => 300, 'y' => winy)
+		pady 10
+	end
+	$widgets.push($inbedfile, $inbedlabel)
 end
 #-----------------------------------------------------------------------------------------------
 def feature_window
@@ -727,49 +747,62 @@ def general_window
 		place('x' => 640, 'y' => 360)
 		width 10
 	end
+	altbait = TkLabel.new($root) do
+		text 'Alt. bait lengths (comma-separated list)'
+		font TkFont.new('times 20')
+		place('x' => 40, 'y' => 410)
+		pady 0
+	end
+	altbaitentry = TkEntry.new($root) do
+		textvariable $options.altbaits
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 380, 'y' => 410)
+		width 60
+	end
 	threeprime = TkLabel.new($root) do
 		text '3\' Sequence'
 		font TkFont.new('times 20')
-		place('x' => 270, 'y' => 400)
+		place('x' => 270, 'y' => 450)
 		pady 10
 	end
 	threeprimeentry = TkEntry.new($root) do
 		textvariable $options.threeprime
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 390, 'y' => 410)
+		place('x' => 390, 'y' => 460)
 		width 10
 	end
 	fiveprime = TkLabel.new($root) do
 		text '5\' Sequence'
 		font TkFont.new('times 20')
-		place('x' => 50, 'y' => 400)
+		place('x' => 50, 'y' => 450)
 		pady 10
 	end
 	fiveprimeentry = TkEntry.new($root) do
 		textvariable $options.fiveprime
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 170, 'y' => 410)
+		place('x' => 170, 'y' => 460)
 		width 10
 	end
 	noaddenda = TkCheckButton.new($root) do
 		variable $options.noaddenda
 		text "Exclude addenda from QC"
-		place('x' => 520, 'y' => 400)
+		place('x' => 520, 'y' => 450)
 	end
 	rng = TkLabel.new($root) do
 		text 'Random number seed'
 		font TkFont.new('times 20')
-		place('x' => 50, 'y' => 450)
+		place('x' => 50, 'y' => 500)
 		pady 10
 	end
 	rngentry = TkEntry.new($root) do
 		textvariable $options.rng
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 240, 'y' => 460)
-		width 80
+		place('x' => 240, 'y' => 510)
+		width 60
 	end
 	configure_buttons([outdir, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gzip, noaddenda])
 	bed.state = shuffle.state = "disabled" if $options.algorithm == "checkbaits"
@@ -777,7 +810,8 @@ def general_window
 	rbed.state = "disabled" unless $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "tilebaits" or $options.algorithm == "aln2baits"
 	outdir.width = rbed.width = rc.width = noaddenda.width = 20
 	ncbi.width = phred64.width = 15
-	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gzip, gaps, gapselect, threads, threadentry, rng, rngentry, threeprime, threeprimeentry, fiveprime, fiveprimeentry, noaddenda, fillin, fillinentry)
+	altbait.width = 35
+	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gzip, gaps, gapselect, threads, threadentry, altbait, altbaitentry, rng, rngentry, threeprime, threeprimeentry, fiveprime, fiveprimeentry, noaddenda, fillin, fillinentry)
 end
 #-----------------------------------------------------------------------------------------------
 def subcommand_window(subcommand)
@@ -816,7 +850,8 @@ def subcommand_window(subcommand)
 		inputlabel = "Input BLAST table"
 		blast_window
 	when "checkbaits"
-		length_window
+		length_window(200)
+		inbed_window
 		inputlabel = "Input FASTA/FASTQ"
 	when "pyrad2baits"
 		length_window
@@ -916,7 +951,7 @@ end
 #-----------------------------------------------------------------------------------------------
 def taxa_window
 	clear_widgets
-	$labelVar.value = "vcf2baits Taxa Options"
+	$labelVar.value = "vcf2baits Taxa Options and Previous Baits"
 	taxafile = TkButton.new($root) do
 		text 'Taxa file (optional)'
 		command '$options.taxafile.value = Tk.getOpenFile'
@@ -953,10 +988,21 @@ def taxa_window
 		font TkFont.new('times 12')
 		place('x' => 50, 'y' => 310)
 		width 50
-	end	
-	configure_buttons([taxafile])
-	taxafile.width = 20
-	$widgets.push(taxafile, taxalabel, taxacount, popcat, taxacountentry, popcatentry)
+	end
+	previousbaits = TkButton.new($root) do
+		text 'Baits BED (optional)'
+		command '$options.previousbaits.value = Tk.getOpenFile'
+		place('x' => 50, 'y' => 360)
+	end
+	baitslabel = TkLabel.new($root) do
+		textvariable $options.previousbaits
+		font TkFont.new('times 12')
+		place('x' => 300, 'y' => 360)
+		pady 10
+	end
+	configure_buttons([taxafile, previousbaits])
+	previousbaits.width = taxafile.width = 20
+	$widgets.push(taxafile, taxalabel, taxacount, popcat, taxacountentry, popcatentry, previousbaits, baitslabel)
 end
 #-----------------------------------------------------------------------------------------------
 def qc_window
@@ -1231,12 +1277,12 @@ end
 def go_back
 	case $labelVar.value
 	when "Filtration Options"
-		if $options.algorithm == "vcf2baits"
+		if $options.algorithm == "vcf2baits" && $options.every != 1
 			taxa_window
 		else
 			subcommand_window($options.algorithm)
 		end
-	when "vcf2baits Taxa Options"
+	when "vcf2baits Taxa Options and Previous Baits"
 		subcommand_window($options.algorithm)
 	when "General Options"
 		qc_window
@@ -1288,14 +1334,10 @@ def go_forward
 				Tk::messageBox :message => 'The minimum distance between variants must be greater than 0.'
 			elsif $options.lenbef < 0
 				Tk::messageBox :message => 'The number of bait bases before the variant must be at least 0.'
-			elsif $options.tileoffset.to_i > $options.baitlength.to_i
-				Tk::messageBox :message => 'Tiling offset cannot be greater than bait length.'
 			elsif $options.tileoffset < 1
 				Tk::messageBox :message => 'Tiling offset cannot be less than 1.'
-			elsif $options.tiledepth.to_f > $options.baitlength/$options.tileoffset.to_f
-					Tk::messageBox :message => 'Tiling depth cannot be greater than bait length/tiling offset ratio.'
 			elsif $options.tiledepth < 1
-				Tk::messageBox :message => 'Tiling depth cannot be less than 1.'
+				Tk::messageBox :message => 'Tiles per SNP cannot be less than 1.'
 			else
 				qc_window
 			end
@@ -1317,22 +1359,18 @@ def go_forward
 			Tk::messageBox :message => 'Bait length must be greater than 0.'
 		elsif $options.lenbef.to_i < 0
 			Tk::messageBox :message => 'The number of bait bases before the variant must be at least 0.'
-		elsif $options.tileoffset.to_i > $options.baitlength.to_i
-			Tk::messageBox :message => 'Tiling offset cannot be greater than bait length.'
 		elsif $options.tileoffset.to_i < 1
 			Tk::messageBox :message => 'Tiling offset cannot be less than 1.'
-		elsif $options.tiledepth.to_f > $options.baitlength/$options.tileoffset.to_f
-			Tk::messageBox :message => 'Tiling depth cannot be greater than bait length/tiling offset ratio.'
 		elsif $options.tiledepth.to_i < 1
-			Tk::messageBox :message => 'Tiling depth cannot be less than 1.'
+			Tk::messageBox :message => 'Tiles per SNP cannot be less than 1.'
 		elsif ($options.alpha.to_f < 0.0 or $options.alpha.to_f > 1.0) && $options.hwe == 1
 			Tk::messageBox :message => 'Alpha must be between 0.0 and 1.0.'
-		elsif $labelVar.value == "vcf2baits Options"
+		elsif $labelVar.value == "vcf2baits Options" and $options.every != 1
 			taxa_window
 		else
 			qc_window
 		end
-	when "vcf2baits Taxa Options"
+	when "vcf2baits Taxa Options and Previous Baits"
 		data_fails = false
 		if $options.taxafile != ""
 			taxacnt = $options.taxacount.value.split(",").map { |x| x.to_i }
@@ -1348,7 +1386,7 @@ def go_forward
 			elsif taxacnt[2] < 0
 				Tk::messageBox :message => 'The number of variants variable within populations must be at least 0.'
 				data_fails = true
-			elsif taxacnt[0] + taxacnt[1] + taxacnt[2] < 1  # Ruby 2.0 does not have Array#sum method
+			elsif taxacnt.sum < 1 
 				Tk::messageBox :message => 'The total number of variants must be greater than 0.'
 				data_fails = true
 			elsif $options.popcategories != "" # Check that population values are ok
@@ -1445,6 +1483,15 @@ def go_forward
 	when "General Options"
 		if $options.threads < 1
 			Tk::messageBox :message => 'Threads must be greater than 0.'
+		elsif $options.altbaits != ""
+			altbaits = $options.altbaits.value.split(",").map { |x| x.to_i }
+			if altbaits.any? { |x| x < 1 }
+				Tk::messageBox :message => 'Baits must at least 1 bp.'
+			elsif $options.algorithm == 'checkbaits' && altbaits.any? { |x| x > $options.baitlength }
+				Tk::messageBox :message => 'Alternate baits cannot be longer than previously generated baits.'
+			else
+				start_baitstools
+			end
 		else
 			start_baitstools
 		end
@@ -1480,6 +1527,7 @@ def set_defaults
 	$options.taxafile = TkVariable.new("") # Taxa assignment file
 	$options.taxacount = TkVariable.new("") # Variant category counts
 	$options.popcategories = TkVariable.new("") # Population-specific variant counts
+	$options.previousbaits = TkVariable.new("") # Previous baits BED file
 	$options.baitlength = TkVariable.new(120) # Bait length
 	$options.tileoffset = TkVariable.new(60) # Offset between tiled baits
 	$options.bait_type = TkVariable.new("RNA-DNA") # Hybridization type
@@ -1506,6 +1554,7 @@ def set_defaults
 	$options.blastlen = TkVariable.new(1) # Minimum length for BLAST hit
 	$options.evalue = TkVariable.new(0.1) # Maximum E-value to include BLAST hit
 	$options.evalue_filter = TkVariable.new(0) # Flag to filter BLAST hits by E-value
+	$options.inbed = TkVariable.new("") # Optional corresponding BED file for checkbaits
 	# Filtration Parameters
 	$options.params = TkVariable.new(0) # Flag to output filtration parameters
 	$options.no_lc = TkVariable.new(0) # Flag to disable linguistic complexity calculation for filtration
@@ -1547,6 +1596,7 @@ def set_defaults
 	$options.rna = TkVariable.new(0) # Flag whether baits are output as RNA
 	$options.rc = TkVariable.new(0) # Flag to output reverse complement baits
 	$options.gaps = TkVariable.new("include") # Flag to omit bait sequences with gaps
+	$options.altbaits = TkVariable.new("") # Alternative bait lengths (comma-separated)
 	$options.threeprime = TkVariable.new("") # 3' sequence addendum
 	$options.fiveprime = TkVariable.new("") # 5' sequence addendum
 	$options.fillin = TkVariable.new("") # Fill-in sequence motif
@@ -1585,7 +1635,7 @@ $next_btn = TkButton.new($root) do
 	place('x' => 660, 'y' => 520)
 end
 credit = TkLabel.new($root) do
-	text "Michael G. Campana, 2017-2020\nSmithsonian Conservation Biology Institute"
+	text "Michael G. Campana, 2017-2021\nSmithsonian Conservation Biology Institute"
 	borderwidth 5
 	font TkFont.new('times 12')
 	pack("side" => "bottom",  "padx"=> "50", "pady"=> "10")

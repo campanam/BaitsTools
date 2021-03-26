@@ -1,5 +1,5 @@
 # BaitsTools Change Log  
-Michael G. Campana, 2017-2020  
+Michael G. Campana, 2017-2021  
 Smithsonian Conservation Biology Institute  
 Contact: campanam@si.edu  
 
@@ -20,6 +20,9 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.7.0  
+altbaits option  
+
 ### Version 1.6.3  
 Log outputs total numbers of generated/filtered baits in addition to coverage  
 
@@ -128,6 +131,15 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.7.0  
+Improved selectsnps distance-based SNP deletion  
+Previously generated bait complementation in selectsnps  
+taxafile/popcategories no longer erroneously overrides every option  
+altbaits option required edits of write_files, cat_files  
+method checkpop removed  
+Fixed cat_files bug in snp_to_baits   
+Fixed file output bugs with stacks2baits  
+
 ### Version 1.6.8  
 improved gz_file_open takes block  
 Fa_Seq#make_DNA converts '?' bases to 'N' to prevent downstream bugs  
@@ -263,6 +275,19 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.7.0  
+Complement previous baits option  
+Interactive mode no longer prompts you to enter linguistic complexity if LC calculation disabled  
+vcf2baits/pyrad2baits/stacks2baits tiling offset can now be longer than bait length  
+vcf2baits/pyrad2baits/stacks2baits tiles per SNP can now be greater than length of bait/offset  
+altbaits option  
+gzip of log moved to end of baitstools script  
+Use of sum and any? methods for array requires Ruby >= 2.4.1  
+blast2baits and annot2baits no longer have erroneous --list option  
+method ynq to clean up yes/no questions in interactive prompt  
+checkbaits previously made BED filtering (--inbed option)  
+fixed bug that caused infinite loop in checkbaits interactive mode  
+
 ### Version 1.6.7  
 Capitalization of options that select between choices no longer matters  
 bed2baits description updated to include interval lists  
@@ -411,6 +436,14 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.7.0  
+Handling for previousbaits option  
+Every option for vcf2baits now bypasses taxafile/previousbaits screen  
+vcf2baits/pyrad2baits/stacks2baits tiling offset can now be longer than bait length  
+vcf2baits/pyrad2baits/stacks2baits tiles per SNP can now be greater than length of bait/offset  
+--inbed option handling for checkbaits  
+--altbaits option handling  
+
 ### Version 1.6.7  
 bed2baits list option capitalized to BED for consistency  
 
@@ -553,6 +586,11 @@ Region tiling code transferred to baitslib
 Preliminary script to generate baits from BLAST hit tables and a reference sequence  
 
 ## checkbaits  
+### Version 1.7.0  
+checkbaits previously made BED filtering (--inbed option)  
+--altbaits option  
+
+### Version 1.6.0  
 5' and 3' addenda  
 Sequence motif fill-in  
 Code-update and bug fixes  
@@ -604,8 +642,9 @@ Versioning added to header of script
 RVM default bug fixed  
 
 ## pyrad2baits  
-### Version 1.6.8  
+### Version 1.7.0  
 improved gz_file_open takes block  
+--altbaits option  
 
 ### Version 1.6.6  
 Removed eval statement from gz_file_open call  
@@ -630,6 +669,12 @@ pyrad2baits can produce an uncollapsed reference sequence
 Preliminary script to generate baits from PyRAD/ipyrad loci files  
 
 ## stacks2baits  
+### Version 1.7.0  
+--altbaits option  
+Fixed bug in which filtered TSV printed even if not filtering  
+Files labelled 'all' rather than 'betweenpops' when not sorting  
+Fixed file output bugs  
+
 ### Version 1.6.8  
 improved gz_file_open takes block  
 
@@ -664,6 +709,9 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
 ## tilebaits  
+### Version 1.7.0  
+altbaits option  
+
 ### Version 1.6.3  
 Log now notes total numbers of baits generated/filtered and the mean bait coverages across loci (rough mean: does not account for differences in source sequence lengths)  
 
@@ -729,6 +777,10 @@ Output now controlled by baitslib write_probes function
 Preliminary script to divide genic/genomic sequences into tiled baits
 
 ## vcf2baits  
+### Version 1.7.0  
+--altbaits option  
+Fixed glitches in Gzipping VCF output  
+
 ### Version 1.6.8  
 improved gz_file_open takes block  
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # stacks2baits
-STACKS2BAITSVER = "1.6.8"
-# Michael G. Campana, 2017-2020
+STACKS2BAITSVER = "1.7.0"
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -50,6 +50,26 @@ def write_stacks(header, snps, tag) # Method to write stacks output since repeat
 		for ssnp in snps[key]
 			write_file(tag + ".tsv", ssnp.line)
 		end
+	end
+	system("gzip #{resolve_unix_path($options.filestem + $options.infix + tag + '.tsv')}") if $options.gzip # Gzip filtered stacks tsv
+end
+#-----------------------------------------------------------------------------------------------
+def stacks_altbaits(stacksheader, snpset, refseq, infix, logheader = "") # Reduce redundant programming for multiple baits
+	write_file(".log.txt", logheader) if $options.log
+	unless $options.altbaits.nil?
+		baits = snp_to_baits(snpset, refseq, $options.baitlength, infix)
+		write_stacks(stacksheader, baits, infix + "-filtered") if $options.filter
+		tmp_baitlength = $options.baitlength # Save original baitlength to restore when needed
+		for altbait in $options.altbaits
+			$options.baitlength = altbait
+			write_file(".log.txt", "") if $options.log # Add a linebreak between subsequent entries
+			baits = snp_to_baits(snpset, refseq, altbait, infix)
+			write_stacks(stacksheader, baits, infix + "-filtered") if $options.filter
+		end
+		$options.baitlength = tmp_baitlength
+	else
+		baits = snp_to_baits(snpset, refseq, nil, infix)
+		write_stacks(stacksheader, baits, infix + "-filtered") if $options.filter
 	end
 end
 #-----------------------------------------------------------------------------------------------
@@ -130,40 +150,45 @@ def stacks2baits
 	end
 	# Select SNPs -- Note that there is no cross-referencing between types
 	print "** Selecting SNPs **\n"
-	write_file(".log.txt", "BetweenPopsVariants") if $options.log
+	if $options.log
+		if $options.sort
+			write_file(".log.txt", "BetweenPopsVariants")
+		else
+			write_file(".log.txt", "AllVariants")
+		end
+	end
 	selected_between = selectsnps(between_pops)
-	write_stacks(stacksheader, selected_between, "-betweenpops")
-	if $options.sort and $options.hwe
-		write_file(".log.txt", "InHWEVariants") if $options.log
-		selected_inhwe = selectsnps(in_hwe)
-		write_file(".log.txt", "OutHWEVariants") if $options.log
-		selected_outhwe = selectsnps(out_hwe)
-		write_stacks(stacksheader, selected_inhwe, "-inhwe")
-		write_stacks(stacksheader, selected_outhwe, "-outhwe")	
-	elsif $options.sort
-		write_file(".log.txt", "WithinPopsVariants") if $options.log
-		selected_within = selectsnps(within_pops)
-		write_stacks(stacksheader, selected_within, "-withinpops")
+	if $options.sort
+		write_stacks(stacksheader, selected_between, "-betweenpops")
+		if $options.hwe
+			write_file(".log.txt", "InHWEVariants") if $options.log
+			selected_inhwe = selectsnps(in_hwe)
+			write_file(".log.txt", "OutHWEVariants") if $options.log
+			selected_outhwe = selectsnps(out_hwe)
+			write_stacks(stacksheader, selected_inhwe, "-inhwe")
+			write_stacks(stacksheader, selected_outhwe, "-outhwe")
+		else
+			write_file(".log.txt", "WithinPopsVariants") if $options.log
+			selected_within = selectsnps(within_pops)
+			write_stacks(stacksheader, selected_within, "-withinpops")
+		end
+	else
+		write_stacks(stacksheader, selected_between, "-all")
 	end
 	# Output baits unless -p
 	if !$options.no_baits
 		print "** Reading reference sequence **\n"
 		refseq = read_fasta($options.refseq)
-		print "** Generating and filtering baits **\n"
-		write_file(".log.txt", "BetweenPopsVariantBaits") if $options.log
-		bbaits = snp_to_baits(selected_between, refseq, "-betweenpops")
-		write_stacks(stacksheader, bbaits, "-betweenpops-filtered")
-		if $options.sort and $options.hwe
-			write_file(".log.txt", "InHWEVariantBaits") if $options.log
-			ihbaits = snp_to_baits(selected_inhwe, refseq, "-inhwe")
-			write_file(".log.txt", "OutHWEVariantBaits") if $options.log
-			ohbaits = snp_to_baits(selected_outhwe,refseq, "-outhwe")
-			write_stacks(stacksheader, ihbaits, "-inhwe-filtered")
-			write_stacks(stacksheader, ohbaits, "-outhwe-filtered")
-		elsif $options.sort
-			wbaits = snp_to_baits(selected_within_pops, refseq, "-withinpops")
-			write_file(".log.txt", "WithinPopsVariantBaits") if $options.log
-			write_stacks(stacksheader, wbaits, "-withinpops-filtered")
+		if $options.sort
+			stacks_altbaits(stacksheader, selected_between, refseq, "-betweenpops", "BetweenPopsVariantBaits")
+			if $options.hwe
+				stacks_altbaits(stacksheader, selected_inhwe, refseq, "-inhwe", "InHWEVariantBaits")
+				stacks_altbaits(stacksheader, selected_outhwe, refseq, "-outhwe", "OutHWEVariantBaits")
+			else
+				stacks_altbaits(stacksheader, selected_within, refseq, "-withinpops", "WithinPopsVariantBaits")
+			end
+		else
+			stacks_altbaits(stacksheader, selected_between, refseq, "-all", "AllVariantBaits")
 		end
 	end
 end
