@@ -716,7 +716,20 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 	return selectsnps
 end
 #-----------------------------------------------------------------------------------------------
-def snp_to_baits(selectedsnps, refseq, filext = "")
+def snp_to_baits(selectedsnps, refseq, altbait = nil, filext = "")
+	logtext_infix = altbaits_infix(altbait)
+	baitline = ''
+	case filext
+	when "-betweenpops"
+		baitline = "(Between population variants) "
+	when "-inhwe"
+		baitline = "(Variants in HWE) "
+	when "-outwhe"
+		baitline = "(Variants out of HWE) "
+	when "-withinpops"
+		baitline = "(Within population variants) "
+	end
+	print "** Generating and filtering " + $options.baitlength + " bp baits " + baitline + "**\n"
 	if $options.params
 		paramline = "Chromosome:Coordinates\tSNP\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept"
 		write_file("-filtered-params.txt", paramline)
@@ -726,7 +739,7 @@ def snp_to_baits(selectedsnps, refseq, filext = "")
 	if $options.log
 		logs = []
 		refseq.size.times { logs.push([]) }
-		logtext = "Chromosome\tVariant\tNumberBaits\tRetainedBaits\tExcludedBaits"
+		logtext = logtext_infix + "Chromosome\tVariant\tNumberBaits\tRetainedBaits\tExcludedBaits"
 		write_file(".log.txt", logtext)
 	end
 	@splits = setup_temp(refseq.size)

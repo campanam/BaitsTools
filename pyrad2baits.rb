@@ -117,7 +117,6 @@ def pyrad2baits
 		print "** Selecting variants **\n"
 		snp_hash = pyrad_to_selectsnps(@pyrad_loci)
 		@selectsnps = selectsnps(snp_hash)
-		print "** Generating and filtering baits **\n"
 		snp_to_baits(@selectsnps, refseq)
 	end
 end

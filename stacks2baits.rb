@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # stacks2baits
-STACKS2BAITSVER = "1.6.8"
-# Michael G. Campana, 2017-2020
+STACKS2BAITSVER = "1.7.0"
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -149,7 +149,6 @@ def stacks2baits
 	if !$options.no_baits
 		print "** Reading reference sequence **\n"
 		refseq = read_fasta($options.refseq)
-		print "** Generating and filtering baits **\n"
 		write_file(".log.txt", "BetweenPopsVariantBaits") if $options.log
 		bbaits = snp_to_baits(selected_between, refseq, "-betweenpops")
 		write_stacks(stacksheader, bbaits, "-betweenpops-filtered")

@@ -1,11 +1,23 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # vcf2baits
-VCF2BAITSVER = "1.6.8"
-# Michael G. Campana, 2017-2020
+VCF2BAITSVER = "1.7.0"
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
+def write_filtered_vcf(baits)
+	if $options.filter
+		write_file( "-filtered.vcf", vcffilt)
+		for i in 0 ... baits.size # Filtered snps
+			for snp in baits[baits.keys[i]]
+				write_file( "-filtered.vcf", snp.line)
+			end
+		end
+	end
+end
+
+#-----------------------------------------------------------------------------------------------
 def vcf2baits
 	# Read VCF file
 	@snps = {}
@@ -90,16 +102,20 @@ def vcf2baits
 	if !$options.no_baits
 		print "** Reading reference sequence **\n"
 		refseq = read_fasta($options.refseq)
-		print "** Generating and filtering baits **\n"
 		write_file(".log.txt", "VariantBaits") if $options.log
-		baits = snp_to_baits(@selectsnps, refseq)
-		if $options.filter
-			write_file( "-filtered.vcf", vcffilt)
-			for i in 0 ... baits.size # Filtered snps
-				for snp in baits[baits.keys[i]]
-					write_file( "-filtered.vcf", snp.line)
-				end
+		unless $options.altbaits.nil? # Tile baits under alternate lengths
+			baits = snp_to_baits(@selectsnps, refseq, $options.baitlength)
+			write_filtered_vcf(baits)
+			for altbait in $options.altbaits
+				$options.baitlength = altbait
+				write_file(".log.txt", "") if $options.log # Add a linebreak between subsequent entries
+				baits = snp_to_baits(@selectsnps, refseq, $options.baitlength)
+				write_filtered_vcf(baits)
 			end
+		else
+			baits = snp_to_baits(@selectsnps, refseq) # Baits without multibaits infix
+			write_filtered_vcf(baits)
 		end
+		
 	end
 end
