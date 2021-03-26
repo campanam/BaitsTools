@@ -729,7 +729,7 @@ def snp_to_baits(selectedsnps, refseq, altbait = nil, filext = "")
 	when "-withinpops"
 		baitline = "(Within population variants) "
 	end
-	print "** Generating and filtering " + $options.baitlength + " bp baits " + baitline + "**\n"
+	print "** Generating and filtering " + $options.baitlength.to_s + " bp baits " + baitline + "**\n"
 	if $options.params
 		paramline = "Chromosome:Coordinates\tSNP\tBaitLength\tGC%\tTm\tMasked%\tMaxHomopolymer\tSeqComplexity\tMeanQuality\tMinQuality\tNs\tGaps\tKept"
 		write_file("-filtered-params.txt", paramline)
