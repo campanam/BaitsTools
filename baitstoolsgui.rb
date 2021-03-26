@@ -82,6 +82,7 @@ def start_baitstools
 	cmdline << " -C" if $options.collapse_ambiguities == 1
 	cmdline << " -Y" if $options.rna == 1
 	cmdline << " -G " + $options.gaps
+	cmdline << " --altbaits " + $options.altbaits if $options.altbaits != ""
 	cmdline << " -5 " + $options.fiveprime if $options.fiveprime != ""
 	cmdline << " -3 " + $options.threeprime if $options.threeprime != ""
 	cmdline << " --fillin " + $options.fillin if $options.fillin != ""
@@ -746,49 +747,62 @@ def general_window
 		place('x' => 640, 'y' => 360)
 		width 10
 	end
+	altbait = TkLabel.new($root) do
+		text 'Alt. bait lengths (comma-separated list)'
+		font TkFont.new('times 20')
+		place('x' => 40, 'y' => 410)
+		pady 0
+	end
+	altbaitentry = TkEntry.new($root) do
+		textvariable $options.altbaits
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 380, 'y' => 410)
+		width 60
+	end
 	threeprime = TkLabel.new($root) do
 		text '3\' Sequence'
 		font TkFont.new('times 20')
-		place('x' => 270, 'y' => 400)
+		place('x' => 270, 'y' => 450)
 		pady 10
 	end
 	threeprimeentry = TkEntry.new($root) do
 		textvariable $options.threeprime
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 390, 'y' => 410)
+		place('x' => 390, 'y' => 460)
 		width 10
 	end
 	fiveprime = TkLabel.new($root) do
 		text '5\' Sequence'
 		font TkFont.new('times 20')
-		place('x' => 50, 'y' => 400)
+		place('x' => 50, 'y' => 450)
 		pady 10
 	end
 	fiveprimeentry = TkEntry.new($root) do
 		textvariable $options.fiveprime
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 170, 'y' => 410)
+		place('x' => 170, 'y' => 460)
 		width 10
 	end
 	noaddenda = TkCheckButton.new($root) do
 		variable $options.noaddenda
 		text "Exclude addenda from QC"
-		place('x' => 520, 'y' => 400)
+		place('x' => 520, 'y' => 450)
 	end
 	rng = TkLabel.new($root) do
 		text 'Random number seed'
 		font TkFont.new('times 20')
-		place('x' => 50, 'y' => 450)
+		place('x' => 50, 'y' => 500)
 		pady 10
 	end
 	rngentry = TkEntry.new($root) do
 		textvariable $options.rng
 		borderwidth 5
 		font TkFont.new('times 12')
-		place('x' => 240, 'y' => 460)
-		width 80
+		place('x' => 240, 'y' => 510)
+		width 60
 	end
 	configure_buttons([outdir, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gzip, noaddenda])
 	bed.state = shuffle.state = "disabled" if $options.algorithm == "checkbaits"
@@ -796,7 +810,8 @@ def general_window
 	rbed.state = "disabled" unless $options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "tilebaits" or $options.algorithm == "aln2baits"
 	outdir.width = rbed.width = rc.width = noaddenda.width = 20
 	ncbi.width = phred64.width = 15
-	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gzip, gaps, gapselect, threads, threadentry, rng, rngentry, threeprime, threeprimeentry, fiveprime, fiveprimeentry, noaddenda, fillin, fillinentry)
+	altbait.width = 35
+	$widgets.push(prefix, prefixentry, outdir, outdirlabel, bed, rbed, shuffle, log, ncbi, rna, rc, phred64, gzip, gaps, gapselect, threads, threadentry, altbait, altbaitentry, rng, rngentry, threeprime, threeprimeentry, fiveprime, fiveprimeentry, noaddenda, fillin, fillinentry)
 end
 #-----------------------------------------------------------------------------------------------
 def subcommand_window(subcommand)
@@ -1371,7 +1386,7 @@ def go_forward
 			elsif taxacnt[2] < 0
 				Tk::messageBox :message => 'The number of variants variable within populations must be at least 0.'
 				data_fails = true
-			elsif taxacnt[0] + taxacnt[1] + taxacnt[2] < 1  # Ruby 2.0 does not have Array#sum method
+			elsif taxacnt.sum < 1 
 				Tk::messageBox :message => 'The total number of variants must be greater than 0.'
 				data_fails = true
 			elsif $options.popcategories != "" # Check that population values are ok
@@ -1468,6 +1483,15 @@ def go_forward
 	when "General Options"
 		if $options.threads < 1
 			Tk::messageBox :message => 'Threads must be greater than 0.'
+		elsif $options.altbaits != ""
+			altbaits = $options.altbaits.value.split(",").map { |x| x.to_i }
+			if altbaits.any? { |x| x < 1 }
+				Tk::messageBox :message => 'Baits must at least 1 bp.'
+			elsif $options.algorithm == 'checkbaits' && altbaits.any? { |x| x > $options.baitlength }
+				Tk::messageBox :message => 'Alternate baits cannot be longer than previously generated baits.'
+			else
+				start_baitstools
+			end
 		else
 			start_baitstools
 		end
@@ -1572,6 +1596,7 @@ def set_defaults
 	$options.rna = TkVariable.new(0) # Flag whether baits are output as RNA
 	$options.rc = TkVariable.new(0) # Flag to output reverse complement baits
 	$options.gaps = TkVariable.new("include") # Flag to omit bait sequences with gaps
+	$options.altbaits = TkVariable.new("") # Alternative bait lengths (comma-separated)
 	$options.threeprime = TkVariable.new("") # 3' sequence addendum
 	$options.fiveprime = TkVariable.new("") # 5' sequence addendum
 	$options.fillin = TkVariable.new("") # Fill-in sequence motif
