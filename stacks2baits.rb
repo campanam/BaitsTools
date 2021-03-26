@@ -176,7 +176,11 @@ def stacks2baits
 	if !$options.no_baits
 		print "** Reading reference sequence **\n"
 		refseq = read_fasta($options.refseq)
-		stacks_altbaits(stacksheader, selected_between, refseq, "-betweenpops", "BetweenPopsVariantBaits")
+		if $options.sort
+			stacks_altbaits(stacksheader, selected_between, refseq, "-betweenpops", "BetweenPopsVariantBaits")
+		else
+			stacks_altbaits(stacksheader, selected_between, refseq, "-all", "AllVariantBaits")
+		end
 		if $options.sort and $options.hwe
 			stacks_altbaits(stacksheader, selected_inhwe, refseq, "-inhwe", "InHWEVariantBaits")
 			stacks_altbaits(stacksheader, selected_outhwe, refseq, "-outhwe", "OutHWEVariantBaits")
