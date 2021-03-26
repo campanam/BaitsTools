@@ -1018,6 +1018,7 @@ def get_command_line # Get command line for summary output
 			cmdline << " -a" if $options.alt_alleles
 		end
 	end
+	cmdline << " --inbed " + resolve_unix_path($options.inbed) unless $options.inbed.nil?
 	cmdline << " -o " + resolve_unix_path($options.outprefix)
 	cmdline << " -Z " + resolve_unix_path($options.outdir)
 	cmdline << " -l" if $options.log

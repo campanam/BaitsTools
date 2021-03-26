@@ -70,6 +70,7 @@ def start_baitstools
 			cmdline << " -a" if $options.alt_alleles
 		end
 	end
+	cmdline << " --inbed " + resolve_unix_path($options.inbed.to_s) if $options.inbed != ""
 	cmdline << " -o " + resolve_unix_path($options.outprefix.to_s)
 	cmdline << " -Z " + resolve_unix_path($options.outdir.to_s)
 	cmdline << " -l" if $options.log == 1
@@ -437,6 +438,23 @@ def reference_window(winy = 150)
 		pady 10
 	end
 	$widgets.push($reffile, $reflabel)
+end
+#-----------------------------------------------------------------------------------------------
+def inbed_window(winy = 150)
+	$inbedfile = TkButton.new($root) do
+		text 'BED file (optional)'
+		command '$options.inbed.value = Tk.getOpenFile'
+		place('x' => 50, 'y' => winy)
+	end
+	configure_buttons([$inbedfile])
+	$inbedfile.width = 20
+	$inbedlabel = TkLabel.new($root) do
+		textvariable $options.inbed
+		font TkFont.new('times 12')
+		place('x' => 300, 'y' => winy)
+		pady 10
+	end
+	$widgets.push($inbedfile, $inbedlabel)
 end
 #-----------------------------------------------------------------------------------------------
 def feature_window
@@ -817,7 +835,8 @@ def subcommand_window(subcommand)
 		inputlabel = "Input BLAST table"
 		blast_window
 	when "checkbaits"
-		length_window
+		length_window(200)
+		inbed_window
 		inputlabel = "Input FASTA/FASTQ"
 	when "pyrad2baits"
 		length_window
@@ -1511,6 +1530,7 @@ def set_defaults
 	$options.blastlen = TkVariable.new(1) # Minimum length for BLAST hit
 	$options.evalue = TkVariable.new(0.1) # Maximum E-value to include BLAST hit
 	$options.evalue_filter = TkVariable.new(0) # Flag to filter BLAST hits by E-value
+	$options.inbed = TkVariable.new("") # Optional corresponding BED file for checkbaits
 	# Filtration Parameters
 	$options.params = TkVariable.new(0) # Flag to output filtration parameters
 	$options.no_lc = TkVariable.new(0) # Flag to disable linguistic complexity calculation for filtration
