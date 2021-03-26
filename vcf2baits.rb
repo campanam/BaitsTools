@@ -14,6 +14,9 @@ def write_filtered_vcf(baits, vcffilt)
 				write_file( "-filtered.vcf", snp.line)
 			end
 		end
+		if $options.gzip
+			system("gzip #{resolve_unix_path($options.filestem + $options.infix + '-filtered.vcf')}")
+		end
 	end
 end
 
@@ -96,6 +99,9 @@ def vcf2baits
 			for snp in @selectsnps[@selectsnps.keys[i]]
 				write_file("-selected.vcf", snp.line)
 			end
+		end
+		if $options.gzip
+			system("gzip #{resolve_unix_path($options.filestem + '-selected.vcf')}")
 		end
 	end
 	# Output bait sequences unless -p

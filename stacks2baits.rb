@@ -57,16 +57,19 @@ def stacks_altbaits(stacksheader, snpset, refseq, infix, logheader = "") # Reduc
 	write_file(".log.txt", logheader) if $options.log
 	unless $options.altbaits.nil?
 		baits = snp_to_baits(snpset, refseq, $options.baitlength, infix)
-		write_stacks(stacksheader, baits, $options.baitlength.to_s + "-" + infix + "-filtered") if $options.filter
+		write_stacks(stacksheader, baits, infix + "-filtered") if $options.filter
 		for altbait in $options.altbaits
 			$options.baitlength = altbait
 			write_file(".log.txt", "") if $options.log # Add a linebreak between subsequent entries
 			baits = snp_to_baits(snpset, refseq, altbait, infix)
-			write_stacks(stacksheader, baits, altbait.to_s + "-" + infix + "-filtered") if $options.filter
+			write_stacks(stacksheader, baits, infix + "-filtered") if $options.filter
 		end
 	else
 		baits = snp_to_baits(snpset, refseq, nil, infix)
 		write_stacks(stacksheader, baits, infix + "-filtered") if $options.filter
+		if $options.gzip # Gzip filtered stacks tsv
+			system("gzip #{resolve_unix_path($options.filestem + infix + '-filtered.tsv')}")
+		end
 	end
 end
 #-----------------------------------------------------------------------------------------------

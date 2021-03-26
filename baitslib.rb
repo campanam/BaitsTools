@@ -862,7 +862,6 @@ def snp_to_baits(selectedsnps, refseq, altbait = nil, filext = "")
 	threads.each { |thr| thr.join }
 	files_to_concat = [filext + "-baits.fa"]
 	files_to_concat.push(filext + "-baits.bed") if $options.coords
-	files_to_concat.push(filext + ".tsv") if $options.algorithm = "stacks2baits"
 	if $options.filter
 		files_to_concat.push(filext + "-filtered-baits.fa")
 		files_to_concat.push(filext + "-filtered-params.txt") if $options.params
