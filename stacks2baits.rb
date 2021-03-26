@@ -62,7 +62,7 @@ def stacks_altbaits(stacksheader, snpset, refseq, infix, logheader = "") # Reduc
 			$options.baitlength = altbait
 			write_file(".log.txt", "") if $options.log # Add a linebreak between subsequent entries
 			baits = snp_to_baits(snpset, refseq, altbaits, infix)
-			write_stacks(stacksheader, baits, altbaits.to_s + "-" + infix + "-filtered") if $options.filter
+			write_stacks(stacksheader, baits, altbait.to_s + "-" + infix + "-filtered") if $options.filter
 		end
 	else
 		baits = snp_to_baits(snpset, refseq, nil, infix)
@@ -184,7 +184,6 @@ def stacks2baits
 		if $options.sort and $options.hwe
 			stacks_altbaits(stacksheader, selected_inhwe, refseq, "-inhwe", "InHWEVariantBaits")
 			stacks_altbaits(stacksheader, selected_outhwe, refseq, "-outhwe", "OutHWEVariantBaits")
-			write_file(".log.txt", "InHWEVariantBaits") if $options.log
 		elsif $options.sort
 			stacks_altbaits(stacksheader, selected_within, refseq, "-withinpops", "WithinPopsVariantBaits")
 		end
