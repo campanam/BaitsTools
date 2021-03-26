@@ -854,11 +854,14 @@ def snp_to_baits(selectedsnps, refseq, altbait = nil, filext = "")
 		}
 	end
 	threads.each { |thr| thr.join }
-	if $options.coords
-		cat_files([filext + "-baits.fa", filext + "-baits.bed", filext + "-filtered-baits.fa", filext + "-filtered-baits.bed", filext + "-filtered-params.txt"])
-	else
-		cat_files([filext + "-baits.fa", filext + "-filtered-baits.fa", filext + "-filtered-params.txt"])
+	files_to_concat = [filext + "-baits.fa"]
+	files_to_concat.push(filext + "-baits.bed") if $options.coords
+	if $options.filter
+		files_to_concat.push(filext + "-filtered-baits.fa")
+		files_to_concat.push(filext + "-filtered-params.txt") if $options.params
+		files_to_concat.push(filext + "-filtered-baits.bed") if $options.coords
 	end
+	cat_files(files_to_concat)
 	if $options.log
 		vlogs = [[],[]]
 		for i in 0 ... logs.size
