@@ -720,6 +720,8 @@ def snp_to_baits(selectedsnps, refseq, altbait = nil, filext = "")
 	logtext_infix = altbaits_infix(altbait)
 	baitline = ''
 	case filext
+	when "-all"
+		baitline = "(all variants)"
 	when "-betweenpops"
 		baitline = "(between population variants) "
 	when "-inhwe"

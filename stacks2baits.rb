@@ -147,9 +147,19 @@ def stacks2baits
 	end
 	# Select SNPs -- Note that there is no cross-referencing between types
 	print "** Selecting SNPs **\n"
-	write_file(".log.txt", "BetweenPopsVariants") if $options.log
+	if $options.log
+		if $options.sort
+			write_file(".log.txt", "BetweenPopsVariants")
+		else
+			write_file(".log.txt", "AllVariants")
+		end
+	end
 	selected_between = selectsnps(between_pops)
-	write_stacks(stacksheader, selected_between, "-betweenpops")
+	if $options.sort
+		write_stacks(stacksheader, selected_between, "-betweenpops")
+	else
+		write_stacks(stacksheader, selected_between, "-all")
+	end
 	if $options.sort and $options.hwe
 		write_file(".log.txt", "InHWEVariants") if $options.log
 		selected_inhwe = selectsnps(in_hwe)
