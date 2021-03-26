@@ -283,7 +283,7 @@ gzip of log moved to end of baitstools script
 Use of sum and any? methods for array requires Ruby >= 2.4.1  
 blast2baits and annot2baits no longer have erroneous --list option  
 method ynq to clean up yes/no questions in interactive prompt  
-checkbaits previously made BED filtering  
+checkbaits previously made BED filtering (--inbed option)  
 fixed bug that caused infinite loop in checkbaits interactive mode  
 
 ### Version 1.6.7  
@@ -582,6 +582,11 @@ Region tiling code transferred to baitslib
 Preliminary script to generate baits from BLAST hit tables and a reference sequence  
 
 ## checkbaits  
+### Version 1.7.0  
+checkbaits previously made BED filtering (--inbed option)  
+--altbaits option  
+
+### Version 1.6.0  
 5' and 3' addenda  
 Sequence motif fill-in  
 Code-update and bug fixes  
