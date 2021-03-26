@@ -721,13 +721,13 @@ def snp_to_baits(selectedsnps, refseq, altbait = nil, filext = "")
 	baitline = ''
 	case filext
 	when "-betweenpops"
-		baitline = "(Between population variants) "
+		baitline = "(between population variants) "
 	when "-inhwe"
-		baitline = "(Variants in HWE) "
+		baitline = "variants in HWE) "
 	when "-outwhe"
-		baitline = "(Variants out of HWE) "
+		baitline = "(variants out of HWE) "
 	when "-withinpops"
-		baitline = "(Within population variants) "
+		baitline = "(within population variants) "
 	end
 	print "** Generating and filtering " + $options.baitlength.to_s + " bp baits " + baitline + "**\n"
 	if $options.params
