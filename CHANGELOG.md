@@ -131,6 +131,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.7.1  
+Fixed a glitch in selectsnps which caused a crash if no suitable SNPs were found after taxonomic sorting  
+
 ### Version 1.7.0  
 Improved selectsnps distance-based SNP deletion  
 Previously generated bait complementation in selectsnps  
