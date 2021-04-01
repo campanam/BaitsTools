@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.7.0"
+BAITSLIBVER = "1.7.1"
 # Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -617,67 +617,73 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 				popcategories[key] = 0
 			end
 		end
-		for i in 1..$options.totalsnps
-			selected_contig = snp_hash.keys[rand(snp_hash.size)] # Get name of contig
-			snpindex = rand(snp_hash[selected_contig].size)
-			selected_snp = snp_hash[selected_contig][snpindex]
-			# Delete SNPs that are too close
-			snp_hash[selected_contig].delete_if { |snp| (snp.snp - selected_snp.snp).abs < $options.distance }
-			# Add SNP to selected pool and delete contigs if maximum number of SNPs reached or no remaining SNPs on contig
-			selectsnps[selected_contig] = [] if selectsnps[selected_contig].nil?
-			selectsnps[selected_contig].push(selected_snp)
-			snp_hash[selected_contig].delete(selected_snp) # So it cannot be reselected
-			# Delete remaining SNPs of category if maximum amount reached
-			if $options.taxafile != nil
-				case selected_snp.category
-				when "AllPopulations"
-					all_populations += 1
-					if all_populations == $options.taxacount[0]
-						for chromo in snp_hash.keys
-							snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" }
-							snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+		if snp_hash.size == 0 # If no suitable SNPs found, print error rather than crashing
+			$stderr.puts "** No suitable SNPs found. Exiting. **"
+			write_file(".log.txt", "\nNo suitable SNPs found. Run aborted.") if $options.log
+			exit
+		else
+			for i in 1..$options.totalsnps
+				selected_contig = snp_hash.keys[rand(snp_hash.size)] # Get name of contig
+				snpindex = rand(snp_hash[selected_contig].size)
+				selected_snp = snp_hash[selected_contig][snpindex]
+				# Delete SNPs that are too close
+				snp_hash[selected_contig].delete_if { |snp| (snp.snp - selected_snp.snp).abs < $options.distance }
+				# Add SNP to selected pool and delete contigs if maximum number of SNPs reached or no remaining SNPs on contig
+				selectsnps[selected_contig] = [] if selectsnps[selected_contig].nil?
+				selectsnps[selected_contig].push(selected_snp)
+				snp_hash[selected_contig].delete(selected_snp) # So it cannot be reselected
+				# Delete remaining SNPs of category if maximum amount reached
+				if $options.taxafile != nil
+					case selected_snp.category
+					when "AllPopulations"
+						all_populations += 1
+						if all_populations == $options.taxacount[0]
+							for chromo in snp_hash.keys
+								snp_hash[chromo].delete_if { |snp| snp.category == "AllPopulations" }
+								snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+							end
 						end
-					end
-				when "BetweenPopulations"
-					between_populations += 1
-					if between_populations == $options.taxacount[1]
-						for chromo in snp_hash.keys
-							snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" }
-							snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+					when "BetweenPopulations"
+						between_populations += 1
+						if between_populations == $options.taxacount[1]
+							for chromo in snp_hash.keys
+								snp_hash[chromo].delete_if { |snp| snp.category == "BetweenPopulations" }
+								snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+							end
 						end
-					end
-				when "WithinPopulations"
-					within_populations += 1
-					unless $options.popcategories.nil? # Remove unwanted population-specific SNPs
-						for popcat in $options.popcategories.keys
-							popcategories[popcat] += 1 if selected_snp.popcategory.include?(popcat)
-							if popcategories[popcat] == $options.popcategories[popcat]
-								for chromo in snp_hash.keys
-									snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) }
-									snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+					when "WithinPopulations"
+						within_populations += 1
+						unless $options.popcategories.nil? # Remove unwanted population-specific SNPs
+							for popcat in $options.popcategories.keys
+								popcategories[popcat] += 1 if selected_snp.popcategory.include?(popcat)
+								if popcategories[popcat] == $options.popcategories[popcat]
+									for chromo in snp_hash.keys
+										snp_hash[chromo].delete_if { |snp| snp.popcategory.include?(popcat) }
+										snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+									end
 								end
 							end
 						end
-					end
-					if within_populations == $options.taxacount[2]
-						for chromo in snp_hash.keys
-							snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations" }
-							snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+						if within_populations == $options.taxacount[2]
+							for chromo in snp_hash.keys
+								snp_hash[chromo].delete_if { |snp| snp.category == "WithinPopulations" }
+								snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+							end
 						end
 					end
 				end
-			end
-			if $options.scale
-				maxsize = $options.scalehash[selected_contig]
-			else
-				maxsize = $options.maxsnps
-			end
-			unless snp_hash[selected_contig].nil?
-				if selectsnps[selected_contig].size == maxsize or snp_hash[selected_contig].size == 0
-					snp_hash.delete_if {|key, value | key == selected_contig}
+				if $options.scale
+					maxsize = $options.scalehash[selected_contig]
+				else
+					maxsize = $options.maxsnps
 				end
+				unless snp_hash[selected_contig].nil?
+					if selectsnps[selected_contig].size == maxsize or snp_hash[selected_contig].size == 0
+						snp_hash.delete_if {|key, value | key == selected_contig}
+					end
+				end
+				break if snp_hash.size == 0 # Stop selecting SNPs when all contigs deleted from consideration
 			end
-			break if snp_hash.size == 0 # Stop selecting SNPs when all contigs deleted from consideration
 		end
 	else
 		selectsnps = snp_hash
