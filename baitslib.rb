@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.7.1"
+BAITSLIBVER = "1.7.2"
 # Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -582,9 +582,11 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 					chromo = line_arr[0]
 					seqst = line_arr[1].to_i + 1 # Convert to 1-based indexing to compare with VCF
 					seqend = line_arr[2].to_i
-					snp_hash[chromo].delete_if { |snp| (snp.snp - seqst).abs < $options.distance }
-					snp_hash[chromo].delete_if { |snp| (snp.snp - seqend).abs < $options.distance }
-					snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+					unless snp_hash[chromo].nil? # Prevent nil error if previous baits includes a chr not included with new VCF
+						snp_hash[chromo].delete_if { |snp| (snp.snp - seqst).abs < $options.distance }
+						snp_hash[chromo].delete_if { |snp| (snp.snp - seqend).abs < $options.distance }
+						snp_hash.delete_if {|key, value | key == chromo} if snp_hash[chromo].size == 0
+					end
 				end
 			end
 		end
