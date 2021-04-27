@@ -131,6 +131,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.7.2  
+Fixed a glitch in selectsnps which caused a crash if previous baits specify a chr not found in current VCF  
+
 ### Version 1.7.1  
 Fixed a glitch in selectsnps which caused a crash if no suitable SNPs were found after taxonomic sorting  
 
