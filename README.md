@@ -300,10 +300,7 @@ Bait melting temperatures are calculated according to salt-adjusted formulas for
 
 2. Sequence characters in lowercase are considered masked by BaitsTools. This only impacts the optional `--maxmask` filter.  
 
-3. While BaitsTools can read wrapped FASTA and FASTQ files, this will slow the program down tremendously. Remove extraneous line breaks in reference sequences before running bait generation. A simple way is using the awk command [6]:  
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`awk '!/^>/ { printf "%s", $0; n = "\n" } /^>/ { print n $0; n = "" } END { printf "%s", n }' \`  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<input.fasta> > <output.fasta>`  
+3. While BaitsTools can read wrapped FASTA and FASTQ files, this will slow the program down tremendously. Remove extraneous line breaks in reference sequences before running bait generation. A simple way using awk is available [here](https://stackoverflow.com/questions/15857088/remove-line-breaks-in-a-fasta-file.)[6].   
 
 4. If BaitsTools is running slowly, try using the Rubinius Ruby compiler (https://rubinius.com/). Rubinius can multithread across multiple processors, while the standard Ruby interpreter only uses one processor (despite the number of requested threads).  
 
