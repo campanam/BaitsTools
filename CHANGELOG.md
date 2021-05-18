@@ -92,6 +92,9 @@ Corrected double-tabbed output in parameters output
 Preliminary script to generate weighted bait set from a fasta alignment  
 
 ## annot2baits  
+### Version 1.7.3  
+Fixing missing reference sequence bug  
+
 ### Version 1.6.8  
 improved gz_file_open takes block  
 
