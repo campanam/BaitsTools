@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # annot2baits
-ANNOT2BAITSVER = "1.6.8"
-# Michael G. Campana, 2017-2020
+ANNOT2BAITSVER = "1.7.3"
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -29,12 +29,16 @@ def annot2baits
 				seqend = line_arr[4].to_i - 1 + $options.pad # Correct for 0-based counting and padding
 				unless feature.nil? # Skip bad feature lines such as line breaks
 					if $options.features.include?(feature.upcase) # test whether included feature
-						seqst, seqend, seqcycles = get_looped_sequence(refhash, chromo, seqst, seqend)
-						seq = get_padded_faseq(refhash, chromo, seqst, seqend, seqcycles) 
-						regions.push(seq)
-						if $options.log
-							write_file(".log.txt", seq.header + "\t" + chromo + "\t" + (seqst+1).to_s + "\t" + (seqend+1).to_s + "\t" + seq.seq.length.to_s)
-							totallength += seq.seq.length
+						if refhash.include?(chromo)
+							seqst, seqend, seqcycles = get_looped_sequence(refhash, chromo, seqst, seqend)
+							seq = get_padded_faseq(refhash, chromo, seqst, seqend, seqcycles) 
+							regions.push(seq)
+							if $options.log
+								write_file(".log.txt", seq.header + "\t" + chromo + "\t" + (seqst+1).to_s + "\t" + (seqend+1).to_s + "\t" + seq.seq.length.to_s)
+								totallength += seq.seq.length
+							end
+						else
+							print "** Chromosome " + chromo + " not found in reference sequence file. **\n"
 						end
 					end
 				end
