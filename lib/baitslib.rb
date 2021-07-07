@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.7.3"
+BAITSLIBVER = "1.7.4"
 # Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ class Chromo_SNP # Container for SNPs
 end
 #-----------------------------------------------------------------------------------------------
 def mean(val = [])
-	mean = val.reduce(:+).to_f
+	mean = val.sum.to_f
 	mean /= val.size
 	return mean
 end
