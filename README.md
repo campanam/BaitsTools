@@ -37,49 +37,39 @@ The software is made available under the Smithsonian Institution [terms of use](
 12. [References](#References)  
 
 ## Installation  
-### Basic Installation  
 *Ruby >= 2.4.1 is required as of BaitsTools version 1.7.0. BaitsTools versions <= 1.6.8.1 are compatible with Ruby >= 2.0.0.*  
+General instructions for installation using RubyGems/Bundler and specific instructions for macOS are provided below. You can test your BaitsTools installation by running the tutorials included in the example_data directory. The archive "tutorial.tgz" includes the expected output of each tutorial. Note that vcf2baits and stacks2baits output will vary slightly due to the random number generator.  
 
-In a terminal window, execute the following commands:  
+### Installation using RubyGems and Bundler  
+The BaitsTools executables can be installed using RubyGems and Bundler (available on most UNIX-like operating systems with [Ruby](www.ruby-lang.org) and [RubyGems](www.rubygems.org) installed). See instructions for macOS below as macOS requires the [Ruby Version Manager](https://get.rvm.io) to manually install Ruby gems. See the Ruby and RubyGems documentation for installation on other operating systems.  
 
-`git clone "https://github.com/campanam/BaitsTools/"`  
-`cd BaitsTools`  
-`chmod +x *.rb`  
+In a terminal window, execute the following command:  
 
-Optionally, the Ruby files (.rb files) can be placed within the user’s $PATH so that they can be executed from any location. Depending on your operating system, you may need to change the shebang lines in the scripts (first lines starting with #!) to specify the path of your Ruby executable.  
+`gem install baitstools --source "https://rubygems.pkg.github.com/campanam"`  
 
-You can test your BaitsTools installation by running the tutorials included in the example data. The archive "tutorial.tgz" includes the expected output of each tutorial. Note that vcf2baits and stacks2baits output will vary slightly due to the random number generator.  
 
-### GUI Installation  
-The GUI requires the Ruby gem 'tk' (typically installed using `gem install tk` on most UNIX-like operating systems with the appropriate RubyGems package installed). macOS requires the [Ruby Version Manager](https://get.rvm.io) to manually install Ruby gems. The GUI requires BaitsTools Ruby files to be in your $PATH. Please note that the GUI has only been tested on macOS and may not work well on other operating systems. Due to its requirement of external dependencies, the GUI can be difficult to install. I have included instructions for automatic and manual installation on macOS. Please report any encountered bugs using the Bug Report issues template.  
+### macOS Installation  
+macOS uses a deprecated version of Tcl-Tk as its default Tk framework. If you have compilation issues with the tk gem, install [ActiveTcl 8.5](https://www.activestate.com/products/activetcl/downloads/) and then reinstall the tk gem (`gem install tk`). Please note that the tk gem is not currently compatible with Tcl-Tk 8.6, so you will need to install the 8.5 version.  
 
-_Automatic GUI Installation (macOS):_  
-For macOS users, there is a script `osx_install.sh` that will automatically install the scripts and modify your $PATH variable as needed. It will also install the [Ruby Version Manager](https://rvm.io/) and the tk gem. To install using the script: 
+_Automatic Installation (macOS):_  
+For macOS users, there is a script `osx_install.sh` that will automatically install the [Ruby Version Manager](https://rvm.io/) and the BaitsTools gem. To install using the script: 
 
 `git clone "https://github.com/campanam/BaitsTools/"`  
 `cd BaitsTools`  
 `bash osx_install.sh`  
-
-Afterwards, relaunch your terminal window.  
 
 _Manual Installation (macOS):_  
 Enter the following commands (step annotations are provided after the highlighted text to help debug):
 
 `curl -sSL https://get.rvm.io | bash -s stable`:  Install the Ruby Version Manager.  
 `source ~/.rvm/scripts/rvm`: Source the RVM scripts.  
-`rvm install 2.7.3`: Install RVM Ruby 2.7.2.  
-`rvm --default use 2.7.3`: Set Ruby 2.7.2 as default.  
-`gem install tk`: Install the latest 'tk' version.  
-`gem install shell`: Install the 'shell' gem. *NOTE: 'shell' was bundled with Ruby versions < 2.7. This step is not required for Ruby versions < 2.7*.  
-`git clone "https://github.com/campanam/BaitsTools/"`: Download BaitsTools.  
-`cd BaitsTools`  
-`chmod +x *.rb`: Make BaitsTools' scripts executable.  
-`sudo mv *.rb /usr/local/bin/`: Move scripts to your $PATH.  
+`rvm install 3.0`: Install RVM Ruby 3.0.  
+`rvm --default use 3.0`: Set Ruby 3.0 as default.  
+`gem install baitstools --source "https://rubygems.pkg.github.com/campanam"`: Install the latest BaitsTools gem.  
 
-_GUI Installation Notes:_
+_macOS Installation Notes:_
 1. The Ruby Version Manager uses Homebrew. During installation you may need to give an administrator password and authorization to install/update Homebrew.  
 2. macOS does not include gpg for key verification. Although not necessary, gpg can be installed with Homebrew if you wish to verify your Ruby Version Manager installation using the mpapis public key (see [RVM Installation](https://rvm.io/rvm/install)).  
-3. macOS uses a deprecated version of Tcl-Tk as its default Tk framework. If you have compilation issues with the tk gem, install [ActiveTcl 8.5](https://www.activestate.com/products/activetcl/downloads/) and then reinstall the tk gem. Please note that the tk gem is not currently compatible with Tcl-Tk 8.6, so you will need to install the 8.5 version.  
 
 ## Execution  
 *As of BaitsTools 2.7.4, the executable is now 'baitstools' rather than 'baitstools.rb'.*  
@@ -100,7 +90,10 @@ A list of all subcommand-specific arguments (see 'Subcommand Arguments' below) i
 
 ### GUI Mode
 *As of BaitsTools 2.7.4, the executable is now 'baitstoolsgui' rather than 'baitstoolsgui.rb'.*  
+
 Enter the command: `baitstoolsgui`  
+
+Please note that the GUI has only been tested on macOS and may not work well on other operating systems.  
 
 ## Tutorial and Example Data  
 A tutorial and example data are available in the example_data subdirectory of the BaitsTools repository. The ipyrad.loci file is from the [ipyrad tutorial documentation](https://ipyrad.readthedocs.io/en/latest/tutorial_intro_cli.html) [1].  
