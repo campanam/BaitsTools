@@ -134,6 +134,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.7.4  
+mean method uses .sum rather than .reduce(:+)  
+
 ### Version 1.7.2  
 Fixed a glitch in selectsnps which caused a crash if previous baits specify a chr not found in current VCF  
 
