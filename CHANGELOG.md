@@ -284,7 +284,7 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
-### Version 1.7.3-gem  
+### Version 1.7.4  
 Conversion to a RubyGem  
 
 ### Version 1.7.0  
@@ -448,7 +448,7 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
-### Version 1.7.3-gem  
+### Version 1.7.4  
 Conversion to a RubyGem  
 
 ### Version 1.7.0  
