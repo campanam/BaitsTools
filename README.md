@@ -66,7 +66,7 @@ Enter the following commands (step annotations are provided after the highlighte
 
 `curl -sSL https://get.rvm.io | bash -s stable`:  Install the Ruby Version Manager.  
 `source ~/.rvm/scripts/rvm`: Source the RVM scripts.  
-`rvm install 3.0`: Install RVM Ruby 3.0.  
+`rvm install 3.0`: Install Ruby 3.0.  
 `rvm --default use 3.0`: Set Ruby 3.0 as default.  
 `git clone https://github.com/campanam/baitstools`: Download the BaitsTools repository.  
 `cd baitstools`: Enter the baitstools directory.  
@@ -74,7 +74,7 @@ Enter the following commands (step annotations are provided after the highlighte
 `gem install baitstools-1.7.4.gem`: Install the BaitsTools gem.  
 
 _macOS Installation Notes:_
-1. The Ruby Version Manager uses Homebrew. During installation you may need to give an administrator password and authorization to install/update Homebrew.  
+1. The Ruby Version Manager uses [Homebrew](https://brew.sh). During installation you may need to give an administrator password and authorization to install/update Homebrew.  
 2. macOS does not include gpg for key verification. Although not necessary, gpg can be installed with Homebrew if you wish to verify your Ruby Version Manager installation using the mpapis public key (see [RVM Installation](https://rvm.io/rvm/install)).  
 
 ### Uninstallation  
