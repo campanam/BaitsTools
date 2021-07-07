@@ -54,7 +54,7 @@ You can test your BaitsTools installation by running the tutorials included in t
 The GUI requires the Ruby gem 'tk' (typically installed using `gem install tk` on most UNIX-like operating systems with the appropriate RubyGems package installed). macOS requires the [Ruby Version Manager](https://get.rvm.io) to manually install Ruby gems. The GUI requires BaitsTools Ruby files to be in your $PATH. Please note that the GUI has only been tested on macOS and may not work well on other operating systems. Due to its requirement of external dependencies, the GUI can be difficult to install. I have included instructions for automatic and manual installation on macOS. Please report any encountered bugs using the Bug Report issues template.  
 
 _Installation on macOS Mojave:_  
-The tk gem will not compile correctly on macOS Mojave using the default Tk framework. Install [ActiveTcl 8.5](https://www.activestate.com/products/activetcl/downloads/) and then follow the steps described below. Please note that the tk gem is not currently compatible with Tcl-Tk 8.6, so you will need to install the 8.5 version.  
+The tk gem will not compile correctly on macOS Mojave using the default Tk framework. 
 
 _Automatic GUI Installation (macOS):_  
 For macOS users, there is a script `osx_install.sh` that will automatically install the scripts and modify your $PATH variable as needed. It will also install the [Ruby Version Manager](https://rvm.io/) and the tk gem. To install using the script: 
@@ -65,13 +65,13 @@ For macOS users, there is a script `osx_install.sh` that will automatically inst
 
 Afterwards, relaunch your terminal window.  
 
-_Manual GUI Installation (macOS):_  
+_Manual Installation (macOS):_  
 Enter the following commands (step annotations are provided after the highlighted text to help debug):
 
 `curl -sSL https://get.rvm.io | bash -s stable`:  Install the Ruby Version Manager.  
 `source ~/.rvm/scripts/rvm`: Source the RVM scripts.  
-`rvm install 2.7.2`: Install RVM Ruby 2.7.2.  
-`rvm --default use 2.7.2`: Set Ruby 2.7.2 as default.  
+`rvm install 2.7.3`: Install RVM Ruby 2.7.2.  
+`rvm --default use 2.7.3`: Set Ruby 2.7.2 as default.  
 `gem install tk`: Install the latest 'tk' version.  
 `gem install shell`: Install the 'shell' gem. *NOTE: 'shell' was bundled with Ruby versions < 2.7. This step is not required for Ruby versions < 2.7*.  
 `git clone "https://github.com/campanam/BaitsTools/"`: Download BaitsTools.  
@@ -82,26 +82,28 @@ Enter the following commands (step annotations are provided after the highlighte
 _GUI Installation Notes:_
 1. The Ruby Version Manager uses Homebrew. During installation you may need to give an administrator password and authorization to install/update Homebrew.  
 2. macOS does not include gpg for key verification. Although not necessary, gpg can be installed with Homebrew if you wish to verify your Ruby Version Manager installation using the mpapis public key (see [RVM Installation](https://rvm.io/rvm/install)).  
+3. macOS uses a deprecated version of Tcl-Tk as its default Tk framework. If you have compilation issues with the tk gem, install [ActiveTcl 8.5](https://www.activestate.com/products/activetcl/downloads/) and then reinstall the tk gem. Please note that the tk gem is not currently compatible with Tcl-Tk 8.6, so you will need to install the 8.5 version.  
 
 ## Execution  
-Executing the command `ruby baitstools.rb` (or `baitstools.rb` if the .rb files are moved to a location within the $PATH) will display the splash screen listing the available subcommands.  
+*As of BaitsTools 2.7.4, the executable is now 'baitstools' rather than 'baitstools.rb'.*  
+
+Executing the command `baitstools` will display the splash screen listing the available subcommands.  
 
 ### Interactive Mode  
-To enter interactive mode, enter the command `ruby baitstools.rb [subcommand]` without further arguments. This will bring up a series of subcommand-specific interactive prompts. Upon execution, the program will print to the screen the command-line parameters that correspond to the prompt responses for future replication.  
+To enter interactive mode, enter the command `baitstools [subcommand]` without further arguments. This will bring up a series of subcommand-specific interactive prompts. Upon execution, the program will print to the screen the command-line parameters that correspond to the prompt responses for future replication.  
 
 ### Command-line Mode  
-To use the command-line mode, enter the command `ruby baitstools.rb [subcommand]` with needed arguments. The program will prompt for corrections to parameters that cannot be processed as stated (e.g. missing reference sequences). Upon execution, the program will print to the screen the interpreted command-line parameters for future replication.  
+To use the command-line mode, enter the command `baitstools [subcommand]` with needed arguments. The program will prompt for corrections to parameters that cannot be processed as stated (e.g. missing reference sequences). Upon execution, the program will print to the screen the interpreted command-line parameters for future replication.  
 
 A list of all subcommand-specific arguments (see 'Subcommand Arguments' below) is available with the `-h` or `--help` arguments. For instance, to view the help screen for the vcf2baits subcommand, enter:  
 
-`ruby baitstools.rb vcf2baits -h` or `ruby baitstools.rb vcf2baits --help`  
+`baitstools vcf2baits -h` or `baitstools vcf2baits --help`  
 
 *Entering default values*: For all parameters with defaults, entering the argument flag without specifying a value will cause BaitsTools to assume the default (e.g. entering `-n` will cause BaitsTools to filter by minimum GC content of 30.0%).  
 
 ### GUI Mode
-Enter the command:  
-
-`baitstoolsgui.rb`  
+*As of BaitsTools 2.7.4, the executable is now 'baitstoolsgui' rather than 'baitstoolsgui.rb'.*  
+Enter the command: `baitstoolsgui`  
 
 ## Tutorial and Example Data  
 A tutorial and example data are available in the example_data subdirectory of the BaitsTools repository. The ipyrad.loci file is from the [ipyrad tutorial documentation](https://ipyrad.readthedocs.io/en/latest/tutorial_intro_cli.html) [1].  
