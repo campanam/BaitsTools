@@ -43,9 +43,12 @@ General instructions for installation using RubyGems/Bundler and specific instru
 ### Installation using RubyGems and Bundler  
 The BaitsTools executables can be installed using [RubyGems](www.rubygems.org) and [Bundler](https://bundler.io/) (available on most UNIX-like operating systems with [Ruby](www.ruby-lang.org) and RubyGems installed). See instructions for macOS below as macOS requires the [Ruby Version Manager](https://get.rvm.io) to manually install Ruby gems. See the Ruby and RubyGems documentation for installation on other operating systems.  
 
-In a terminal window, execute the following command:  
+In a terminal window, execute the following commands:  
 
-`gem install baitstools --source "https://rubygems.pkg.github.com/campanam"`  
+`git clone https://github.com/campanam/baitstools`  
+`cd baitstools`  
+`gem build baitstools.gemspec`  
+`gem install baitstools-1.7.4.gem`  
 
 
 ### macOS Installation  
@@ -65,7 +68,10 @@ Enter the following commands (step annotations are provided after the highlighte
 `source ~/.rvm/scripts/rvm`: Source the RVM scripts.  
 `rvm install 3.0`: Install RVM Ruby 3.0.  
 `rvm --default use 3.0`: Set Ruby 3.0 as default.  
-`gem install baitstools --source "https://rubygems.pkg.github.com/campanam"`: Install the latest BaitsTools gem.  
+`git clone https://github.com/campanam/baitstools`: Download the BaitsTools repository.  
+`cd baitstools`: Enter the baitstools directory.  
+`gem build baitstools.gemspec`: Build the BaitsTools gem.  
+`gem install baitstools-1.7.4.gem`: Install the BaitsTools gem.  
 
 _macOS Installation Notes:_
 1. The Ruby Version Manager uses Homebrew. During installation you may need to give an administrator password and authorization to install/update Homebrew.  
