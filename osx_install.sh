@@ -1,18 +1,13 @@
 #!/bin/bash
 #-----------------------------------------------------------------------------------------------
-# osx_install v 1.6.8
-# Michael G. Campana, 2017-2020
+# osx_install v 1.7.4
+# Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
-mkdir $HOME/baitstools
-chmod +x *.rb
-mv *.rb $HOME/baitstools/
-echo 'export PATH="$PATH:$HOME/baitstools"' >> $HOME/.bash_profile
-echo 'export PATH="$PATH:$HOME/baitstools"' >> $HOME/.zshrc
+
 curl -sSL https://get.rvm.io | bash -s stable
 source ~/.rvm/scripts/rvm
-rvm install 2.7.2
-rvm --default use 2.7.2
-gem install tk
-gem install shell
-exec zsh
+rvm install 3.0
+rvm --default use 3.0
+gem build baitstools.gemspec
+gem install ./baitstools-1.7.4.gem
