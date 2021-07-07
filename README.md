@@ -58,7 +58,7 @@ _Automatic Installation (macOS):_
 For macOS users, there is a script `osx_install.sh` that will automatically install the [Ruby Version Manager](https://rvm.io/) and the BaitsTools gem. To install using the script: 
 
 `git clone "https://github.com/campanam/BaitsTools/"`  
-`cd BaitsTools`  
+`cd baitstools`  
 `bash osx_install.sh`  
 
 _Manual Installation (macOS):_  
