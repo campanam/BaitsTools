@@ -10,8 +10,9 @@ The software is made available under the Smithsonian Institution [terms of use](
 
 ## Table of Contents  
 1. [Installation](#installation)  
-1a. [Basic Installation](#basic-installation)  
-1b. [GUI Installation](#gui-installation)  
+1a. [Basic Installation](#installation-using-rubygems-and-bundler)  
+1b. [GUI Installation](#macos-installation)  
+1c. [Uninstallation](#uninstallation)  
 2. [Execution](#execution)  
 2a. [Interactive Mode](#interactive-mode)  
 2b. [Command-line Mode](#command-line-mode)  
