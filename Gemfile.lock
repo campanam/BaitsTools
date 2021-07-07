@@ -1,0 +1,19 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    e2mmap (0.1.0)
+    shell (0.8.1)
+      e2mmap
+      sync
+    sync (0.5.0)
+    tk (0.4.0)
+
+PLATFORMS
+  x86_64-darwin-19
+
+DEPENDENCIES
+  shell (= 0.8.1)
+  tk (= 0.4.0)
+
+BUNDLED WITH
+   2.2.22
