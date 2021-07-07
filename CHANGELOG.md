@@ -134,6 +134,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.7.4  
+mean method uses .sum rather than .reduce(:+)  
+
 ### Version 1.7.2  
 Fixed a glitch in selectsnps which caused a crash if previous baits specify a chr not found in current VCF  
 
@@ -284,6 +287,9 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.7.4  
+Conversion to a RubyGem  
+
 ### Version 1.7.0  
 Complement previous baits option  
 Interactive mode no longer prompts you to enter linguistic complexity if LC calculation disabled  
@@ -445,6 +451,9 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.7.4  
+Conversion to a RubyGem  
+
 ### Version 1.7.0  
 Handling for previousbaits option  
 Every option for vcf2baits now bypasses taxafile/previousbaits screen  

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.7.0"
+BAITSTOOLSGUI = "1.7.4"
 # Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ require 'tk'
 require 'tkextlib/tile'
 require 'ostruct'
 require 'shell'
-require_relative 'baitslib.rb'
+require 'baitslib'
 
 #-----------------------------------------------------------------------------------------------
 def start_baitstools

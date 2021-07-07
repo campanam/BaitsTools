@@ -1,23 +1,23 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.7.3"
+BAITSTOOLSVER = "1.7.4"
 # Michael G. Campana, 2017-2021
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
 require 'optparse'
 require 'ostruct'
-require_relative 'vcf2baits'
-require_relative 'tilebaits'
-require_relative 'bed2baits'
-require_relative 'annot2baits'
-require_relative 'aln2baits'
-require_relative 'stacks2baits'
-require_relative 'checkbaits'
-require_relative 'pyrad2baits'
-require_relative 'blast2baits'
-require_relative 'baitslib'
+require 'vcf2baits'
+require 'tilebaits'
+require 'bed2baits'
+require 'annot2baits'
+require 'aln2baits'
+require 'stacks2baits'
+require 'checkbaits'
+require 'pyrad2baits'
+require 'blast2baits'
+require 'baitslib'
 #-----------------------------------------------------------------------------------------------
 class Parser
 	def self.parse(options)
@@ -122,7 +122,7 @@ class Parser
 		args.inbed = nil # Input BED for checkbaits for revised filtering
 		opt_parser = OptionParser.new do |opts|
 			if algorithms.include?(args.algorithm) # Process correct commands
-				opts.banner = "Command-line usage: ruby baitstools.rb "+args.algorithm+" [options]"
+				opts.banner = "Command-line usage: baitstools "+args.algorithm+" [options]"
 				opts.separator ""
 				opts.separator args.algorithm+"-specific options:"
 				opts.separator ""
@@ -469,7 +469,7 @@ class Parser
 				end
 			else
 				opts.banner = "Common options:"
-				print "Welcome to baitstools " + BAITSTOOLSVER + "\n\nTo use the interactive interface, enter <ruby baitstools.rb [subcommand]> without command-line options.\nCommand-line usage: ruby baitstools.rb [subcommand] [options]"
+				print "Welcome to baitstools " + BAITSTOOLSVER + "\n\nTo use the interactive interface, enter <baitstools [subcommand]> without command-line options.\nCommand-line usage: baitstools [subcommand] [options]"
 				print "\nAdd '-h' or '--help' to subcommands (without other options) to see their relevant options.\n\nAvailable subcommands:\n\n"
 				print "    aln2baits\t\t\t\tGenerate weighted baits from a FASTA/FASTQ alignment\n"
 				print "    annot2baits\t\t\t\tGenerate tiled baits from a GFF/GTF file and a reference sequence\n"
