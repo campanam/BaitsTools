@@ -15,5 +15,4 @@ Gem::Specification.new do |s|
 	s.license = 'Nonstandard'
 	s.add_runtime_dependency 'tk','0.4.0'
 	s.add_runtime_dependency 'shell', '0.8.1'
-	s.requirements << 'MacoOS Mojave (or higher): ActiveTcl-8.5'
 end
