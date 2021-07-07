@@ -53,9 +53,6 @@ You can test your BaitsTools installation by running the tutorials included in t
 ### GUI Installation  
 The GUI requires the Ruby gem 'tk' (typically installed using `gem install tk` on most UNIX-like operating systems with the appropriate RubyGems package installed). macOS requires the [Ruby Version Manager](https://get.rvm.io) to manually install Ruby gems. The GUI requires BaitsTools Ruby files to be in your $PATH. Please note that the GUI has only been tested on macOS and may not work well on other operating systems. Due to its requirement of external dependencies, the GUI can be difficult to install. I have included instructions for automatic and manual installation on macOS. Please report any encountered bugs using the Bug Report issues template.  
 
-_Installation on macOS Mojave:_  
-The tk gem will not compile correctly on macOS Mojave using the default Tk framework. 
-
 _Automatic GUI Installation (macOS):_  
 For macOS users, there is a script `osx_install.sh` that will automatically install the scripts and modify your $PATH variable as needed. It will also install the [Ruby Version Manager](https://rvm.io/) and the tk gem. To install using the script: 
 
