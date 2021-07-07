@@ -38,6 +38,7 @@ The software is made available under the Smithsonian Institution [terms of use](
 
 ## Installation  
 *Ruby >= 2.4.1 is required as of BaitsTools version 1.7.0. BaitsTools versions <= 1.6.8.1 are compatible with Ruby >= 2.0.0.*  
+
 General instructions for installation using RubyGems/Bundler and specific instructions for macOS are provided below. You can test your BaitsTools installation by running the tutorials included in the example_data directory. The archive "tutorial.tgz" includes the expected output of each tutorial. Note that vcf2baits and stacks2baits output will vary slightly due to the random number generator.  
 
 ### Installation using RubyGems and Bundler  
@@ -49,7 +50,6 @@ In a terminal window, execute the following commands:
 `cd baitstools`  
 `gem build baitstools.gemspec`  
 `gem install baitstools-1.7.4.gem`  
-
 
 ### macOS Installation  
 macOS uses a deprecated version of Tcl-Tk as its default Tk framework. If you have compilation issues with the tk gem, install [ActiveTcl 8.5](https://www.activestate.com/products/activetcl/downloads/) and then reinstall the tk gem (`gem install tk`). Please note that the tk gem is not currently compatible with Tcl-Tk 8.6, so you will need to install the 8.5 version.  
