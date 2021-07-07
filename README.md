@@ -71,6 +71,11 @@ _macOS Installation Notes:_
 1. The Ruby Version Manager uses Homebrew. During installation you may need to give an administrator password and authorization to install/update Homebrew.  
 2. macOS does not include gpg for key verification. Although not necessary, gpg can be installed with Homebrew if you wish to verify your Ruby Version Manager installation using the mpapis public key (see [RVM Installation](https://rvm.io/rvm/install)).  
 
+### Uninstallation  
+You can uninstall the BaitsTools gem using:  
+
+`gem uninstall baitstools`  
+
 ## Execution  
 *As of BaitsTools 2.7.4, the executable is now 'baitstools' rather than 'baitstools.rb'.*  
 
