@@ -41,7 +41,7 @@ The software is made available under the Smithsonian Institution [terms of use](
 General instructions for installation using RubyGems/Bundler and specific instructions for macOS are provided below. You can test your BaitsTools installation by running the tutorials included in the example_data directory. The archive "tutorial.tgz" includes the expected output of each tutorial. Note that vcf2baits and stacks2baits output will vary slightly due to the random number generator.  
 
 ### Installation using RubyGems and Bundler  
-The BaitsTools executables can be installed using RubyGems and Bundler (available on most UNIX-like operating systems with [Ruby](www.ruby-lang.org) and [RubyGems](www.rubygems.org) installed). See instructions for macOS below as macOS requires the [Ruby Version Manager](https://get.rvm.io) to manually install Ruby gems. See the Ruby and RubyGems documentation for installation on other operating systems.  
+The BaitsTools executables can be installed using [RubyGems](www.rubygems.org) and [Bundler](https://bundler.io/) (available on most UNIX-like operating systems with [Ruby](www.ruby-lang.org) and RubyGems installed). See instructions for macOS below as macOS requires the [Ruby Version Manager](https://get.rvm.io) to manually install Ruby gems. See the Ruby and RubyGems documentation for installation on other operating systems.  
 
 In a terminal window, execute the following command:  
 
