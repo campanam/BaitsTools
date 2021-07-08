@@ -306,15 +306,13 @@ Bait melting temperatures are calculated according to salt-adjusted formulas for
 
 2. Sequence characters in lowercase are considered masked by BaitsTools. This only impacts the optional `--maxmask` filter.  
 
-3. While BaitsTools can read wrapped FASTA and FASTQ files, this will slow the program down tremendously. Remove extraneous line breaks in reference sequences before running bait generation. A simple way using awk is available [here](https://stackoverflow.com/questions/15857088/remove-line-breaks-in-a-fasta-file) [6].   
+3. While BaitsTools can read wrapped FASTA and FASTQ files, this will slow the program down tremendously. Remove extraneous line breaks in reference sequences before running bait generation. A simple way using awk is available [here](https://stackoverflow.com/questions/15857088/remove-line-breaks-in-a-fasta-file) [6].  
 
-4. If BaitsTools is running slowly, try using the Rubinius Ruby compiler (https://rubinius.com/). Rubinius can multithread across multiple processors, while the standard Ruby interpreter only uses one processor (despite the number of requested threads).  
+4. If you need to enter a negative value into the command-line interface (e.g. a negative melting temperature), omit the space between the parameter and the value (e.g. `-q-30.0` rather than `-q -30.0`). Including the space will cause a Ruby parsing error.  
 
-5. If you need to enter a negative value into the command-line interface (e.g. a negative melting temperature), omit the space between the parameter and the value (e.g. `-q-30.0` rather than `-q -30.0`). Including the space will cause a Ruby parsing error.  
+5. It is possible to generate baits from paired-end sequences that do not overlap in a single BaitsTools run. Concatenate the two reads (reverse-complementing as appropriate) with a pad of Ns between the two reads. Using the `-N` option will then exclude candidate baits that overlap the N pad. This could be helpful for generating baits from FASTA/FASTQ alignments (e.g. using `aln2baits`) in which some sequences overlap and can be merged, but others have an unsequenced gap between the paired reads. This trick can also be used for unmerged paired-end PyRAD/ipyrad loci in `pyrad2baits`.  
 
-6. It is possible to generate baits from paired-end sequences that do not overlap in a single BaitsTools run. Concatenate the two reads (reverse-complementing as appropriate) with a pad of Ns between the two reads. Using the `-N` option will then exclude candidate baits that overlap the N pad. This could be helpful for generating baits from FASTA/FASTQ alignments (e.g. using `aln2baits`) in which some sequences overlap and can be merged, but others have an unsequenced gap between the paired reads. This trick can also be used for unmerged paired-end PyRAD/ipyrad loci in `pyrad2baits`.  
-
-7. As of version 1.5.0, BaitsTools considers files with the terminal extension '.gz' to be gzip compressed. All other file names are assumed to be uncompressed.  
+6. As of version 1.5.0, BaitsTools considers files with the terminal extension '.gz' to be gzip compressed. All other file names are assumed to be uncompressed.  
 
 ## Bug Reports and Feature Requests  
 BaitsTools is a complex program under active development. Bugs and technical issues are inevitable. Please report any issues and associated error reports using the issues template. Feature requests can also be filed using the feature request issue template. Please see the CONTRIBUTING guidelines.  
