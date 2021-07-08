@@ -62,6 +62,8 @@ For macOS users, there is a script `osx_install.sh` that will automatically inst
 `cd baitstools`  
 `bash osx_install.sh`  
 
+Then restart your terminal.  
+
 _Manual Installation (macOS):_  
 Enter the following commands (step annotations are provided after the highlighted text to help debug):
 
