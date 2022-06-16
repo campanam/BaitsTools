@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.7.4"
-# Michael G. Campana, 2017-2021
-# Smithsonian Conservation Biology Institute
+BAITSLIBVER = "1.7.5"
+# Michael G. Campana, 2017-2022
+# Smithsonian's National Zoo and Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
 require 'zlib'
