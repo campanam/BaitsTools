@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.7.4"
-# Michael G. Campana, 2017-2021
-# Smithsonian Conservation Biology Institute
+BAITSTOOLSGUI = "1.7.5"
+# Michael G. Campana, 2017-2022
+# Smithsonian's National Zoo and Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
 require 'tk'
@@ -15,7 +15,7 @@ require 'baitslib'
 #-----------------------------------------------------------------------------------------------
 def start_baitstools
 	# Generate basic command line
-	cmdline = "baitstools.rb " + $options.algorithm + " -i " + resolve_unix_path($options.infile.to_s)
+	cmdline = "baitstools " + $options.algorithm + " -i " + resolve_unix_path($options.infile.to_s)
 	case $options.algorithm
 	when "vcf2baits", "stacks2baits"
 		if $options.every == 1
@@ -1635,7 +1635,7 @@ $next_btn = TkButton.new($root) do
 	place('x' => 660, 'y' => 520)
 end
 credit = TkLabel.new($root) do
-	text "Michael G. Campana, 2017-2021\nSmithsonian Conservation Biology Institute"
+	text "Michael G. Campana, 2017-2022\nSmithsonian's National Zoo and Conservation Biology Institute"
 	borderwidth 5
 	font TkFont.new('times 12')
 	pack("side" => "bottom",  "padx"=> "50", "pady"=> "10")
