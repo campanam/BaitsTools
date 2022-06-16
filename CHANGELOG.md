@@ -1,6 +1,6 @@
 # BaitsTools Change Log  
-Michael G. Campana, 2017-2021  
-Smithsonian Conservation Biology Institute  
+Michael G. Campana, 2017-2022  
+Smithsonian's National Zoo and Conservation Biology Institute  
 Contact: campanam@si.edu  
 
 ## Table of Contents  
@@ -451,6 +451,9 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.7.5  
+Fixed bug calling baitstools.rb rather than updated baitstools executable  
+
 ### Version 1.7.4  
 Conversion to a RubyGem  
 
