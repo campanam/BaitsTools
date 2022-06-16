@@ -53,7 +53,7 @@ In a terminal window, execute the following commands:
 `gem install baitstools-1.7.4.gem`  
 
 ### macOS Installation  
-macOS uses a deprecated version of Tcl-Tk as its default Tk framework. If you have compilation issues with the tk gem, install [ActiveTcl 8.5](https://www.activestate.com/products/activetcl/downloads/) and then reinstall the tk gem (`gem install tk`). Please note that the tk gem is not currently compatible with Tcl-Tk 8.6, so you will need to install the 8.5 version.  
+macOS uses a deprecated version of Tcl-Tk as its default Tk framework. For best results, install [ActiveTcl 8.6](https://www.activestate.com/products/activetcl/downloads/) and then reinstall the tk gem (`gem install tk`). Tcl-Tk can also be installed using [Homebrew](https://brew.sh) or [Anaconda](https://anaconda.org/), but the windows are not optimized for these methods.  
 
 _Automatic Installation (macOS):_  
 For macOS users, there is a script `osx_install.sh` that will automatically install the [Ruby Version Manager](https://rvm.io/) and the BaitsTools gem. To install using the script: 
