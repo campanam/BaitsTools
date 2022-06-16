@@ -9,11 +9,11 @@ GEM
     tk (0.4.0)
 
 PLATFORMS
-  x86_64-darwin-19
+  x86_64-darwin-21
 
 DEPENDENCIES
   shell (= 0.8.1)
   tk (= 0.4.0)
 
 BUNDLED WITH
-   2.2.22
+   2.3.16
