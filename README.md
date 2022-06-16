@@ -69,8 +69,8 @@ Enter the following commands (step annotations are provided after the highlighte
 
 `curl -sSL https://get.rvm.io | bash -s stable`:  Install the Ruby Version Manager.  
 `source ~/.rvm/scripts/rvm`: Source the RVM scripts.  
-`rvm install 3.0`: Install Ruby 3.0.  
-`rvm --default use 3.0`: Set Ruby 3.0 as default.  
+`rvm install 3.1.2`: Install Ruby 3.0.  
+`rvm --default use 3.1.2`: Set Ruby 3.0 as default.  
 `git clone https://github.com/campanam/baitstools`: Download the BaitsTools repository.  
 `cd baitstools`: Enter the baitstools directory.  
 `gem build baitstools.gemspec`: Build the BaitsTools gem.  
