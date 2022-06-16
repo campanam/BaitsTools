@@ -644,6 +644,14 @@ Version constant added to header
 Preliminary script to filter predefined baits through quality filters  
 
 ## osx_install  
+### Version 1.7.5  
+Updated Ruby version to latest (3.1.2)  
+Installs latest baitstools gem (1.7.5)  
+
+### Version 1.7.4  
+Updated Ruby version to latest (3.0.0)  
+Installs latest baitstools gem (1.7.4)  
+
 ### Version 1.6.8  
 Updated Ruby version to latest (2.7.2)  
 Installs 'shell' gem due to removal from bundle in Ruby 2.7  
