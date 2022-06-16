@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
 	s.name = 'baitstools'
-	s.version = '1.7.4'
+	s.version = '1.7.5'
 	s.required_ruby_version = '>= 2.4.1'
-	s.date = '2021-07-02'
+	s.date = '2022-06-16'
 	s.summary = 'BaitsTools: Software for hybridization capture bait design'
 	s.description = 'Software for hybridization capture bait design'
 	s.authors = ["Michael G. Campana"]
@@ -15,5 +15,5 @@ Gem::Specification.new do |s|
 	s.license = 'Nonstandard'
 	s.add_runtime_dependency 'tk','0.4.0'
 	s.add_runtime_dependency 'shell', '0.8.1'
-	s.requirements << 'macOS Mojave (or higher): ActiveTcl-8.5'
+	s.requirements << 'macOS Mojave (or higher): ActiveTcl-8.6'
 end
