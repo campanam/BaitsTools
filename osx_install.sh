@@ -7,7 +7,7 @@
 
 curl -sSL https://get.rvm.io | bash -s stable
 source ~/.rvm/scripts/rvm
-rvm install 3.0
-rvm --default use 3.0
+rvm install 3.1.2
+rvm --default use 3.1.2
 gem build baitstools.gemspec
 gem install ./baitstools-1.7.5.gem
