@@ -69,8 +69,8 @@ Enter the following commands (step annotations are provided after the highlighte
 
 `curl -sSL https://get.rvm.io | bash -s stable`:  Install the Ruby Version Manager.  
 `source ~/.rvm/scripts/rvm`: Source the RVM scripts.  
-`rvm install 3.1.2`: Install Ruby 3.0.  
-`rvm --default use 3.1.2`: Set Ruby 3.0 as default.  
+`rvm install 3.1.2`: Install Ruby 3.1.2.  
+`rvm --default use 3.1.2`: Set Ruby 3.1.2 as default.  
 `git clone https://github.com/campanam/baitstools`: Download the BaitsTools repository.  
 `cd baitstools`: Enter the baitstools directory.  
 `gem build baitstools.gemspec`: Build the BaitsTools gem.  
@@ -86,7 +86,7 @@ You can uninstall the BaitsTools gem using:
 `gem uninstall baitstools`  
 
 ## Execution  
-*As of BaitsTools 2.7.4, the executable is now 'baitstools' rather than 'baitstools.rb'.*  
+*As of BaitsTools 1.7.4, the executable is now 'baitstools' rather than 'baitstools.rb'.*  
 
 Executing the command `baitstools` will display the splash screen listing the available subcommands.  
 
@@ -103,7 +103,7 @@ A list of all subcommand-specific arguments (see 'Subcommand Arguments' below) i
 *Entering default values*: For all parameters with defaults, entering the argument flag without specifying a value will cause BaitsTools to assume the default (e.g. entering `-n` will cause BaitsTools to filter by minimum GC content of 30.0%).  
 
 ### GUI Mode
-*As of BaitsTools 2.7.4, the executable is now 'baitstoolsgui' rather than 'baitstoolsgui.rb'.*  
+*As of BaitsTools 1.7.4, the executable is now 'baitstoolsgui' rather than 'baitstoolsgui.rb'.*  
 
 Enter the command: `baitstoolsgui`  
 
