@@ -1,6 +1,6 @@
 # BaitsTools: software for hybridization capture bait design
 
-Michael G. Campana, 2015-2022  
+Michael G. Campana, 2015-2023  
 Smithsonian's National Zoo and Conservation Biology Institute  
 
 BaitsTools is a package to facilitate the design of nucleic acid bait sets for hybridization capture experiments. It can generate RNA and DNA baits from a wide variety of input formats including FASTA/FASTQ sequences and alignments, [Stacks](http://catchenlab.life.illinois.edu/stacks/) population summary statistics files, [PyRAD](http://dereneaton.com/software/pyrad/) and [ipyrad](http://ipyrad.readthedocs.io/) loci files, genome annotations and features (BED/GTF/GFF) and VCF files. BaitsTools provides both a traditional command-line interface with arguments and an interactive interface using text prompts. Please read and cite the accompanying [manuscript](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract) when using this software.  
@@ -315,7 +315,7 @@ Bait melting temperatures are calculated according to salt-adjusted formulas for
 6. As of version 1.5.0, BaitsTools considers files with the terminal extension '.gz' to be gzip compressed. All other file names are assumed to be uncompressed.  
 
 ## Bug Reports and Feature Requests  
-BaitsTools is a complex program under active development. Bugs and technical issues are inevitable. Please report any issues and associated error reports using the issues template. Feature requests can also be filed using the feature request issue template. Please see the CONTRIBUTING guidelines.  
+BaitsTools is a complex program under active development. Bugs and technical issues are inevitable. Please report any issues and associated error reports using the issues template. Feature requests can also be filed using the feature request issue template. Please see the [CONTRIBUTING](CONTRIBUTING.Md] guidelines.  
 
 ## Citation  
 Please cite:  

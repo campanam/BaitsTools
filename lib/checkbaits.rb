@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # checkbaits
-CHECKBAITSVER = "1.7.0"
-# Michael G. Campana, 2017-2021
+CHECKBAITSVER = "1.7.6"
+# Michael G. Campana, 2017-2023
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
 def multi_checkbaits(seq_array, altbait = nil)
 	logtext_infix = altbaits_infix(altbait)
-	print "** Filtering " + $options.baitlength.to_s + " baits **\n"
+	print "** Filtering " + $options.baitlength.to_s + " bp baits **\n"
 	@splits = setup_temp(seq_array.size)
 	threads = []
 	@kept = []

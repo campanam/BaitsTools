@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.7.5"
-# Michael G. Campana, 2017-2022
+BAITSTOOLSVER = "1.7.6"
+# Michael G. Campana, 2017-2023
 # Smithsonian's National Zoo and Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 

@@ -607,6 +607,9 @@ Region tiling code transferred to baitslib
 Preliminary script to generate baits from BLAST hit tables and a reference sequence  
 
 ## checkbaits  
+### Version 1.7.6  
+Fixed omission of word bp from ** Filtering XX baits **  
+
 ### Version 1.7.0  
 checkbaits previously made BED filtering (--inbed option)  
 --altbaits option  
