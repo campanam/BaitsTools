@@ -315,7 +315,7 @@ Bait melting temperatures are calculated according to salt-adjusted formulas for
 6. As of version 1.5.0, BaitsTools considers files with the terminal extension '.gz' to be gzip compressed. All other file names are assumed to be uncompressed.  
 
 ## Bug Reports and Feature Requests  
-BaitsTools is a complex program under active development. Bugs and technical issues are inevitable. Please report any issues and associated error reports using the issues template. Feature requests can also be filed using the feature request issue template. Please see the [CONTRIBUTING](CONTRIBUTING.Md] guidelines.  
+BaitsTools is a complex program under active development. Bugs and technical issues are inevitable. Please report any issues and associated error reports using the issues template. Feature requests can also be filed using the feature request issue template. Please see the [CONTRIBUTING](CONTRIBUTING.Md) guidelines.  
 
 ## Citation  
 Please cite:  
