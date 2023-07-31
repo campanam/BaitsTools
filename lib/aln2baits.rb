@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # aln2baits
-ALN2BAITSVER = "1.7.0"
-# Michael G. Campana, 2017-2021
+ALN2BAITSVER = "1.7.7"
+# Michael G. Campana, 2017-2023
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -122,7 +122,7 @@ def multi_aln2baits(aln_hash, altbait = nil)
 								end
 							end
 						end
-						Thread.current[:window].var_permutations(aln) if $options.haplodef == "variant" # Call here for code efficiency
+						Thread.current[:window].var_permutations(:aln) if $options.haplodef == "variant" # Call here for code efficiency
 						Thread.current[:windows].push(Thread.current[:window])
 						Thread.current[:seqstart] += $options.tileoffset # Control the window by tiling density
 					end

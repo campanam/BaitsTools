@@ -20,6 +20,9 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Versin 1.7.7  
+Fixed Thread.current[:window].var_permutations(aln) glitch using variant haplotype definition  
+
 ### Version 1.7.0  
 altbaits option  
 
@@ -647,6 +650,9 @@ Version constant added to header
 Preliminary script to filter predefined baits through quality filters  
 
 ## osx_install  
+### Version 1.7.7  
+Installs latest baitstools gem (1.7.7)  
+
 ### Version 1.7.5  
 Updated Ruby version to latest (3.1.2)  
 Installs latest baitstools gem (1.7.5)  
