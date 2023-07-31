@@ -50,7 +50,7 @@ In a terminal window, execute the following commands:
 `git clone https://github.com/campanam/baitstools`  
 `cd baitstools`  
 `gem build baitstools.gemspec`  
-`gem install baitstools-1.7.5.gem`  
+`gem install baitstools-1.7.7.gem`  
 
 ### macOS Installation  
 macOS uses a deprecated version of Tcl-Tk as its default Tk framework. For best results, install [ActiveTcl 8.6](https://www.activestate.com/products/activetcl/downloads/) and then reinstall the tk gem (`gem install tk`). Tcl-Tk can also be installed using [Homebrew](https://brew.sh) or [Anaconda](https://anaconda.org/), but the windows are not optimized for these methods.  
