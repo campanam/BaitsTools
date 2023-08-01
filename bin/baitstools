@@ -848,7 +848,7 @@ begin
 				print "Enter maximum number of variant permutations per alignment window to retain.\n"
 				$options.maxvars = gets.chomp.to_i
 			end
-			while $options.maxvar < 0 and $options.haplodef == "variant"
+			while $options.maxvars < 0 and $options.haplodef == "variant"
 				print "Minimum number of retained variant permutations must be greater than 0. Re-enter.\n"
 				$options.maxvars = gets.chomp.to_i
 			end
