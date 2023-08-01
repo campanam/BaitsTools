@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # tilebaits
-TILEBAITSVER = "1.7.0"
-# Michael G. Campana, 2017-2021
+TILEBAITSVER = "1.7.8"
+# Michael G. Campana, 2017-2023
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -27,6 +27,7 @@ def multi_tilebaits(seq_array, altbait = nil) # Method to permit tiling baits wi
 				Thread.current[:seqst] = 1 # Beginning of bait coordinate
 				Thread.current[:baitnum] = 0
 				Thread.current[:filtnum] = 0
+				Thread.current[:endloop] = false
 				while Thread.current[:seqst] < seq_array[Thread.current[:j]].seq.length+1 # Stop the loop once end of sequence reached
 					Thread.current[:seqend] = Thread.current[:seqst]+$options.baitlength-1 #End of bait coordinate
 					if Thread.current[:seqend] > seq_array[Thread.current[:j]].seq.length and !seq_array[Thread.current[:j]].circular #correct for running off end of linear sequence
@@ -34,6 +35,7 @@ def multi_tilebaits(seq_array, altbait = nil) # Method to permit tiling baits wi
 						if $options.shuffle
 							Thread.current[:seqst] = Thread.current[:seqend] - $options.baitlength + 1
 							Thread.current[:seqst] = 1 if Thread.current[:seqst] < 1
+							Thread.current[:endloop] = true # End the shuffle loop if goes off end
 						end
 						Thread.current[:prb] = seq_array[Thread.current[:j]].seq[Thread.current[:seqst]-1..Thread.current[:seqend]-1] #Correct for 0-based counting
 						Thread.current[:qual] = seq_array[Thread.current[:j]].numeric_quality[Thread.current[:seqst]-1..Thread.current[:seqend]-1] unless seq_array[Thread.current[:j]].fasta
@@ -79,6 +81,7 @@ def multi_tilebaits(seq_array, altbait = nil) # Method to permit tiling baits wi
 						end
 					end
 					Thread.current[:seqst] += $options.tileoffset
+					break if Thread.current[:endloop]
 				end
 				if $options.log
 					Thread.current[:log] = [seq_array[Thread.current[:j]].header, seq_array[Thread.current[:j]].seq.length, Thread.current[:baitnum]]

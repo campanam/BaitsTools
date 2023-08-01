@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # aln2baits
-ALN2BAITSVER = "1.7.7"
+ALN2BAITSVER = "1.7.8"
 # Michael G. Campana, 2017-2023
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -16,15 +16,15 @@ class Hap_Window # Object defining a haplotype window
 		@bedstarts = bedstarts
 		@locus = locus
 	end
-	def var_permutations(aln) # Get possible variant permutations
+	def var_permutations # Get possible variant permutations
 		variants = []
-		for i in 0...@haplotypes[0].length
+		for i in 0...self.haplotypes[0].length
 			variants.push([])
 		end
 		threads = [] # Array to hold threads
 		$options.threads.times do |j|
 			threads[j] = Thread.new {
-				for Thread.current[:i] in 0...@haplotypes[0].length
+				for Thread.current[:i] in 0...self.haplotypes[0].length
 					if Thread.current[:i] % $options.threads == j
 						Thread.current[:vars] = []
 						for Thread.current[:seq] in @haplotypes
@@ -83,6 +83,7 @@ def multi_aln2baits(aln_hash, altbait = nil)
 				if Thread.current[:j] % $options.threads == i
 					Thread.current[:seqstart] = 0
 					Thread.current[:windows] = []
+					Thread.current[:endloop] = false # Switch to break loop if shuffle turned on
 					Thread.current[:aln] = aln_hash[aln_hash.keys[Thread.current[:j]]]
 					while Thread.current[:seqstart] < Thread.current[:aln][0].seq.length
 						Thread.current[:seqend] = Thread.current[:seqstart] + $options.baitlength - 1
@@ -92,6 +93,7 @@ def multi_aln2baits(aln_hash, altbait = nil)
 							if $options.shuffle
 								Thread.current[:seqstart] = Thread.current[:seqend] - $options.baitlength + 1
 								Thread.current[:seqstart] = 0 if Thread.current[:seqstart] < 0
+								Thread.current[:endloop] = true # Turn on switch to break loop
 							end
 						elsif Thread.current[:seqend] > Thread.current[:aln][0].seq.length-1 and Thread.current[:aln][0].circular
 							while Thread.current[:seqend] > Thread.current[:aln][0].seq.length-1
@@ -122,9 +124,10 @@ def multi_aln2baits(aln_hash, altbait = nil)
 								end
 							end
 						end
-						Thread.current[:window].var_permutations(:aln) if $options.haplodef == "variant" # Call here for code efficiency
+						Thread.current[:window].var_permutations if $options.haplodef == "variant" # Call here for code efficiency
 						Thread.current[:windows].push(Thread.current[:window])
 						Thread.current[:seqstart] += $options.tileoffset # Control the window by tiling density
+						break if Thread.current[:endloop]
 					end
 					@windows[Thread.current[:j]] = Thread.current[:windows]
 				end

@@ -1,6 +1,6 @@
 #!/bin/bash
 #-----------------------------------------------------------------------------------------------
-# osx_install v 1.7.7
+# osx_install v 1.7.8
 # Michael G. Campana, 2017-2023
 # Smithsonian's National Zoo and Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -10,4 +10,4 @@ source ~/.rvm/scripts/rvm
 rvm install 3.1.2
 rvm --default use 3.1.2
 gem build baitstools.gemspec
-gem install ./baitstools-1.7.7.gem
+gem install ./baitstools-1.7.8.gem

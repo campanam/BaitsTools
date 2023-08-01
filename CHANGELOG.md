@@ -20,7 +20,10 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
-### Versin 1.7.7  
+### Version 1.7.8  
+Fixed bug in --shuffle option that caused infinite loop  
+
+### Version 1.7.7  
 Fixed Thread.current[:window].var_permutations(aln) glitch using variant haplotype definition  
 
 ### Version 1.7.0  
@@ -650,6 +653,9 @@ Version constant added to header
 Preliminary script to filter predefined baits through quality filters  
 
 ## osx_install  
+### Version 1.7.8  
+Installs latest baitstools gem (1.7.8)  
+
 ### Version 1.7.7  
 Installs latest baitstools gem (1.7.7)  
 
@@ -747,6 +753,9 @@ Fixed bug in that reread reference sequence every time snps_to_baits run in stac
 Preliminary script to turn a Stacks summary tsv file and a reference sequence into baits  
 
 ## tilebaits  
+### Version 1.7.8  
+Fixed bug in --shuffle option that caused infinite loop  
+
 ### Version 1.7.0  
 altbaits option  
 
