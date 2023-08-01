@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstools
-BAITSTOOLSVER = "1.7.8"
+BAITSTOOLSVER = "1.8.0"
 # Michael G. Campana, 2017-2023
 # Smithsonian's National Zoo and Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -74,6 +74,7 @@ class Parser
 		args.no_Ns = false # Flag to omit bait sequences with Ns
 		args.collapse_ambiguities = false # Flag to collapse ambiguities to a single nucleotide
 		args.haplodef = "haplotype" # Haplotype definition for aln2baits
+		args.maxvars = 24 # Maximum number of retained variant permutations per window for aln2baits
 		args.uncollapsed_ref = false # Flag to keep ambiguities in pyrad reference sequence
 		args.sort = false # Flag to sort stack2baits SNPs by between/within population variation
 		args.hwe = false # Flag to sort stacks2baits SNPs by Hardy-Weinberg Equilibrium
@@ -186,6 +187,9 @@ class Parser
 					opts.on("-H","--haplo [VALUE]", String, "If using alignment strategy, window haplotype definition (haplotype or variant) (Default = haplotype)") do |fa|
 						args.haplodef = fa.downcase if fa != nil
 					end
+					opts.on("--maxvars [VALUE]",Integer, "Maximum number of variant permutations per alignment window (Default = 24)") do |maxvars|
+							args.maxvars = maxvars if maxvars != nil
+						end	
 					opts.on("--uncollapsedref","Keep ambiguities in pyrad2baits reference sequence") do
 						args.uncollapsed_ref = true
 					end
@@ -252,6 +256,9 @@ class Parser
 						opts.on("-H","--haplo [VALUE]", String, "Window haplotype definition (haplotype or variant) (Default = haplotype)") do |fa|
 							args.haplodef = fa if fa.downcase != nil
 						end
+						opts.on("--maxvars [VALUE]",Integer, "Maximum number of variant permutations per alignment window (Default = 24)") do |maxvars|
+							args.maxvars = maxvars if maxvars != nil
+						end	
 					end
 					if args.algorithm == "blast2baits"
 						opts.on("--percid [VALUE]", Float, "Minimum percent identity to include BLAST hit (Default = 0.0)") do |percid|
@@ -836,6 +843,14 @@ begin
 			while $options.haplodef != 'haplotype' and $options.haplodef != 'variant'
 				print "Please choose a haplotype definition (haplotype or variant)\n"
 				$options.haplodef = gets.chomp.downcase
+			end
+			if $options.interact and $options.haplodef == "variant"
+				print "Enter maximum number of variant permutations per alignment window to retain.\n"
+				$options.maxvars = gets.chomp.to_i
+			end
+			while $options.maxvar < 0 and $options.haplodef == "variant"
+				print "Minimum number of retained variant permutations must be greater than 0. Re-enter.\n"
+				$options.maxvars = gets.chomp.to_i
 			end
 		end
 		if $options.algorithm == "blast2baits"
