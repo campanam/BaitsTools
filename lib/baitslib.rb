@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.7.5"
-# Michael G. Campana, 2017-2022
+BAITSLIBVER = "1.8.0"
+# Michael G. Campana, 2017-2023
 # Smithsonian's National Zoo and Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -1010,6 +1010,7 @@ def get_command_line # Get command line for summary output
 		end
 		if $options.algorithm == "aln2baits" or ($options.algorithm == "pyrad2baits" && $options.strategy == "alignment")
 			cmdline << " -H " + $options.haplodef
+			cmdline << " --maxvars " + $options.maxvars.to_s if $options.haplodef == "variant"
 		elsif $options.algorithm == "annot2baits"
 			cmdline << " -U "
 			for feature in $options.features

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitstoolsgui
-BAITSTOOLSGUI = "1.7.8"
+BAITSTOOLSGUI = "1.8.0"
 # Michael G. Campana, 2017-2023
 # Smithsonian's National Zoo and Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -58,6 +58,7 @@ def start_baitstools
 		end
 		if $options.algorithm == "aln2baits" or ($options.algorithm == "pyrad2baits" && $options.strategy == "alignment")
 			cmdline << " -H " + $options.haplodef
+			cmdline << " --maxvars " + $options.maxvars if $options.haplodef == "variant"
 		elsif $options.algorithm == "annot2baits"
 			cmdline << " -U " + $options.features.value.upcase
 		elsif $options.algorithm == "blast2baits"
@@ -235,6 +236,11 @@ def update_strategy
 		$alts.state = "disabled"
 		$uncollapsedref.state = "disabled"
 		$haplo.state = $haploselect.state = "normal"
+		if $options.haplodef == "variant"
+			$maxvars.state = $maxvarsentry.state = "normal"
+		else
+			$maxvars.state = $maxvarsentry.state = "disabled"
+		end
 	else
 		$maxsnpentry.state = $maxsnps.state = "normal"
 		$distanceentry.state = $distance.state = "normal"
@@ -244,6 +250,7 @@ def update_strategy
 		$alts.state = "normal"
 		$uncollapsedref.state = "normal"
 		$haplo.state = $haploselect.state = "disabled"
+		$maxvars.state = $maxvarsentry.state = "disabled"
 	end
 end
 #-----------------------------------------------------------------------------------------------
@@ -421,7 +428,31 @@ def haplodef_window
 		height 2
 		place('x' => 240, 'y' => 260)
 	end
-	$widgets.push($haplo, $haploselect)
+	$haploselect.bind("<ComboboxSelected>") do
+		update_haplodef
+	end
+	$maxvars = TkLabel.new($root) do
+		text 'Maximum variants per window'
+		font TkFont.new('times 20')
+		place('x' => 400, 'y' => 250)
+		pady 10
+	end
+	$maxvarsentry = TkEntry.new($root) do
+		textvariable $options.maxvars
+		borderwidth 5
+		font TkFont.new('times 12')
+		place('x' => 660, 'y' => 260)
+		width 10
+	end
+	$widgets.push($haplo, $haploselect,$maxvars,$maxvarsentry)
+end
+#-----------------------------------------------------------------------------------------------
+def update_haplodef
+	if $options.haplodef == "variant"
+		$maxvars.state = $maxvarsentry.state = "normal"
+	else
+		$maxvars.state = $maxvarsentry.state = "disabled"
+	end
 end
 #-----------------------------------------------------------------------------------------------
 def reference_window(winy = 150)
@@ -828,6 +859,7 @@ def subcommand_window(subcommand)
 		offset_window
 		haplodef_window
 		inputlabel = "Input FASTA/FASTQ"
+		update_haplodef
 	when "annot2baits"
 		reference_window
 		pad_window
@@ -1301,6 +1333,8 @@ def go_forward
 			Tk::messageBox :message => 'Please specify an input file.'
 		elsif ($options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "blast2baits") && $options.refseq == ""
 			Tk::messageBox :message => 'Please specify a reference sequence.'
+		elsif $options.algorithm == "aln2baits" && $options.strategy == "alignment" && $options.haplodef == "variant" && $options.maxvars < 1
+			Tk::messageBox :message => 'Maximum number of variant permutations per window must be greater than 0.'
 		elsif ($options.algorithm == "annot2baits" or $options.algorithm == "bed2baits" or $options.algorithm == "blast2baits") && $options.pad < 0
 			Tk::messageBox :message => 'Pad length cannot be less than 0.'
 		elsif $options.baitlength < 1
@@ -1325,6 +1359,8 @@ def go_forward
 			Tk::messageBox :message => 'Tiling offset must be greater than 0.'
 		elsif $options.minind < 1
 			Tk::messageBox :message => 'Minimum individuals must be greater than 0.'
+		elsif $options.strategy == "alignment" && $options.haplodef == "variant" && $options.maxvars < 1
+			Tk::messageBox :message => 'Maximum number of variant permutations per window must be greater than 0.'
 		elsif $options.strategy != "alignment"
 			if $options.totalsnps < 1
 				Tk::messageBox :message => 'The total number of variants must be greater than 0.'
@@ -1532,6 +1568,7 @@ def set_defaults
 	$options.tileoffset = TkVariable.new(60) # Offset between tiled baits
 	$options.bait_type = TkVariable.new("RNA-DNA") # Hybridization type
 	$options.haplodef = TkVariable.new("haplotype") # Haplotype definition for aln2baits
+	$options.maxvars = TkVariable.new(24) # Maximum number of variant permutations per alignment window
 	$options.list_format = TkVariable.new("BED") # Interval list file format
 	$options.features = TkVariable.new("") # Desired features in comma-separated list
 	$options.pad = TkVariable.new(0) # BP to pad ends of extracted regions
@@ -1635,7 +1672,7 @@ $next_btn = TkButton.new($root) do
 	place('x' => 660, 'y' => 520)
 end
 credit = TkLabel.new($root) do
-	text "Michael G. Campana, 2017-2022\nSmithsonian's National Zoo and Conservation Biology Institute"
+	text "Michael G. Campana, 2017-2023\nSmithsonian's National Zoo and Conservation Biology Institute"
 	borderwidth 5
 	font TkFont.new('times 12')
 	pack("side" => "bottom",  "padx"=> "50", "pady"=> "10")

@@ -20,6 +20,9 @@ Contact: campanam@si.edu
 [Deprecated](#deprecated)  
 
 ## aln2baits  
+### Version 1.8.0  
+Added --maxvars option to make variant haplotype definition more efficient/function properly  
+
 ### Version 1.7.8  
 Fixed bug in --shuffle option that caused infinite loop  
 Fixed hanging bug when running variant options  
@@ -142,6 +145,9 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.8.0  
+Handling for --maxvars option  
+
 ### Version 1.7.4  
 mean method uses .sum rather than .reduce(:+)  
 
@@ -295,6 +301,9 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.8.0  
+Handling for --maxvars option  
+
 ### Version 1.7.4  
 Conversion to a RubyGem  
 
@@ -459,6 +468,9 @@ The word 'probe' changed to 'baits' in all instances for clarity
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
 ## baitstoolsgui  
+### Version 1.8.0  
+Handling for --maxvars option  
+
 ### Version 1.7.5  
 Fixed bug calling baitstools.rb rather than updated baitstools executable  
 
@@ -655,6 +667,9 @@ Version constant added to header
 Preliminary script to filter predefined baits through quality filters  
 
 ## osx_install  
+### Version 1.8.0  
+Installs latest baitstools gem (1.8.0)  
+
 ### Version 1.7.8  
 Installs latest baitstools gem (1.7.8)  
 

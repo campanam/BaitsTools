@@ -43,14 +43,18 @@ The software is made available under the Smithsonian Institution [terms of use](
 General instructions for installation using RubyGems/Bundler and specific instructions for macOS are provided below. You can test your BaitsTools installation by running the tutorials included in the example_data directory. The archive "tutorial.tgz" includes the expected output of each tutorial. Note that vcf2baits and stacks2baits output will vary slightly due to the random number generator.  
 
 ### Installation using RubyGems and Bundler  
-The BaitsTools executables can be installed using [RubyGems](https://www.rubygems.org) and [Bundler](https://bundler.io/) (available on most UNIX-like operating systems with [Ruby](https://www.ruby-lang.org) and RubyGems installed). See instructions for macOS below as macOS requires the [Ruby Version Manager](https://rvm.io) to manually install Ruby gems. See the Ruby and RubyGems documentation for installation on other operating systems.  
+The BaitsTools executables can be installed using [RubyGems](https://www.rubygems.org) and [Bundler](https://bundler.io/) (available on most UNIX-like operating systems with [Ruby](https://www.ruby-lang.org) and RubyGems installed). See instructions for macOS below as macOS requires the [Ruby Version Manager](https://rvm.io) to manually install Ruby gems. See the Ruby and RubyGems documentation for installation on other operating systems. Precompiled gems are available [here](https://github.com/campanam/BaitsTools/pkgs/rubygems/baitstools).  
 
-In a terminal window, execute the following commands:  
+After downloading the latest precompiled gem, execute the following command in a terminal window:  
+
+`gem install baitstools-1.8.0.gem`  
+
+To manually build and install the gem, execute the following commands in a terminal window:  
 
 `git clone https://github.com/campanam/baitstools`  
 `cd baitstools`  
 `gem build baitstools.gemspec`  
-`gem install baitstools-1.7.8.gem`  
+`gem install baitstools-1.8.0.gem`  
 
 ### macOS Installation  
 macOS uses a deprecated version of Tcl-Tk as its default Tk framework. For best results, install [ActiveTcl 8.6](https://www.activestate.com/products/activetcl/downloads/) and then reinstall the tk gem (`gem install tk`). Tcl-Tk can also be installed using [Homebrew](https://brew.sh) or [Anaconda](https://anaconda.org/), but the windows are not optimized for these methods.  
@@ -74,7 +78,7 @@ Enter the following commands (step annotations are provided after the highlighte
 `git clone https://github.com/campanam/baitstools`: Download the BaitsTools repository.  
 `cd baitstools`: Enter the baitstools directory.  
 `gem build baitstools.gemspec`: Build the BaitsTools gem.  
-`gem install baitstools-1.7.5.gem`: Install the BaitsTools gem.  
+`gem install baitstools-1.8.0.gem`: Install the BaitsTools gem.  
 
 _macOS Installation Notes:_
 1. The Ruby Version Manager uses [Homebrew](https://brew.sh). During installation you may need to give an administrator password and authorization to install/update Homebrew.  
@@ -183,7 +187,8 @@ aln2baits generates baits from a DNA alignment in FASTA or FASTQ format. Bait se
 `-i, --input [FILE]`: Input alignment file name. Include the path to the file if not in the current directory.  
 `-L, --length [VALUE]`: Requested bait length. Default is 120 bp.  
 `-O, --offset [VALUE]`: Offset (in bp) between tiled baits. Default is 60 bp.  
-`-H, --haplo [VALUE]`: Alignment window haplotype definition (`haplotype` or `variant`). `haplotype` will cause the program to identify all unique haplotypes within each bait tiling window observed in the data. `variant` will cause the program to generate all possible permutations of single nucleotide variants observed within the window. Default is `haplotype`.  
+`-H, --haplo [VALUE]`: Alignment window haplotype definition (`haplotype` or `variant`). `haplotype` will cause the program to identify all unique haplotypes within each bait tiling window observed in the data. `variant` will cause the program to generate random permutations of single nucleotide variants observed within the window. Default is `haplotype`.  
+`--maxvars [VALUE]`: Maximum number of variant permutations to retain within each alignment window when using the `variant` haplotype definition. Default is 24.  
 
 ### annot2baits  
 annot2baits generates baits from an annotation file in GTF or GFF and a corresponding DNA sequence in FASTA or FASTQ format.  
@@ -232,7 +237,8 @@ pyrad2baits selects variants and generates baits from a PyRAD/ipyrad loci file. 
 `-O, --offset [VALUE]`: Base pair offset between tiled baits. Default is 60 bp.  
 `-I, --minind [VALUE]`: Minimum number of individuals to include locus. Default is 1.  
 `-W, --strategy [VALUE]`: Strategy to generate baits from loci (`alignment`, `SNPs`, or `informative`). `alignment` treats the individual loci as FASTA alignments and passes the alignments to [aln2baits](#aln2baits) to generate weighted alignments. `SNPs` and `informative` select and generate baits for identified variable sites. `SNPs` includes all identified sites, whereas `informative` includes only phylogenetically informative sites. Default is `alignment`.  
-`-H, --haplo [VALUE]`: If using `alignment` strategy, alignment window haplotype definition (`haplotype` or `variant`). `haplotype` will cause the program to identify all unique haplotypes within each bait tiling window observed in the data. `variant` will cause the program to generate all possible permutations of single nucleotide variants observed within the window. Default is `haplotype`.  
+`-H, --haplo [VALUE]`: If using `alignment` strategy, alignment window haplotype definition (`haplotype` or `variant`). `haplotype` will cause the program to identify all unique haplotypes within each bait tiling window observed in the data. `variant` will cause the program to generate random permutations of single nucleotide variants observed within the window. Default is `haplotype`.  
+`--maxvars [VALUE]`: Maximum number of variant permutations to retain within each alignment window when using the `variant` haplotype definition. Default is 24.  
 `--uncollapsedref`: If using `SNPs` or `informative` strategies, choose a random reference sequence and keep ambiguities for each locus.  
 `-a, --alt`: If using `SNPs` or `informative` strategies, generate baits for alternate alleles.  
 `-t, --totalvars [VALUE]`: If using `SNPs` or `informative` strategies, total requested variants. Default is 30,000.  

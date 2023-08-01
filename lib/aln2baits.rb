@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # aln2baits
-ALN2BAITSVER = "1.7.8"
+ALN2BAITSVER = "1.8.0"
 # Michael G. Campana, 2017-2023
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
@@ -40,7 +40,9 @@ class Hap_Window # Object defining a haplotype window
 		varindex = 1 # Index for sequence
 		for var in variants
 			varindex *= var.size # Must be complete down here or interferes with multithreading
+			break if varindex > $options.maxvars # Control unnecessary extra processing if too many variants requested
 		end
+		varindex = $options.maxvars if varindex > $options.maxvars
 		revised_haplos = []
 		bedstarts = self.bedstarts[0] # Reset bedstart array and assume coordinates of first array member
 		self.bedstarts = []
@@ -54,7 +56,7 @@ class Hap_Window # Object defining a haplotype window
 				for Thread.current[:k] in 0...varindex
 					if Thread.current[:k] % $options.threads == j
 						for Thread.current[:i] in 0...self.haplotypes[0].length
-							Thread.current[:var] = Thread.current[:k] % variants[Thread.current[:i]].size
+							Thread.current[:var] = rand(variants[Thread.current[:i]].size)
 							revised_haplos[Thread.current[:k]] << variants[Thread.current[:i]][Thread.current[:var]] # Minimize lock time
 						end
 						if $options.gaps == "extend"
