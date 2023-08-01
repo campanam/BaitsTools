@@ -43,14 +43,18 @@ The software is made available under the Smithsonian Institution [terms of use](
 General instructions for installation using RubyGems/Bundler and specific instructions for macOS are provided below. You can test your BaitsTools installation by running the tutorials included in the example_data directory. The archive "tutorial.tgz" includes the expected output of each tutorial. Note that vcf2baits and stacks2baits output will vary slightly due to the random number generator.  
 
 ### Installation using RubyGems and Bundler  
-The BaitsTools executables can be installed using [RubyGems](https://www.rubygems.org) and [Bundler](https://bundler.io/) (available on most UNIX-like operating systems with [Ruby](https://www.ruby-lang.org) and RubyGems installed). See instructions for macOS below as macOS requires the [Ruby Version Manager](https://rvm.io) to manually install Ruby gems. See the Ruby and RubyGems documentation for installation on other operating systems.  
+The BaitsTools executables can be installed using [RubyGems](https://www.rubygems.org) and [Bundler](https://bundler.io/) (available on most UNIX-like operating systems with [Ruby](https://www.ruby-lang.org) and RubyGems installed). See instructions for macOS below as macOS requires the [Ruby Version Manager](https://rvm.io) to manually install Ruby gems. See the Ruby and RubyGems documentation for installation on other operating systems. Precompiled gems are available [here](https://github.com/campanam/BaitsTools/pkgs/rubygems/baitstools).  
 
-In a terminal window, execute the following commands:  
+After downloading the latest precompiled gem, execute the following command in a terminal window:  
+
+`gem install baitstools-1.8.0.gem`  
+
+To manually build and install the gem, execute the following commands in a terminal window:  
 
 `git clone https://github.com/campanam/baitstools`  
 `cd baitstools`  
 `gem build baitstools.gemspec`  
-`gem install baitstools-1.7.8.gem`  
+`gem install baitstools-1.8.0.gem`  
 
 ### macOS Installation  
 macOS uses a deprecated version of Tcl-Tk as its default Tk framework. For best results, install [ActiveTcl 8.6](https://www.activestate.com/products/activetcl/downloads/) and then reinstall the tk gem (`gem install tk`). Tcl-Tk can also be installed using [Homebrew](https://brew.sh) or [Anaconda](https://anaconda.org/), but the windows are not optimized for these methods.  
