@@ -43,11 +43,15 @@ The software is made available under the Smithsonian Institution [terms of use](
 General instructions for installation using RubyGems/Bundler and specific instructions for macOS are provided below. You can test your BaitsTools installation by running the tutorials included in the example_data directory. The archive "tutorial.tgz" includes the expected output of each tutorial. Note that vcf2baits and stacks2baits output will vary slightly due to the random number generator.  
 
 ### Installation using RubyGems and Bundler  
-The BaitsTools executables can be installed using [RubyGems](https://www.rubygems.org) and [Bundler](https://bundler.io/) (available on most UNIX-like operating systems with [Ruby](https://www.ruby-lang.org) and RubyGems installed). See instructions for macOS below as macOS requires the [Ruby Version Manager](https://rvm.io) to manually install Ruby gems. See the Ruby and RubyGems documentation for installation on other operating systems. Precompiled gems are available [here](https://github.com/campanam/BaitsTools/pkgs/rubygems/baitstools).  
+The BaitsTools executables can be installed using [RubyGems](https://www.rubygems.org) and [Bundler](https://bundler.io/) (available on most UNIX-like operating systems with [Ruby](https://www.ruby-lang.org) and RubyGems installed). See instructions for macOS below as macOS requires the [Ruby Version Manager](https://rvm.io) to manually install Ruby gems. See the Ruby and RubyGems documentation for installation on other operating systems. Available precompiled gems are listed [here](https://github.com/campanam/BaitsTools/pkgs/rubygems/baitstools).  
 
-After downloading the latest precompiled gem, execute the following command in a terminal window:  
+First add the GitHub Ruby package repository to your sources, substituting your GitHub username and Personal Access Token for USER and TOKEN respectively:  
 
-`gem install baitstools-1.8.0.gem`  
+`gem sources --add https://USER:TOKEN@rubygems.pkg.github.com/campanam`  
+
+Then download and install the latet gem version by executing the following command in a terminal window:  
+
+`gem install baitstools --version "1.8.0"`  
 
 To manually build and install the gem, execute the following commands in a terminal window:  
 
