@@ -22,6 +22,8 @@ Contact: campanam@si.edu
 ## aln2baits  
 ### Version 1.7.8  
 Fixed bug in --shuffle option that caused infinite loop  
+Fixed hanging bug when running variant options  
+Discovered -- but did not fix -- that variant permutation was running incorrectly  
 
 ### Version 1.7.7  
 Fixed Thread.current[:window].var_permutations(aln) glitch using variant haplotype definition  
