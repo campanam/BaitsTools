@@ -1010,7 +1010,7 @@ def get_command_line # Get command line for summary output
 		end
 		if $options.algorithm == "aln2baits" or ($options.algorithm == "pyrad2baits" && $options.strategy == "alignment")
 			cmdline << " -H " + $options.haplodef
-			cmdline << " --maxvars " + $options.maxvars if $options.haplodef == "variant"
+			cmdline << " --maxvars " + $options.maxvars.to_s if $options.haplodef == "variant"
 		elsif $options.algorithm == "annot2baits"
 			cmdline << " -U "
 			for feature in $options.features

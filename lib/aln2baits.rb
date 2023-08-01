@@ -42,7 +42,7 @@ class Hap_Window # Object defining a haplotype window
 			varindex *= var.size # Must be complete down here or interferes with multithreading
 			break if varindex > $options.maxvars # Control unnecessary extra processing if too many variants requested
 		end
-		varindex = $options.maxvars if varindex < $options.maxvars
+		varindex = $options.maxvars if varindex > $options.maxvars
 		revised_haplos = []
 		bedstarts = self.bedstarts[0] # Reset bedstart array and assume coordinates of first array member
 		self.bedstarts = []
