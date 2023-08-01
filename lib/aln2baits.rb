@@ -16,7 +16,7 @@ class Hap_Window # Object defining a haplotype window
 		@bedstarts = bedstarts
 		@locus = locus
 	end
-	def var_permutations # Get possible variant permutations
+	def var_permutations(aln) # Get possible variant permutations
 		variants = []
 		for i in 0...self.haplotypes[0].length
 			variants.push([])
@@ -27,10 +27,10 @@ class Hap_Window # Object defining a haplotype window
 				for Thread.current[:i] in 0...self.haplotypes[0].length
 					if Thread.current[:i] % $options.threads == j
 						Thread.current[:vars] = []
-						for Thread.current[:seq] in @haplotypes
+						for Thread.current[:seq] in self.haplotypes
 							Thread.current[:vars].push($ambig_hash[Thread.current[:seq][Thread.current[:i]]])
 						end
-						Thread.current[:vars] = Thread.current[:vars].flatten!.uniq # Remove duplicate variants
+						Thread.current[:vars] = Thread.current[:vars].flatten!.uniq# Remove duplicate variants
 						variants[Thread.current[:i]] = Thread.current[:vars] # Minimize lock time
 					end
 				end
@@ -42,24 +42,24 @@ class Hap_Window # Object defining a haplotype window
 			varindex *= var.size # Must be complete down here or interferes with multithreading
 		end
 		revised_haplos = []
-		bedstarts = @bedstarts[0] # Reset bedstart array and assume coordinates of first array member
-		@bedstarts = []
+		bedstarts = self.bedstarts[0] # Reset bedstart array and assume coordinates of first array member
+		self.bedstarts = []
 		for i in 1..varindex
 			revised_haplos.push("")
-			@bedstarts.push(bedstarts)
-		end
+			self.bedstarts.push(bedstarts)
+		end			
 		threads = []
 		$options.threads.times do |j|
 			threads[j] = Thread.new {
 				for Thread.current[:k] in 0...varindex
 					if Thread.current[:k] % $options.threads == j
-						for Thread.current[:i] in 0...@haplotypes[0].length
+						for Thread.current[:i] in 0...self.haplotypes[0].length
 							Thread.current[:var] = Thread.current[:k] % variants[Thread.current[:i]].size
 							revised_haplos[Thread.current[:k]] << variants[Thread.current[:i]][Thread.current[:var]] # Minimize lock time
 						end
 						if $options.gaps == "extend"
 							Thread.current[:refhap] = aln[rand(aln.size)] # Choose a random reference sequence
-							revised_haplos[Thread.current[:k]] = extend_baits(revised_haplos[Thread.current[:k]], $options.fasta_score, Thread.current[:refhap], @seqstart, @seqend)[0]
+							revised_haplos[Thread.current[:k]] = extend_baits(revised_haplos[Thread.current[:k]], $options.fasta_score, Thread.current[:refhap], self.seqstart, self.seqend)[0]
 						end
 						revised_haplos[Thread.current[:k]] = fill_in_baits(revised_haplos[Thread.current[:k]], $options.fasta_score, true)[0] if $options.fillin_switch
 					end
@@ -67,7 +67,7 @@ class Hap_Window # Object defining a haplotype window
 			}
 		end
 		threads.each { |thr| thr.join }
-		@haplotypes = revised_haplos.uniq # Remove new redundant haplotypes
+		self.haplotypes = revised_haplos.uniq # Remove new redundant haplotypes
 	end
 end
 #-----------------------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ def multi_aln2baits(aln_hash, altbait = nil)
 								end
 							end
 						end
-						Thread.current[:window].var_permutations if $options.haplodef == "variant" # Call here for code efficiency
+						Thread.current[:window].var_permutations(Thread.current[:aln]) if $options.haplodef == "variant" # Call here for code efficiency
 						Thread.current[:windows].push(Thread.current[:window])
 						Thread.current[:seqstart] += $options.tileoffset # Control the window by tiling density
 						break if Thread.current[:endloop]
