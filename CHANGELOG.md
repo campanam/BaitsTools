@@ -1,5 +1,5 @@
 # BaitsTools Change Log  
-Michael G. Campana, 2017-2022  
+Michael G. Campana, 2017-2023  
 Smithsonian's National Zoo and Conservation Biology Institute  
 Contact: campanam@si.edu  
 
