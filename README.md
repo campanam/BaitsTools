@@ -49,7 +49,7 @@ First add the GitHub Ruby package repository to your sources, substituting your 
 
 `gem sources --add https://USER:TOKEN@rubygems.pkg.github.com/campanam`  
 
-Then download and install the latet gem version by executing the following command in a terminal window:  
+Then download and install the latest gem version by executing the following command in a terminal window:  
 
 `gem install baitstools --version "1.8.0"`  
 
