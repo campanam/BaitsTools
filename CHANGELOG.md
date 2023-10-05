@@ -477,6 +477,7 @@ GUI must be specifically requested during build
 ## baitstoolsgui  
 ### Version 1.8.1  
 Made script executable in repository  
+Updated P&H easter egg  
 
 ### Version 1.8.0  
 Handling for --maxvars option  
