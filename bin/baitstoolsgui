@@ -978,8 +978,8 @@ def create_root_menu
 			image TkPhotoImage.new(:file => "~/baitstools/poonheli.gif")
 			place('height' => 118, 'width' => 118, 'x' => 341, 'y' => 400)
 		end
+		$widgets.push(poonheli)
 	end
-	$widgets.push(poonheli)
 	$labelVar.value = "Choose Subcommand"
 end
 #-----------------------------------------------------------------------------------------------
