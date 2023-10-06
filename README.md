@@ -51,14 +51,14 @@ First add the GitHub Ruby package repository to your sources, substituting your 
 
 Then download and install the latest gem version by executing the following command in a terminal window:  
 
-`gem install baitstools --version "1.8.0"`  
+`gem install baitstools --version "1.8.1"`  
 
 To manually build and install the gem, execute the following commands in a terminal window:  
 
 `git clone https://github.com/campanam/baitstools`  
 `cd baitstools`  
 `gem build baitstools.gemspec`  
-`gem install baitstools-1.8.0.gem`  
+`gem install baitstools-1.8.1.gem`  
 
 ### macOS Installation  
 macOS uses a deprecated version of Tcl-Tk as its default Tk framework. For best results, install [ActiveTcl 8.6](https://www.activestate.com/products/activetcl/downloads/) and then reinstall the tk gem (`gem install tk`). Tcl-Tk can also be installed using [Homebrew](https://brew.sh) or [Anaconda](https://anaconda.org/), but the windows are not optimized for these methods.  
@@ -77,16 +77,24 @@ Enter the following commands (step annotations are provided after the highlighte
 
 `curl -sSL https://get.rvm.io | bash -s stable`:  Install the Ruby Version Manager.  
 `source ~/.rvm/scripts/rvm`: Source the RVM scripts.  
-`rvm install 3.1.2`: Install Ruby 3.1.2.  
-`rvm --default use 3.1.2`: Set Ruby 3.1.2 as default.  
+`rvm install 3.2.2`: Install Ruby 3.1.2.  
+`rvm --default use 3.2.2`: Set Ruby 3.1.2 as default.  
 `git clone https://github.com/campanam/baitstools`: Download the BaitsTools repository.  
 `cd baitstools`: Enter the baitstools directory.  
 `gem build baitstools.gemspec`: Build the BaitsTools gem.  
-`gem install baitstools-1.8.0.gem`: Install the BaitsTools gem.  
+`gem install baitstools-1.8.1.gem`: Install the BaitsTools gem.  
 
 _macOS Installation Notes:_
 1. The Ruby Version Manager uses [Homebrew](https://brew.sh). During installation you may need to give an administrator password and authorization to install/update Homebrew.  
 2. macOS does not include gpg for key verification. Although not necessary, gpg can be installed with Homebrew if you wish to verify your Ruby Version Manager installation using the mpapis public key (see [RVM Installation](https://rvm.io/rvm/install)).  
+
+_GUI Installation:_  
+The BaitsTools GUI has only been tested on Intel-based macOS. It is not compatible with Apple Silicon-based machines and has not been extensively tested on other operating systems.  
+To install BaitsTools including the GUI, compile the gem manually adding the 'gui' option:  
+`git clone https://github.com/campanam/baitstools`  
+`cd baitstools`  
+`gem build baitstools.gemspec gui`  
+`gem install baitstools-1.8.1`  
 
 ### Uninstallation  
 You can uninstall the BaitsTools gem using:  
@@ -115,7 +123,7 @@ A list of all subcommand-specific arguments (see 'Subcommand Arguments' below) i
 
 Enter the command: `baitstoolsgui`  
 
-Please note that the GUI has only been tested on macOS and may not work well on other operating systems.  
+Please note that the GUI has only been tested on macOS running Intel processors and may not work well on other operating systems.  
 
 ## Tutorial and Example Data  
 A tutorial and example data are available in the example_data subdirectory of the BaitsTools repository. The ipyrad.loci file is from the [ipyrad tutorial documentation](https://ipyrad.readthedocs.io/en/latest/tutorial_intro_cli.html) [1].  

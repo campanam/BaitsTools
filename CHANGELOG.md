@@ -301,6 +301,9 @@ New method write_probes handles basic output
 filter_probes definition removed into separate script for access by other scripts  
 
 ## baitstools  
+### Version 1.8.1  
+Made script executable in repository  
+
 ### Version 1.8.0  
 Handling for --maxvars option  
 
@@ -467,7 +470,15 @@ New front-end for baitstools package (hence inconsistent version number)
 The word 'probe' changed to 'baits' in all instances for clarity  
 Set default for tiling offset as 20 bp (from 60 for select_snps and 25 for tile_probes)  
 
+### baitstools.gemspec  
+### Version 1.8.1  
+GUI must be specifically requested during build  
+
 ## baitstoolsgui  
+### Version 1.8.1  
+Made script executable in repository  
+Updated P&H easter egg  
+
 ### Version 1.8.0  
 Handling for --maxvars option  
 
@@ -667,6 +678,10 @@ Version constant added to header
 Preliminary script to filter predefined baits through quality filters  
 
 ## osx_install  
+### Version 1.8.1  
+Updated Ruby version to latest (3.2.2)  
+Installs latest baitstools gem (1.8.1)  
+
 ### Version 1.8.0  
 Installs latest baitstools gem (1.8.0)  
 
