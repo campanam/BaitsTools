@@ -1,7 +1,8 @@
-# BaitsTools: software for hybridization capture bait design
+# BaitsTools: software for hybridization capture bait design  
+<img align="right" src="NZP-20060918-077JC_thumb.jpg">  
 
-Michael G. Campana, 2015-2023  
-Smithsonian's National Zoo and Conservation Biology Institute  
+Michael G. Campana, 2015-2024  
+Smithsonian's National Zoo & Conservation Biology Institute  
 
 BaitsTools is a package to facilitate the design of nucleic acid bait sets for hybridization capture experiments. It can generate RNA and DNA baits from a wide variety of input formats including FASTA/FASTQ sequences and alignments, [Stacks](http://catchenlab.life.illinois.edu/stacks/) population summary statistics files, [PyRAD](http://dereneaton.com/software/pyrad/) and [ipyrad](http://ipyrad.readthedocs.io/) loci files, genome annotations and features (BED/GTF/GFF) and VCF files. BaitsTools provides both a traditional command-line interface with arguments and an interactive interface using text prompts. Please read and cite the accompanying [manuscript](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract) when using this software.  
 
@@ -347,4 +348,4 @@ Campana, M.G. (2018) BaitsTools: software for hybridization capture bait design.
 5. Kibbe, W.A. (2015) Oligo Calc: Oligonucleotide Properties Calculator. Version 3.27. (http://biotools.nubic.northwestern.edu/OligoCalc.html.)   
 6. User 'Johnsyweb' (6 April 2013) Stack Overflow. Remove line breaks in a FASTA file. (https://stackoverflow.com/questions/15857088/remove-line-breaks-in-a-fasta-file.)  
 
-  
+Image Credit: Jessie Cohen. 2006. Smithsonian's National Zoo & Conservation Biology Institute. Smithsonian Institution. https://www.si.edu/object/fishing-cat:nzp_NZP-20060918-077JC.  
