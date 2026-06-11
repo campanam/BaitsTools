@@ -1,5 +1,5 @@
 # BaitsTools Contributing Guidelines  
-Michael G. Campana, 2017-2020  
+Michael G. Campana, 2017-2026  
 Smithsonian Conservation Biology Institute  
 
 ## Bug Reports  

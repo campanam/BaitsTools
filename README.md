@@ -1,7 +1,7 @@
 # BaitsTools: software for hybridization capture bait design  
 <img align="right" src="NZP-20060918-077JC_thumb.jpg">  
 
-Michael G. Campana, 2015-2024  
+Michael G. Campana, 2015-2026  
 Smithsonian's National Zoo & Conservation Biology Institute  
 
 BaitsTools is a package to facilitate the design of nucleic acid bait sets for hybridization capture experiments. It can generate RNA and DNA baits from a wide variety of input formats including FASTA/FASTQ sequences and alignments, [Stacks](http://catchenlab.life.illinois.edu/stacks/) population summary statistics files, [PyRAD](http://dereneaton.com/software/pyrad/) and [ipyrad](http://ipyrad.readthedocs.io/) loci files, genome annotations and features (BED/GTF/GFF) and VCF files. BaitsTools provides both a traditional command-line interface with arguments and an interactive interface using text prompts. Please read and cite the accompanying [manuscript](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12721/abstract) when using this software.  
@@ -52,14 +52,14 @@ First add the GitHub Ruby package repository to your sources, substituting your 
 
 Then download and install the latest gem version by executing the following command in a terminal window:  
 
-`gem install baitstools --version "1.8.1"`  
+`gem install baitstools --version "1.8.2"`  
 
 To manually build and install the gem, execute the following commands in a terminal window:  
 
 `git clone https://github.com/campanam/baitstools`  
 `cd baitstools`  
 `gem build baitstools.gemspec`  
-`gem install baitstools-1.8.1.gem`  
+`gem install baitstools-1.8.2.gem`  
 
 ### macOS Installation  
 macOS uses a deprecated version of Tcl-Tk as its default Tk framework. For best results, install [ActiveTcl 8.6](https://www.activestate.com/products/activetcl/downloads/) and then reinstall the tk gem (`gem install tk`). Tcl-Tk can also be installed using [Homebrew](https://brew.sh) or [Anaconda](https://anaconda.org/), but the windows are not optimized for these methods.  
@@ -83,7 +83,7 @@ Enter the following commands (step annotations are provided after the highlighte
 `git clone https://github.com/campanam/baitstools`: Download the BaitsTools repository.  
 `cd baitstools`: Enter the baitstools directory.  
 `gem build baitstools.gemspec`: Build the BaitsTools gem.  
-`gem install baitstools-1.8.1.gem`: Install the BaitsTools gem.  
+`gem install baitstools-1.8.2.gem`: Install the BaitsTools gem.  
 
 _macOS Installation Notes:_
 1. The Ruby Version Manager uses [Homebrew](https://brew.sh). During installation you may need to give an administrator password and authorization to install/update Homebrew.  
@@ -95,7 +95,7 @@ To install BaitsTools including the GUI, compile the gem manually adding the 'gu
 `git clone https://github.com/campanam/baitstools`  
 `cd baitstools`  
 `gem build baitstools.gemspec gui`  
-`gem install baitstools-1.8.1`  
+`gem install baitstools-1.8.2`  
 
 ### Uninstallation  
 You can uninstall the BaitsTools gem using:  

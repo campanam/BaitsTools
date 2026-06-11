@@ -99,18 +99,24 @@ def multi_tilebaits(seq_array, altbait = nil) # Method to permit tiling baits wi
 	threads.each { |thr| thr.join }
 	cat_files
 	if $options.log
-		vlogs = [[],[],[],[]]
+		vlogs = [[],[],[],[],[]]
 		for log in logs
 			vlogs[0].push(log[2])
 			vlogs[1].push(log[3])
 			vlogs[2].push(log[5])
 			vlogs[3].push(log[6])
+			vlogs[4].push(log[1]) # Sequence lengths
 		end
-		write_file(".log.txt", "\nTotalBaits\tMeanBaitCoveragePerSequence(x)\tFilteredBaits\tMeanFilteredBaitCoveragePerSequence(x)")
+		write_file(".log.txt", "\nTotalBaits\tMeanBaitCoveragePerSequence(x)\tAllTargetBaitCoverage(x)\tFilteredBaits\tMeanFilteredBaitCoveragePerSequence(x)\tAllTargetFilteredBaitCoverage(x)")
+		totalbaits = vlogs[0].reduce(:+)
+		totallength = vlogs[4].reduce(:+)
+		allcov = (totalbaits * $options.baitlength).to_f/totallength.to_f
 		if $options.filter
-			write_file(".log.txt", vlogs[0].reduce(:+).to_s + "\t" + mean(vlogs[2]).to_s + "\t" + vlogs[1].reduce(:+).to_s + "\t" + mean(vlogs[3]).to_s)
+			filtbaits = vlogs[1].reduce(:+)
+			filtcov = (filtbaits * $options.baitlength).to_f/totallength.to_f
+			write_file(".log.txt", totalbaits.to_s + "\t" + mean(vlogs[2]).to_s + "\t" + allcov.to_s + "\t" + filtbaits.to_s + "\t" + mean(vlogs[3]).to_s + "\t" + filtcov.to_s)
 		else
-			write_file(".log.txt", vlogs[0].reduce(:+).to_s + "\t" + mean(vlogs[2]).to_s + "\tNA\tNA")
+			write_file(".log.txt", totalbaits.to_s + "\t" + mean(vlogs[2]).to_s + "\t" + allcov.to_s + "\tNA\tNA\tNA")
 		end
 	end
 end

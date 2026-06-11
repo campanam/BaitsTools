@@ -689,6 +689,7 @@ def selectsnps(snp_hash) # Choose SNPs based on input group of SNPSs
 		end
 	else
 		selectsnps = snp_hash
+		selectvar = 0
 	end
 	write_file(".log.txt", "Chromosome\tSelectedVariants") if $options.log
 	for chromo in selectsnps.keys

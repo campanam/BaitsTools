@@ -1,5 +1,5 @@
 # BaitsTools Change Log  
-Michael G. Campana, 2017-2023  
+Michael G. Campana, 2017-2026  
 Smithsonian's National Zoo and Conservation Biology Institute  
 Contact: campanam@si.edu  
 
@@ -145,6 +145,10 @@ Version constant added to header
 Preliminary script to generate baits from an annotation file and a reference sequence  
 
 ## baitslib  
+### Version 1.8.2  
+Fixed bug in selectsnps when both -e and -l enabled  
+Log now calculates mean depths both as average per sequence and meaned over entire targeted length  
+
 ### Version 1.8.0  
 Handling for --maxvars option  
 
@@ -678,6 +682,9 @@ Version constant added to header
 Preliminary script to filter predefined baits through quality filters  
 
 ## osx_install  
+### Version 1.8.2  
+Installs latest baitstools gem (1.8.2)  
+
 ### Version 1.8.1  
 Updated Ruby version to latest (3.2.2)  
 Installs latest baitstools gem (1.8.1)  

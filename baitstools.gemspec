@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
 	s.name = 'baitstools'
-	s.version = '1.8.1'
+	s.version = '1.8.2'
 	s.required_ruby_version = '>= 2.4.1'
-	s.date = '2023-08-04'
+	s.date = '2026-06-11'
 	s.summary = 'BaitsTools: Software for hybridization capture bait design'
 	s.description = 'Software for hybridization capture bait design'
 	s.authors = ["Michael G. Campana"]
