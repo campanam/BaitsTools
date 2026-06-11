@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # baitslib
-BAITSLIBVER = "1.8.1"
-# Michael G. Campana, 2017-2023
+BAITSLIBVER = "1.8.2"
+# Michael G. Campana, 2017-2026
 # Smithsonian's National Zoo and Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
