@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 #-----------------------------------------------------------------------------------------------
 # vcf2baits
-VCF2BAITSVER = "1.7.0"
-# Michael G. Campana, 2017-2021
+VCF2BAITSVER = "1.8.3"
+# Michael G. Campana, 2017-2026
 # Smithsonian Conservation Biology Institute
 #-----------------------------------------------------------------------------------------------
 
@@ -48,6 +48,7 @@ def vcf2baits
 				snp = line_arr[1].to_i
 				ref = line_arr[3]
 				alt = line_arr[4].split(",")
+				alt[alt.index("*")] = "-" if alt.include?("*")
 				qual = line_arr[5].to_i
 				@snps[chromosome]=temp_snps
 				temp_snps = [] if chromosome != reg # Empty set if no longer on same chromosome

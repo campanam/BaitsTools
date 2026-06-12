@@ -52,14 +52,14 @@ First add the GitHub Ruby package repository to your sources, substituting your 
 
 Then download and install the latest gem version by executing the following command in a terminal window:  
 
-`gem install baitstools --version "1.8.2"`  
+`gem install baitstools --version "1.8.3"`  
 
 To manually build and install the gem, execute the following commands in a terminal window:  
 
 `git clone https://github.com/campanam/baitstools`  
 `cd baitstools`  
 `gem build baitstools.gemspec`  
-`gem install baitstools-1.8.2.gem`  
+`gem install baitstools-1.8.3.gem`  
 
 ### macOS Installation  
 macOS uses a deprecated version of Tcl-Tk as its default Tk framework. For best results, install [ActiveTcl 8.6](https://www.activestate.com/products/activetcl/downloads/) and then reinstall the tk gem (`gem install tk`). Tcl-Tk can also be installed using [Homebrew](https://brew.sh) or [Anaconda](https://anaconda.org/), but the windows are not optimized for these methods.  
@@ -83,7 +83,7 @@ Enter the following commands (step annotations are provided after the highlighte
 `git clone https://github.com/campanam/baitstools`: Download the BaitsTools repository.  
 `cd baitstools`: Enter the baitstools directory.  
 `gem build baitstools.gemspec`: Build the BaitsTools gem.  
-`gem install baitstools-1.8.2.gem`: Install the BaitsTools gem.  
+`gem install baitstools-1.8.3.gem`: Install the BaitsTools gem.  
 
 _macOS Installation Notes:_
 1. The Ruby Version Manager uses [Homebrew](https://brew.sh). During installation you may need to give an administrator password and authorization to install/update Homebrew.  
@@ -95,7 +95,7 @@ To install BaitsTools including the GUI, compile the gem manually adding the 'gu
 `git clone https://github.com/campanam/baitstools`  
 `cd baitstools`  
 `gem build baitstools.gemspec gui`  
-`gem install baitstools-1.8.2`  
+`gem install baitstools-1.8.3`  
 
 ### Uninstallation  
 You can uninstall the BaitsTools gem using:  
@@ -310,7 +310,7 @@ vcf2baits selects variants and generates baits from a VCF file and a reference s
 `-d, --distance [VALUE]`: Minimum distance (in bp) between variants within a contig. The default is 10,000 bp.  
 `-p, --nobaits`: Do not output baits, simply subselect variants. A reference sequence is not required for this analysis.  
 `-e, --every`: Output baits for every variant in the input file, skipping subselection. Overrides -t, -j, -d, -m , -p, --taxafile, --popcategories, --previousbaits.  
-`-a, --alt`: Generate baits for alternate alleles. Assumes biallelic sites. Overrides `-p`.  
+`-a, --alt`: Generate baits for alternate alleles. Overrides `-p`.  
 `-r, --refseq [FILE]`: Input reference sequence file name. Include the path to the file if not in the current directory.  
 `-L, --length [VALUE]`: Requested bait length. Default is 120 bp.  
 `-b, --lenbef [VALUE]`: If outputting baits, the number of bases before the variant to include in the bait sequence. Default is 60 bp.  

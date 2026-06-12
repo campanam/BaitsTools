@@ -863,6 +863,9 @@ Output now controlled by baitslib write_probes function
 Preliminary script to divide genic/genomic sequences into tiled baits
 
 ## vcf2baits  
+### Version 1.8.3  
+Handling for '*' allele  
+
 ### Version 1.7.0  
 --altbaits option  
 Fixed glitches in Gzipping VCF output  
